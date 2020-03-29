@@ -22,6 +22,12 @@
       </div>
 
       <v-spacer></v-spacer>
+      <v-btn to="/" color="white" text rounded class="my-2">
+        HOME
+      </v-btn>
+      <v-btn to="/dashboard" color="white" text rounded class="my-2">
+        DASHBOARD
+      </v-btn>
 
       <v-btn
         href="https://github.com/vuetifyjs/vuetify/releases/latest"
@@ -32,22 +38,21 @@
         <v-icon>mdi-open-in-new</v-icon>
       </v-btn>
     </v-app-bar>
-
     <v-content>
-      <HelloWorld />
+      <router-view></router-view>
     </v-content>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld'
+// import HelloWorld from './components/HelloWorld'
 
 export default {
   name: 'App',
 
-  components: {
-    HelloWorld
-  },
+  // components: {
+  //   HelloWorld
+  // },
 
   data: () => ({
     //

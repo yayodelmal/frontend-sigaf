@@ -27,7 +27,26 @@
     </v-app-bar>
 
     <v-content>
-      <v-container class="fill-height" fluid>
+      <v-container class="grey lighten-5">
+        <v-row>
+          <v-col v-for="n in 3" :key="n" cols="12" sm="4">
+            <v-card class="mx-auto" max-width="344" outlined>
+              <v-list-item three-line>
+                <v-list-item-avatar tile size="80" color="grey"
+                  >5</v-list-item-avatar
+                >
+                <v-list-item-content>
+                  <div class="overline mb-4">OVERLINE</div>
+                  <v-list-item-title class="headline mb-1"
+                    >Headline 5</v-list-item-title
+                  >
+                </v-list-item-content>
+              </v-list-item>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container fluid>
         <v-row align="center" justify="center">
           <div class="my-2">
             <v-btn v-on:click="postAlert" small color="primary">Primary</v-btn>
@@ -63,7 +82,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 export default {
-  name: 'HelloWorld',
+  name: 'Dashboard',
   data() {
     return {
       test: {
