@@ -3,7 +3,7 @@
     <h1>Mantenedor Classroom</h1>
     <v-data-table
       :headers="headers"
-      :items="classRoomsDatatable"
+      :items="classroomsDataTable"
       class="elevation-1"
     >
       <template v-slot:top>
@@ -27,32 +27,8 @@
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
-                        v-model="editedItem.name"
-                        label="Dessert name"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.calories"
-                        label="Calories"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.fat"
-                        label="Fat (g)"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.carbs"
-                        label="Carbs (g)"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.protein"
-                        label="Protein (g)"
+                        v-model="editedItem.description"
+                        label="Nombre"
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -76,44 +52,44 @@
           mdi-delete
         </v-icon>
       </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
-      </template>
     </v-data-table>
+    <v-snackbar v-model="snackbar" :timeout="timeout">
+      {{ successMessage }}
+      <v-btn color="blue" text @click="snackbar = false">
+        Close
+      </v-btn>
+    </v-snackbar>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions, mapState, mapGetters } from 'vuex'
 export default {
   data: () => ({
     dialog: false,
     headers: [
       { text: '#', value: 'id' },
-      { text: 'Nombre', value: 'name' },
+      { text: 'Nombre', value: 'description' },
       { text: 'Actions', value: 'actions', sortable: false }
     ],
     editedIndex: -1,
     editedItem: {
       id: '',
-      name: ''
+      description: ''
     },
     defaultItem: {
       id: '',
-      name: ''
-    }
+      description: ''
+    },
+    successMessage: 'Operación realizada con éxito.',
+    errorMEssage: 'Ha ocurrido un error.',
+    snackbar: false,
+    timeout: 3000
   }),
 
   computed: {
-    ...mapGetters(['classrooms']),
-    classRoomsDatatable() {
-      return this.classrooms.map(classroom => {
-        return {
-          id: classroom.id,
-          name: classroom.description
-        }
-      })
-    },
+    ...mapState(['classrooms', 'success', 'error']),
+    ...mapGetters(['classroomsDataTable']),
     formTitle() {
       return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
     }
@@ -130,17 +106,19 @@ export default {
   },
 
   methods: {
-    ...mapActions(['fetchClassrooms']),
+    ...mapActions(['fetchClassrooms', 'postClassroom']),
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item)
+      this.editedIndex = this.classrooms.findIndex(
+        found => found.id === item.id
+      )
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
 
     deleteItem(item) {
-      const index = this.desserts.indexOf(item)
+      const index = this.classrooms.indexOf(item)
       confirm('Are you sure you want to delete this item?') &&
-        this.desserts.splice(index, 1)
+        this.classrooms.splice(index, 1)
     },
 
     close() {
@@ -153,10 +131,29 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem)
+        this.$store.dispatch('putClassroom', this.editedItem)
+
+        if (this.success) {
+          this.snackbar = true
+          this.$store.dispatch('resetCheckout', null)
+        } else {
+          console.log(this.error)
+        }
       } else {
-        this.desserts.push(this.editedItem)
+        this.postClassroom(this.editedItem).then(({ ({data, success, error}), error }) => {
+          console.log(data)
+          console.log(error)
+          if (data !== undefined) {
+            console.log(data)
+            this.snackbar = true
+
+            this.$store.dispatch('resetCheckout', null)
+          } else {
+            console.log(error.message)
+          }
+        })
       }
+
       this.close()
     }
   }
