@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1>Mantenedor Classroom</h1>
     <v-data-table
       :headers="headers"
       :items="classroomsDataTable"
@@ -8,69 +7,99 @@
     >
       <template v-slot:top>
         <v-toolbar flat color="white">
-          <v-toolbar-title>My CRUD</v-toolbar-title>
+          <v-toolbar-title>Lista de aulas</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog v-model="dialog" max-width="500px" persistent>
             <template v-slot:activator="{ on }">
               <v-btn color="primary" dark class="mb-2" v-on="on"
-                >New Item</v-btn
+                >Crear aula</v-btn
               >
             </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-              </v-card-title>
+            <v-form>
+              <v-card>
+                <v-card-title>
+                  <span class="headline">{{ formTitle }}</span>
+                </v-card-title>
 
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.description"
-                        label="Nombre"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12">
+                        <v-text-field
+                          v-model="editedItem.description"
+                          label="Nombre"
+                          :rules="[rules.required, rules.counter]"
+                          required
+                          counter
+                          maxlength="7"
+                          autofocus
+                          clearable
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card-text>
 
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
-              </v-card-actions>
-            </v-card>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn color="blue darken-1" text @click="close"
+                    >Cancelar</v-btn
+                  >
+                  <v-btn color="blue darken-1" text @click="save"
+                    >Guardar</v-btn
+                  >
+                </v-card-actions>
+              </v-card>
+            </v-form>
           </v-dialog>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">
+        <v-icon small class="mr-2" @click.prevent="editItem(item)">
           mdi-pencil
         </v-icon>
-        <v-icon small @click="deleteItem(item)">
+        <v-icon small @click.prevent="deleteItem(item)">
           mdi-delete
         </v-icon>
       </template>
     </v-data-table>
     <v-snackbar v-model="snackbar" :timeout="timeout">
-      {{ successMessage }}
+      {{ message }}
       <v-btn color="blue" text @click="snackbar = false">
-        Close
+        Cerrar
       </v-btn>
     </v-snackbar>
+    <v-row justify="center">
+      <v-dialog v-model="dialogConfirm" persistent max-width="290">
+        <v-card>
+          <v-card-title class="headline">¿Esta seguro?</v-card-title>
+          <v-card-text>Eliminará un registro de forma permanente</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" text @click="dialogConfirm = false"
+              >Cancelar</v-btn
+            >
+            <v-btn color="blue darken-1" text @click.prevent="confirmDelete"
+              >Aceptar</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
   </div>
 </template>
 
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   data: () => ({
     dialog: false,
+    dialogConfirm: false,
     headers: [
       { text: '#', value: 'id' },
       { text: 'Nombre', value: 'description' },
-      { text: 'Actions', value: 'actions', sortable: false }
+      { text: 'Acciones', value: 'actions', sortable: false }
     ],
     editedIndex: -1,
     editedItem: {
@@ -81,17 +110,26 @@ export default {
       id: '',
       description: ''
     },
+    message: '',
     successMessage: 'Operación realizada con éxito.',
     errorMEssage: 'Ha ocurrido un error.',
     snackbar: false,
-    timeout: 3000
+    timeout: 3000,
+    rules: {
+      required: value => !!value || 'Requerido.',
+      counter: value =>
+        value !== null ? value.length > 6 || 'Mínimo 7 caracteres.' : '',
+      email: value => {
+        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return pattern.test(value) || 'Invalid e-mail.'
+      }
+    }
   }),
 
   computed: {
-    ...mapState(['classrooms', 'success', 'error']),
     ...mapGetters(['classroomsDataTable']),
     formTitle() {
-      return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+      return this.editedIndex === -1 ? 'Crear Aula' : 'Editar Aula'
     }
   },
 
@@ -100,25 +138,39 @@ export default {
       val || this.close()
     }
   },
-
-  created() {
+  mounted() {
     this.fetchClassrooms()
   },
-
   methods: {
-    ...mapActions(['fetchClassrooms', 'postClassroom']),
+    ...mapActions([
+      'fetchClassrooms',
+      'postClassroom',
+      'deleteClassroom',
+      'putClassroom'
+    ]),
     editItem(item) {
-      this.editedIndex = this.classrooms.findIndex(
-        found => found.id === item.id
-      )
+      this.editedIndex = this.classroomsDataTable.indexOf(item)
+
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
-
+    confirmDelete() {
+      this.deleteClassroom(this.editedItem).then(({ success, error }) => {
+        if (success) {
+          this.snackbar = true
+          this.message = this.successMessage
+        } else {
+          this.snackbar = true
+          this.message = error
+        }
+      })
+      this.closeConfirmDelete()
+    },
     deleteItem(item) {
-      const index = this.classrooms.indexOf(item)
-      confirm('Are you sure you want to delete this item?') &&
-        this.classrooms.splice(index, 1)
+      this.editedIndex = this.classroomsDataTable.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+
+      this.dialogConfirm = true
     },
 
     close() {
@@ -128,33 +180,46 @@ export default {
         this.editedIndex = -1
       }, 300)
     },
+    closeConfirmDelete() {
+      this.dialogConfirm = false
+      setTimeout(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      }, 300)
+    },
 
     save() {
-      if (this.editedIndex > -1) {
-        this.$store.dispatch('putClassroom', this.editedItem)
-
-        if (this.success) {
-          this.snackbar = true
-          this.$store.dispatch('resetCheckout', null)
+      if (this.validate()) {
+        if (this.editedIndex > -1) {
+          this.putClassroom(this.editedItem).then(({ success, error }) => {
+            if (success) {
+              this.snackbar = true
+              this.message = this.successMessage
+            } else {
+              this.snackbar = true
+              this.message = error
+              console.log(error)
+            }
+          })
         } else {
-          console.log(this.error)
+          this.postClassroom(this.editedItem).then(({ success, error }) => {
+            if (success) {
+              this.snackbar = true
+              this.message = this.successMessage
+            } else {
+              console.log(error)
+              this.snackbar = true
+              this.message = error
+            }
+          })
         }
-      } else {
-        this.postClassroom(this.editedItem).then(({ ({data, success, error}), error }) => {
-          console.log(data)
-          console.log(error)
-          if (data !== undefined) {
-            console.log(data)
-            this.snackbar = true
-
-            this.$store.dispatch('resetCheckout', null)
-          } else {
-            console.log(error.message)
-          }
-        })
+        this.close()
       }
-
-      this.close()
+    },
+    validate() {
+      if (this.editedItem.description !== null) {
+        return this.editedItem.description.length > 6
+      }
     }
   }
 }
