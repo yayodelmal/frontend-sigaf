@@ -1,82 +1,50 @@
 <template>
-  <v-app id="inspire">
-    <v-navigation-drawer v-model="drawer" app clipped>
-      <v-list dense>
-        <v-list-item link>
-          <v-list-item-action>
-            <v-icon>mdi-view-dashboard</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Dashboard</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link>
-          <v-list-item-action>
-            <v-icon>mdi-settings</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Settings</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-app-bar app clipped-left>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>Application</v-toolbar-title>
-    </v-app-bar>
-
-    <v-content>
-      <v-container class="grey lighten-5">
-        <v-row>
-          <v-col v-for="n in 3" :key="n" cols="12" sm="4">
-            <v-card class="mx-auto" max-width="344" outlined>
-              <v-list-item three-line>
-                <v-list-item-avatar tile size="80" color="grey"
-                  >5</v-list-item-avatar
+  <div>
+    <v-container class="grey lighten-5">
+      <v-row>
+        <v-col v-for="n in 3" :key="n" cols="12" sm="4">
+          <v-card class="mx-auto" max-width="344" outlined>
+            <v-list-item three-line>
+              <v-list-item-avatar tile size="80" color="grey"
+                >5</v-list-item-avatar
+              >
+              <v-list-item-content>
+                <div class="overline mb-4">OVERLINE</div>
+                <v-list-item-title class="headline mb-1"
+                  >Headline 5</v-list-item-title
                 >
-                <v-list-item-content>
-                  <div class="overline mb-4">OVERLINE</div>
-                  <v-list-item-title class="headline mb-1"
-                    >Headline 5</v-list-item-title
-                  >
-                </v-list-item-content>
-              </v-list-item>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-      <v-container fluid>
-        <v-row align="center" justify="center">
-          <div class="my-2">
-            <v-btn v-on:click="postAlert" small color="primary">Primary</v-btn>
-          </div>
-          <v-card>
-            <v-card-title>
-              Ticket
-              <v-spacer></v-spacer>
-              <v-text-field
-                v-model="search"
-                append-icon="mdi-magnify"
-                label="Search"
-              ></v-text-field>
-            </v-card-title>
-            <v-data-table
-              calculate-widths
-              dense
-              :headers="headers"
-              :items="alertsDataTable"
-              :search="search"
-            ></v-data-table>
+              </v-list-item-content>
+            </v-list-item>
           </v-card>
-        </v-row>
-      </v-container>
-    </v-content>
-
-    <v-footer app>
-      <span>&copy; 2019</span>
-    </v-footer>
-  </v-app>
+        </v-col>
+      </v-row>
+    </v-container>
+    <v-container fluid>
+      <v-row align="center" justify="center">
+        <div class="my-2">
+          <v-btn v-on:click="postAlert" small color="primary">Primary</v-btn>
+        </div>
+        <v-card>
+          <v-card-title>
+            Ticket
+            <v-spacer></v-spacer>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search"
+            ></v-text-field>
+          </v-card-title>
+          <v-data-table
+            calculate-widths
+            dense
+            :headers="headers"
+            :items="alertsDataTable"
+            :search="search"
+          ></v-data-table>
+        </v-card>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
