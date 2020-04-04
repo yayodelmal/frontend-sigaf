@@ -1,7 +1,11 @@
 <template>
-  <v-app-bar color="primary" dark app clipped-left>
-    <v-app-bar-nav-icon />
-    <v-toolbar-title>Application</v-toolbar-title>
+  <v-app-bar color="warning" dark app clipped-left>
+    <v-spacer></v-spacer>
+    <v-toolbar-title
+      >Sistema de Información para la Gestión de Acciones
+      Formativas</v-toolbar-title
+    >
+    <v-spacer></v-spacer>
   </v-app-bar>
 </template>
 

@@ -64,12 +64,14 @@
         </v-icon>
       </template>
     </v-data-table>
+
     <v-snackbar v-model="snackbar" :timeout="timeout">
       {{ message }}
       <v-btn color="blue" text @click="snackbar = false">
         Cerrar
       </v-btn>
     </v-snackbar>
+
     <v-row justify="center">
       <v-dialog v-model="dialogConfirm" persistent max-width="290">
         <v-card>
