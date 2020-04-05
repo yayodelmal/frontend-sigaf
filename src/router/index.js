@@ -31,6 +31,10 @@ const routes = [
           {
             path: 'aulas',
             component: () => import('../views/maintenance/Classroom.vue')
+          },
+          {
+            path: 'estado-ticket',
+            component: () => import('../views/maintenance/StatusTicket.vue')
           }
         ]
       }

@@ -46,9 +46,9 @@
             <v-list-item-title>Aula</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item link>
+        <v-list-item to="/my/mantenedor/estado-ticket" link>
           <v-list-item-content>
-            <v-list-item-title>Aula</v-list-item-title>
+            <v-list-item-title>Estado ticket</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list-group>

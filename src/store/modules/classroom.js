@@ -41,6 +41,8 @@ const classroom = {
 
         const json = response.data
 
+        console.log(json)
+
         commit('SET_CLASSROOMS', json.classrooms)
       } catch (error) {
         console.log(error)
