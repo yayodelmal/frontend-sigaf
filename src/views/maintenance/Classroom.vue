@@ -13,7 +13,7 @@
           <v-dialog v-model="dialog" max-width="500px" persistent>
             <template v-slot:activator="{ on }">
               <v-btn color="primary" dark class="mb-2" v-on="on"
-                >Crear aula</v-btn
+                >Crear registro</v-btn
               >
             </template>
             <v-form>
@@ -75,7 +75,7 @@
     <v-row justify="center">
       <v-dialog v-model="dialogConfirm" persistent max-width="290">
         <v-card>
-          <v-card-title class="headline">¿Esta seguro?</v-card-title>
+          <v-card-title class="headline">¿Está seguro?</v-card-title>
           <v-card-text>Eliminará un registro de forma permanente</v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -140,8 +140,8 @@ export default {
       val || this.close()
     }
   },
-  mounted() {
-    this.fetchClassrooms()
+  created() {
+    this.fetchData()
   },
   methods: {
     ...mapActions([
@@ -156,17 +156,12 @@ export default {
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
-    confirmDelete() {
-      this.deleteClassroom(this.editedItem).then(({ success, error }) => {
-        if (success) {
-          this.snackbar = true
-          this.message = this.successMessage
-        } else {
-          this.snackbar = true
-          this.message = error
-        }
-      })
-      this.closeConfirmDelete()
+    async fetchData() {
+      const { success, error } = await this.fetchClassrooms()
+      if (!success) {
+        this.snackbar = true
+        this.message = error
+      }
     },
     deleteItem(item) {
       this.editedIndex = this.classroomsDataTable.indexOf(item)
@@ -174,13 +169,16 @@ export default {
 
       this.dialogConfirm = true
     },
-
-    close() {
-      this.dialog = false
-      setTimeout(() => {
-        this.editedItem = Object.assign({}, this.defaultItem)
-        this.editedIndex = -1
-      }, 300)
+    async confirmDelete() {
+      const { success, error } = await this.deleteClassroom(this.editedItem)
+      if (success) {
+        this.snackbar = true
+        this.message = this.successMessage
+      } else {
+        this.snackbar = true
+        this.message = error
+      }
+      this.closeConfirmDelete()
     },
     closeConfirmDelete() {
       this.dialogConfirm = false
@@ -189,34 +187,38 @@ export default {
         this.editedIndex = -1
       }, 300)
     },
-
-    save() {
+    async save() {
       if (this.validate()) {
         if (this.editedIndex > -1) {
-          this.putClassroom(this.editedItem).then(({ success, error }) => {
-            if (success) {
-              this.snackbar = true
-              this.message = this.successMessage
-            } else {
-              this.snackbar = true
-              this.message = error
-              console.log(error)
-            }
-          })
+          const { success, error } = await this.putClassroom(this.editedItem)
+          if (success) {
+            this.snackbar = true
+            this.message = this.successMessage
+          } else {
+            this.snackbar = true
+            this.message = error
+            console.log(error)
+          }
         } else {
-          this.postClassroom(this.editedItem).then(({ success, error }) => {
-            if (success) {
-              this.snackbar = true
-              this.message = this.successMessage
-            } else {
-              console.log(error)
-              this.snackbar = true
-              this.message = error
-            }
-          })
+          const { success, error } = await this.postClassroom(this.editedItem)
+          if (success) {
+            this.snackbar = true
+            this.message = this.successMessage
+          } else {
+            console.log(error)
+            this.snackbar = true
+            this.message = error
+          }
         }
         this.close()
       }
+    },
+    close() {
+      this.dialog = false
+      setTimeout(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      }, 300)
     },
     validate() {
       if (this.editedItem.description !== null) {

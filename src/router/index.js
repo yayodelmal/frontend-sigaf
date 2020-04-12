@@ -35,6 +35,10 @@ const routes = [
           {
             path: 'estado-ticket',
             component: () => import('../views/maintenance/StatusTicket.vue')
+          },
+          {
+            path: 'estado-final',
+            component: () => import('../views/maintenance/FinalStatus.vue')
           }
         ]
       }
