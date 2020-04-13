@@ -6,6 +6,10 @@ import vuetify from './plugins/vuetify'
 
 Vue.config.productionTip = false
 
+require('./store/modules/subscriber')
+
+store.dispatch('auth/attempt', localStorage.getItem('access_token'))
+
 new Vue({
   router,
   store,
