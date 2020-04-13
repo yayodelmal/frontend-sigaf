@@ -3,8 +3,12 @@
     <v-list>
       <v-list-item link>
         <v-list-item-content>
-          <v-list-item-title class="title">Administrador</v-list-item-title>
-          <v-list-item-subtitle>adm@gmail.com</v-list-item-subtitle>
+          <v-list-item-title class="title">{{
+            user !== null ? user.name : ''
+          }}</v-list-item-title>
+          <v-list-item-subtitle>{{
+            user !== null ? user.email : ''
+          }}</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
     </v-list>
@@ -35,7 +39,7 @@
     <v-divider></v-divider>
 
     <v-list dense nav shaped>
-      <v-list-group no-action prepend-icon="mdi-brightness-7" color>
+      <v-list-group no-action prepend-icon="mdi-cog-outline" color>
         <template v-slot:activator>
           <v-list-item>
             <v-list-item-title>Mantenedor</v-list-item-title>
@@ -62,6 +66,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'NavigationDrawerApp',
   data: () => ({
@@ -71,7 +76,12 @@ export default {
     ],
     links: ['Home', 'Contacts', 'Settings'],
     mini: true
-  })
+  }),
+  computed: {
+    ...mapGetters({
+      user: 'auth/user'
+    })
+  }
 }
 </script>
 
