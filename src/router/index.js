@@ -16,36 +16,29 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "My" */ '../views/My.vue'),
-    meta: { requiresAuth: true },
+    component: () => import(/* webpackChunkName: "about" */ '../views/My.vue'),
     children: [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: () =>
-          import(/* webpackChunkName: "Dashboard"*/ '../views/Dashboard.vue')
+        component: () => import('../views/Dashboard.vue')
       },
       {
         path: 'mantenedor',
         name: 'Mantenedor',
-        component: () =>
-          import(
-            /* webpackChunkName: "Mantenedor"*/ '../views/maintenance/Index.vue'
-          ),
+        component: () => import('../views/maintenance/Index.vue'),
         children: [
           {
             path: 'aulas',
-            component: () =>
-              import(
-                /* webpackChunkName: "Classroom"*/ '../views/maintenance/Classroom.vue'
-              )
+            component: () => import('../views/maintenance/Classroom.vue')
           },
           {
             path: 'estado-ticket',
-            component: () =>
-              import(
-                /* webpackChunkName: "StatusTicket"*/ '../views/maintenance/StatusTicket.vue'
-              )
+            component: () => import('../views/maintenance/StatusTicket.vue')
+          },
+          {
+            path: 'estado-final',
+            component: () => import('../views/maintenance/FinalStatus.vue')
           }
         ]
       }
@@ -57,15 +50,6 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
-})
-
-router.beforeEach((to, from, next) => {
-  const loggedIn = localStorage.getItem('access_token')
-
-  if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
-    next('/')
-  }
-  next()
 })
 
 export default router

@@ -2,12 +2,12 @@
   <div>
     <v-data-table
       :headers="headers"
-      :items="statusTicketsDatatable"
+      :items="finalStatusesDataTable"
       class="elevation-1"
     >
       <template v-slot:top>
         <v-toolbar flat color="white">
-          <v-toolbar-title>Lista de estados de ticket</v-toolbar-title>
+          <v-toolbar-title>Lista de estados finales</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px" persistent>
@@ -128,7 +128,7 @@ export default {
     }
   }),
   computed: {
-    ...mapGetters(['statusTicketsDatatable']),
+    ...mapGetters(['finalStatusesDataTable']),
     formTitle() {
       return this.editedIndex === -1 ? 'Crear Estado' : 'Editar Estado'
     }
@@ -138,32 +138,32 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fetchStatusTickets',
-      'postStatusTicket',
-      'putStatusTicket',
-      'deleteStatusTicket'
+      'fetchFinalStatuses',
+      'postFinalStatus',
+      'putFinalStatus',
+      'deleteFinalStatus'
     ]),
     editItem(item) {
-      this.editedIndex = this.statusTicketsDatatable.indexOf(item)
+      this.editedIndex = this.finalStatusesDataTable.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
     async fetchData() {
-      const { success, error } = await this.fetchStatusTickets()
+      const { success, error } = await this.fetchFinalStatuses()
       if (!success) {
         this.snackbar = true
         this.message = error
       }
     },
     deleteItem(item) {
-      this.editedIndex = this.statusTicketsDatatable.indexOf(item)
+      this.editedIndex = this.finalStatusesDataTable.indexOf(item)
       this.editedItem = Object.assign({}, item)
 
       this.dialogConfirm = true
     },
     async confirmDelete() {
-      const { success, error } = await this.deleteStatusTicket(this.editedItem)
+      const { success, error } = await this.deleteFinalStatus(this.editedItem)
       if (success) {
         this.snackbar = true
         this.message = this.successMessage
@@ -183,7 +183,7 @@ export default {
     async save() {
       if (this.validate()) {
         if (this.editedIndex > -1) {
-          const { success, error } = await this.putStatusTicket(this.editedItem)
+          const { success, error } = await this.putFinalStatus(this.editedItem)
           if (success) {
             this.snackbar = true
             this.message = this.successMessage
@@ -193,9 +193,7 @@ export default {
             console.log(error)
           }
         } else {
-          const { success, error } = await this.postStatusTicket(
-            this.editedItem
-          )
+          const { success, error } = await this.postFinalStatus(this.editedItem)
           if (success) {
             this.snackbar = true
             this.message = this.successMessage

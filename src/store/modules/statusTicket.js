@@ -39,26 +39,30 @@ export default {
   actions: {
     fetchStatusTickets: async ({ commit }) => {
       try {
-        const { data, status } = await axios.get('status-ticket')
+        const { data } = await axios.get('status-ticket')
 
-        if (status === 200) {
-          commit('SET_STATUS_TICKETS', data.statusTickets)
-          return { success: true, error: null }
-        }
+        commit('SET_STATUS_TICKETS', data.statusTickets)
+        return { success: data.success, error: data.error }
       } catch (error) {
-        return { success: false, error: error }
+        const { data } = error.response
+
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
       }
     },
     postStatusTicket: async ({ commit }, statusTicket) => {
       try {
-        const { data, status } = await axios.post('status-ticket', statusTicket)
-
-        if (status === 201) {
-          commit('POST_STATUS_TICKET', data.statusTicket)
-          return { success: true, error: null }
-        }
+        const { data } = await axios.post('status-ticket', statusTicket)
+        commit('POST_STATUS_TICKET', data.statusTicket)
+        return { success: data.success, error: data.error }
       } catch (error) {
-        return { success: false, error: error }
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
       }
     },
     putStatusTicket: async ({ commit }, statusTicket) => {
@@ -69,24 +73,42 @@ export default {
         )
         if (status === 200) {
           commit('PUT_STATUS_TICKET', data.statusTicket)
-          return { success: true, error: null }
+          return { success: data.success, error: data.error }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
         }
       } catch (error) {
-        return { success: false, error: error }
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
       }
     },
     deleteStatusTicket: async ({ commit }, statusTicket) => {
       try {
-        const { status } = await axios.delete(
+        const { status, data } = await axios.delete(
           `status-ticket/${statusTicket.id}`
         )
 
         if (status === 200) {
           commit('DELETE_STATUS_TICKET', statusTicket)
-          return { success: true, error: null }
+          return { success: data.success, error: data.error }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
         }
       } catch (error) {
-        return { success: false, error: error }
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
       }
     }
   }

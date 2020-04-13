@@ -1,44 +1,44 @@
 import axios from '../../services/axios'
 
-const classroom = {
+export default {
   state: {
-    classrooms: []
+    finalStatuses: []
   },
   mutations: {
-    SET_CLASSROOMS: (state, classrooms) => {
-      state.classrooms = classrooms
+    SET_FINAL_STATUSES: (state, finalStatuses) => {
+      state.finalStatuses = finalStatuses
     },
-    POST_CLASSROOM: (state, classroom) => {
-      state.classrooms.push(classroom)
+    POST_FINAL_STATUS: (state, finalStatus) => {
+      state.finalStatuses.push(finalStatus)
     },
-    PUT_CLASSROOM: (state, classroom) => {
-      const editedIndex = state.classrooms.findIndex(
-        find => find.id === classroom.id
+    PUT_FINAL_STATUS: (state, finalStatus) => {
+      const editedIndex = state.finalStatuses.findIndex(
+        find => find.id === finalStatus.id
       )
-      Object.assign(state.classrooms[editedIndex], classroom)
+      Object.assign(state.finalStatuses[editedIndex], finalStatus)
     },
-    DELETE_CLASSROOM: (state, classroom) => {
-      const editedIndex = state.classrooms.findIndex(
-        find => find.id === classroom.id
+    DELETE_FINAL_STATUS: (state, finalStatus) => {
+      const editedIndex = state.finalStatuses.findIndex(
+        find => find.id === finalStatus.id
       )
-      state.classrooms.splice(editedIndex, 1)
+      state.finalStatuses.splice(editedIndex, 1)
     }
   },
   getters: {
-    classroomsDataTable: state => {
-      return state.classrooms.map(classroom => {
+    finalStatusesDataTable: state => {
+      return state.finalStatuses.map(finalStatus => {
         return {
-          id: classroom.id,
-          description: classroom.description
+          id: finalStatus.id,
+          description: finalStatus.description
         }
       })
     }
   },
   actions: {
-    fetchClassrooms: async ({ commit }) => {
+    fetchFinalStatuses: async ({ commit }) => {
       try {
-        const { data } = await axios.get('classroom')
-        commit('SET_CLASSROOMS', data.classrooms)
+        const { data } = await axios.get('final-status')
+        commit('SET_FINAL_STATUSES', data.finalStatuses)
         return { success: data.success, error: data.error }
       } catch (error) {
         const { data } = error.response
@@ -48,10 +48,10 @@ const classroom = {
         }
       }
     },
-    postClassroom: async ({ commit }, classroom) => {
+    postFinalStatus: async ({ commit }, finalStatus) => {
       try {
-        const { data } = await axios.post('classroom', classroom)
-        commit('POST_CLASSROOM', data.classroom)
+        const { data } = await axios.post('final-status', finalStatus)
+        commit('POST_FINAL_STATUS', data.finalStatus)
         return { success: data.success, error: data.error }
       } catch (error) {
         const { data } = error.response
@@ -61,14 +61,14 @@ const classroom = {
         }
       }
     },
-    putClassroom: async ({ commit }, classroom) => {
+    putFinalStatus: async ({ commit }, finalStatus) => {
       try {
-        const { status, data } = await axios.put(
-          `classroom/${classroom.id}`,
-          classroom
+        const { data, status } = await axios.put(
+          `final-status/${finalStatus.id}`,
+          finalStatus
         )
         if (status === 200) {
-          commit('PUT_CLASSROOM', data.classroom)
+          commit('PUT_FINAL_STATUS', data.finalStatus)
           return { success: data.success, error: data.error }
         } else {
           return {
@@ -84,12 +84,14 @@ const classroom = {
         }
       }
     },
-    deleteClassroom: async ({ commit }, classroom) => {
+    deleteFinalStatus: async ({ commit }, finalStatus) => {
       try {
-        const { status, data } = await axios.delete(`classroom/${classroom.id}`)
+        const { status, data } = await axios.delete(
+          `final-status/${finalStatus.id}`
+        )
 
         if (status === 200) {
-          commit('DELETE_CLASSROOM', classroom)
+          commit('DELETE_FINAL_STATUS', finalStatus)
           return { success: data.success, error: data.error }
         } else {
           return {
@@ -107,5 +109,3 @@ const classroom = {
     }
   }
 }
-
-export default classroom

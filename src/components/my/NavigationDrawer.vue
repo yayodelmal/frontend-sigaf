@@ -55,6 +55,11 @@
             <v-list-item-title>Estado ticket</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/my/mantenedor/estado-final" link>
+          <v-list-item-content>
+            <v-list-item-title>Estado final alumno</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list-group>
     </v-list>
   </v-navigation-drawer>
