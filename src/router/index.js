@@ -21,24 +21,37 @@ const routes = [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: () => import('../views/Dashboard.vue')
+        component: () =>
+          import(/* webpackChunkName: "Dashboard" */ '../views/Dashboard.vue')
       },
       {
         path: 'mantenedor',
         name: 'Mantenedor',
-        component: () => import('../views/maintenance/Index.vue'),
+        component: () =>
+          import(
+            /* webpackChunkName: "Maintenance" */ '../views/maintenance/Index.vue'
+          ),
         children: [
           {
             path: 'aulas',
-            component: () => import('../views/maintenance/Classroom.vue')
+            component: () =>
+              import(
+                /* webpackChunkName: "Classroom" */ '../views/maintenance/Classroom.vue'
+              )
           },
           {
             path: 'estado-ticket',
-            component: () => import('../views/maintenance/StatusTicket.vue')
+            component: () =>
+              import(
+                /* webpackChunkName: "EstadoTicket" */ '../views/maintenance/StatusTicket.vue'
+              )
           },
           {
             path: 'estado-final',
-            component: () => import('../views/maintenance/FinalStatus.vue')
+            component: () =>
+              import(
+                /* webpackChunkName: "EstadoFinal" */ '../views/maintenance/FinalStatus.vue'
+              )
           }
         ]
       }
@@ -50,6 +63,15 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  const loggedIn = localStorage.getItem('access_token')
+
+  if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
+    next('/')
+  }
+  next()
 })
 
 export default router
