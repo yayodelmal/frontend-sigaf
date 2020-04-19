@@ -28,7 +28,7 @@
         </v-list-item-icon>
         <v-list-item-title>Cursos</v-list-item-title>
       </v-list-item>
-      <v-list-item link>
+      <v-list-item to="/my/ticket" link>
         <v-list-item-icon>
           <v-icon>mdi-ticket-account</v-icon>
         </v-list-item-icon>

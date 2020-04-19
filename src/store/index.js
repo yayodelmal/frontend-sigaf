@@ -5,6 +5,7 @@ import statusTicket from './modules/statusTicket'
 import finalStatus from './modules/finalStatus'
 import typeTicket from './modules/typeTicket'
 import motiveTicket from './modules/motiveTicket'
+import ticket from './modules/ticket'
 import auth from './modules/auth'
 
 Vue.use(Vuex)
@@ -16,6 +17,7 @@ export default new Vuex.Store({
     finalStatus,
     typeTicket,
     motiveTicket,
+    ticket,
     auth
   }
 })

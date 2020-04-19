@@ -56,10 +56,10 @@
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click.prevent="editItem(item)">
+        <v-icon class="mr-2" @click.prevent="editItem(item)">
           mdi-pencil
         </v-icon>
-        <v-icon small @click.prevent="deleteItem(item)">
+        <v-icon @click.prevent="deleteItem(item)">
           mdi-delete
         </v-icon>
       </template>

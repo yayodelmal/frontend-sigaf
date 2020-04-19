@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-container class="grey lighten-5">
+      <h1>Dashboard</h1>
       <v-row>
         <v-col v-for="n in 3" :key="n" cols="12" sm="4">
           <v-card class="mx-auto" max-width="344" outlined>
@@ -19,83 +20,17 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-container fluid>
-      <v-row align="center" justify="center">
-        <div class="my-2">
-          <v-btn v-on:click="postAlert" small color="primary">Primary</v-btn>
-        </div>
-        <v-card>
-          <v-card-title>
-            Ticket
-            <v-spacer></v-spacer>
-            <v-text-field
-              v-model="search"
-              append-icon="mdi-magnify"
-              label="Search"
-            ></v-text-field>
-          </v-card-title>
-          <v-data-table
-            calculate-widths
-            dense
-            :headers="headers"
-            :items="alertsDataTable"
-            :search="search"
-          ></v-data-table>
-        </v-card>
-      </v-row>
-    </v-container>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'Dashboard',
   data() {
-    return {
-      test: {
-        id: 1,
-        description: 'una descripción',
-        commit: {
-          valor: 5,
-          unaFuncion: function(data) {
-            return data + ' soy una function'
-          }
-        }
-      },
-      tests: ['amarillo', 'azul', 'rojo'],
-      headers: [
-        {
-          text: 'Alumno',
-          value: 'alumno'
-        },
-        {
-          text: 'Curso',
-          value: 'curso'
-        }
-      ],
-      search: '',
-      drawer: null
-    }
+    return {}
   },
-  created() {
-    this.fetchAlerts()
-  },
-  computed: {
-    alertsDataTable() {
-      return this.alerts.map(formatData => {
-        return {
-          alumno:
-            formatData.ticket.course_registered_user.registered_user
-              .name_registered_moodle,
-          curso: formatData.ticket.course_registered_user.course.description
-        }
-      })
-    },
-    ...mapGetters(['alerts'])
-  },
-  methods: {
-    ...mapActions(['postAlert', 'fetchAlerts'])
-  }
+  created() {},
+  computed: {},
+  methods: {}
 }
 </script>
