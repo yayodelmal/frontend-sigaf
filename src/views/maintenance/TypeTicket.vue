@@ -2,7 +2,7 @@
   <div>
     <v-data-table
       :headers="headers"
-      :items="typeTicketDataTable"
+      :items="typeTicketsDataTable"
       class="elevation-1"
     >
       <template v-slot:top>
@@ -93,8 +93,7 @@
 </template>
 
 <script>
-import { mapActions } from 'veux'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   data: () => ({
     dialog: false,
@@ -129,9 +128,14 @@ export default {
     }
   }),
   computed: {
-    ...mapGetters('typeTicketDataTable')
+    ...mapGetters(['typeTicketsDataTable']),
+    formTitle() {
+      return this.editedIndex === -1 ? 'Crear Estado' : 'Editar Estado'
+    }
   },
-  created() {},
+  created() {
+    this.fetchData()
+  },
   methods: {
     ...mapActions([
       'fetchTypeTickets',
@@ -140,7 +144,7 @@ export default {
       'deleteTypeTicket'
     ]),
     editItem(item) {
-      this.editedIndex = this.typeTicketDataTable.indexOf(item)
+      this.editedIndex = this.typeTicketsDataTable.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
       this.dialog = true
@@ -153,7 +157,7 @@ export default {
       }
     },
     deleteItem(item) {
-      this.editedIndex = this.typeTicketDataTable.indexOf(item)
+      this.editedIndex = this.typeTicketsDataTable.indexOf(item)
       this.editedItem = Object.assign({}, item)
 
       this.dialogConfirm = true

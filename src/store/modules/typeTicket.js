@@ -25,7 +25,7 @@ export default {
     }
   },
   getters: {
-    typeTicketDataTable: state => {
+    typeTicketsDataTable: state => {
       return state.typeTickets.map(typeTicket => {
         return {
           id: typeTicket.id,
