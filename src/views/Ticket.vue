@@ -41,7 +41,7 @@
                   label="Crear Ticket"
                 ></base-button>
               </template>
-              <v-card class="fill-height">
+              <v-card>
                 <v-card-title>
                   <span class="headline">Ticket</span>
                 </v-card-title>
