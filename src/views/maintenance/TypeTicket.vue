@@ -32,7 +32,7 @@
                           :rules="[rules.required, rules.counter]"
                           required
                           counter
-                          maxlength="7"
+                          maxlength="20"
                           autofocus
                           clearable
                         ></v-text-field>
@@ -215,7 +215,7 @@ export default {
     },
     validate() {
       if (this.editedItem.description !== null) {
-        return this.editedItem.description.length > 6
+        return this.editedItem.description.length < 20
       }
     }
   }
