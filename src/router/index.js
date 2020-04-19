@@ -53,6 +53,13 @@ const routes = [
               import(
                 /* webpackChunkName: "EstadoFinal" */ '../views/maintenance/FinalStatus.vue'
               )
+          },
+          {
+            path: 'motivo-ticket',
+            component: () =>
+              import(
+                /* webpackChunkName: "EstadoFinal" */ '../views/maintenance/MotiveTicket.vue'
+              )
           }
         ]
       }
