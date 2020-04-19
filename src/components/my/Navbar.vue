@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar color="warning" dark app clipped-left>
+  <v-app-bar color="blueS" dark app clipped-left>
     <v-spacer></v-spacer>
     <v-toolbar-title
       >Sistema de Información para la Gestión de Acciones
