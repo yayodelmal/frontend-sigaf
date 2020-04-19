@@ -35,7 +35,7 @@ export default {
     }
   },
   actions: {
-    fetchFinalStatuses: async ({ commit }) => {
+    fetchMotiveTickets: async ({ commit }) => {
       try {
         const { data } = await axios.get('motive-ticket')
         commit('SET_MOTIVE_TICKETS', data.motiveTickets)

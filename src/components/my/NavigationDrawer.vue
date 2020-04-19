@@ -64,11 +64,11 @@
           <v-list-item-content>
             <v-list-item-title>Tipo ticket</v-list-item-title>
           </v-list-item-content>
-          <v-list-item to="/my/mantenedor/motivo-ticket" link>
-            <v-list-item-content>
-              <v-list-item-title>Motivo ticket</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
+        </v-list-item>
+        <v-list-item to="/my/mantenedor/motivo-ticket" link>
+          <v-list-item-content>
+            <v-list-item-title>Motivo ticket</v-list-item-title>
+          </v-list-item-content>
         </v-list-item>
       </v-list-group>
     </v-list>

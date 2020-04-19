@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'veux'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   data: () => ({
     dialog: false,
