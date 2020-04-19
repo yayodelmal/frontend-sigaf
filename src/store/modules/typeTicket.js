@@ -6,7 +6,7 @@ export default {
   },
   mutations: {
     SET_TYPE_TICKETS: (state, typeTickets) => {
-      state.typeTicket = typeTickets
+      state.typeTickets = typeTickets
     },
     POST_TYPE_TICKET: (state, typeTicket) => {
       state.typeTickets.push(typeTicket)
@@ -38,7 +38,8 @@ export default {
     fetchTypeTickets: async ({ commit }) => {
       try {
         const { data } = await axios.get('in-out-ticket')
-        commit('SET_TYPE_TICKETS', data.typeTickets)
+
+        commit('SET_TYPE_TICKETS', data.inOutTickets)
         return { success: data.success, error: data.error }
       } catch (error) {
         const { data } = error.response
@@ -51,7 +52,7 @@ export default {
     postTypeTicket: async ({ commit }, typeTicket) => {
       try {
         const { data } = await axios.post('in-out-ticket', typeTicket)
-        commit('POST_TYPE_TICKET', data.typeTicket)
+        commit('POST_TYPE_TICKET', data.inOutTicket)
         return { success: data.success, error: data.error }
       } catch (error) {
         const { data } = error.response
@@ -67,8 +68,9 @@ export default {
           `in-out-ticket/${typeTicket.id}`,
           typeTicket
         )
+
         if (status === 200) {
-          commit('PUT_TYPE_TICKET', data.typeTicket)
+          commit('PUT_TYPE_TICKET', data.inOutTicket)
           return { success: data.success, error: data.error }
         } else {
           return {
