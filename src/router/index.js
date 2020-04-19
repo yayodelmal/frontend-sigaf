@@ -39,6 +39,10 @@ const routes = [
           {
             path: 'estado-final',
             component: () => import('../views/maintenance/FinalStatus.vue')
+          },
+          {
+            path: 'tipo-ticket',
+            component: () => import('../views/maintenance/TypeTicket.vue')
           }
         ]
       }
