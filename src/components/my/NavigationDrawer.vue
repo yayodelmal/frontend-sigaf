@@ -70,6 +70,11 @@
             <v-list-item-title>Motivo ticket</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/my/mantenedor/prioridad-ticket" link>
+          <v-list-item-content>
+            <v-list-item-title>Prioridad ticket</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list-group>
     </v-list>
   </v-navigation-drawer>

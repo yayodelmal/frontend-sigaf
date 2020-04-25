@@ -73,6 +73,13 @@ const routes = [
               import(
                 /* webpackChunkName: "TipoTicket" */ '../views/maintenance/TypeTicket.vue'
               )
+          },
+          {
+            path: 'prioridad-ticket',
+            component: () =>
+              import(
+                /* webpackChunkName: "PriodidadTicket" */ '../views/maintenance/PriorityTicket.vue'
+              )
           }
         ]
       }
