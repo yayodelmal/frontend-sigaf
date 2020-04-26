@@ -80,6 +80,19 @@
                         <v-stepper-content step="1">
                           <form @keydown.enter.prevent="fetchUserByRut()">
                             <v-row>
+                              <v-col cols="12" sm="6" md="6">
+                                <v-label>Último acceso:</v-label>
+                                <v-chip
+                                  v-if="user"
+                                  :color="colorLastAccess"
+                                  label
+                                  dark
+                                  class="ma-2"
+                                >
+                                  <v-icon left>{{ iconLastAccess }}</v-icon>
+                                  {{ user.last_access_registered_moodle }}
+                                </v-chip>
+                              </v-col>
                               <v-spacer />
                               <v-col cols="10" sm="4" md="4">
                                 <base-textfield
@@ -88,7 +101,7 @@
                                   color="blueS"
                                   v-model="rut"
                                   clearable
-                                  loading
+                                  :loading="searchRutLoading"
                                   hint="Formato 12.345.678-9"
                                 ></base-textfield>
                               </v-col>
@@ -104,7 +117,6 @@
                                   <v-icon>mdi-magnify</v-icon>
                                 </v-btn>
                               </v-col>
-                              <v-spacer />
                             </v-row>
                           </form>
                           <v-row>
@@ -343,6 +355,7 @@ export default {
       itemsPerPage: 10,
       search: '',
       loading: false,
+      searchRutLoading: false,
       headers: [
         {
           text: '#',
@@ -413,15 +426,29 @@ export default {
       }
     },
     async fetchUserByRut() {
-      const { data } = await axios.get(`v1/registered-user/${this.rut}`)
+      this.searchRutLoading = true
+
+      setTimeout(async () => {
+        const { data } = await axios.get(`v1/registered-user/${this.rut}`)
+
+        this.userCourse = data.registeredUser
+
+        const userInter = this.usersCourse.filter(userCourse => {
+          return userCourse.registered_user.id === this.userCourse.id
+        })[0]
+        this.user = userInter
+
+        this.findActivity(this.user.id)
+
+        this.searchRutLoading = false
+      }, 1000)
+    },
+    async findActivity(id) {
+      const { data } = await axios.get(
+        `v1/activity-course-registered-user/${id}`
+      )
 
       console.log(data)
-      this.userCourse = data.registeredUser
-
-      const userInter = this.usersCourse.filter(userCourse => {
-        return userCourse.registered_user.id === this.userCourse.id
-      })[0]
-      this.user = userInter
     }
   },
   created() {
@@ -441,6 +468,16 @@ export default {
     }
   },
   computed: {
+    colorLastAccess() {
+      return this.user.last_access_registered_moodle === 'Nunca'
+        ? 'redS'
+        : 'blueS'
+    },
+    iconLastAccess() {
+      return this.user.last_access_registered_moodle === 'Nunca'
+        ? 'mdi-alert-circle'
+        : 'mdi-check-circle'
+    },
     coursesComputed() {
       return this.courses
         .map(course => {
