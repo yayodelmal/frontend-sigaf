@@ -118,11 +118,11 @@ export default {
             this.$router.push({ name: 'My' })
           } else {
             this.snackbar = true
-            this.message = 'Usuario/contraseña invalidas'
+            this.message = 'Usuario/contraseña inválidos'
           }
         } else {
           this.snackbar = true
-          this.message = 'Usuario/contraseña invalidas'
+          this.message = 'Usuario/contraseña inválidos'
         }
       }
     },
