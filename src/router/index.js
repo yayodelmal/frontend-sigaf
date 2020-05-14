@@ -89,7 +89,8 @@ const routes = [
             component: () =>
               import(
                 /* webpackChunkName: "PriodidadTicket" */ '../views/maintenance/PriorityTicket.vue'
-              )
+              ),
+            meta: { requiresAuth: true }
           }
         ]
       }
