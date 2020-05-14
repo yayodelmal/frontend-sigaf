@@ -113,7 +113,6 @@ export default {
         const { success, token } = await this.login(this.userEdited)
 
         if (success) {
-          
           const { success } = await this.attempt(token)
           if (success) {
             this.$router.push({ name: 'My' })

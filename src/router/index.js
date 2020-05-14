@@ -23,56 +23,66 @@ const routes = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () =>
-          import(/* webpackChunkName: "Dashboard" */ '../views/Dashboard.vue')
+          import(
+            /* webpackChunkName: "Estadisticas" */ '../views/Dashboard.vue'
+          ),
+        meta: { requiresAuth: true }
       },
       {
         path: 'ticket',
         name: 'Ticket',
         component: () =>
-          import(/* webpackChunkName: "Ticket" */ '../views/Ticket.vue')
+          import(/* webpackChunkName: "Ticket" */ '../views/Ticket.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'mantenedor',
         name: 'Mantenedor',
         component: () =>
           import(
-            /* webpackChunkName: "Maintenance" */ '../views/maintenance/Index.vue'
+            /* webpackChunkName: "Mantenedor" */ '../views/maintenance/Index.vue'
           ),
+        meta: { requiresAuth: true },
         children: [
           {
-            path: 'aulas',
+            path: 'aula',
             component: () =>
               import(
-                /* webpackChunkName: "Classroom" */ '../views/maintenance/Classroom.vue'
-              )
+                /* webpackChunkName: "Aula" */ '../views/maintenance/Classroom.vue'
+              ),
+            meta: { requiresAuth: true }
           },
           {
             path: 'estado-ticket',
             component: () =>
               import(
                 /* webpackChunkName: "EstadoTicket" */ '../views/maintenance/StatusTicket.vue'
-              )
+              ),
+            meta: { requiresAuth: true }
           },
           {
             path: 'estado-final',
             component: () =>
               import(
                 /* webpackChunkName: "EstadoFinal" */ '../views/maintenance/FinalStatus.vue'
-              )
+              ),
+            meta: { requiresAuth: true }
           },
           {
             path: 'motivo-ticket',
             component: () =>
               import(
                 /* webpackChunkName: "MotivoTicket" */ '../views/maintenance/MotiveTicket.vue'
-              )
+              ),
+            meta: { requiresAuth: true }
           },
           {
             path: 'tipo-ticket',
             component: () =>
               import(
                 /* webpackChunkName: "TipoTicket" */ '../views/maintenance/TypeTicket.vue'
-              )
+              ),
+            meta: { requiresAuth: true }
           }
         ]
       }

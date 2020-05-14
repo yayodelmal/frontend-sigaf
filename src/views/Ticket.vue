@@ -57,9 +57,7 @@
                           step="1"
                           >Usuario</v-stepper-step
                         >
-
                         <v-divider></v-divider>
-
                         <v-stepper-step
                           color="redS"
                           dark
@@ -68,14 +66,11 @@
                           step="2"
                           >Ticket</v-stepper-step
                         >
-
                         <v-divider></v-divider>
-
                         <v-stepper-step color="redS" dark editable step="3"
                           >Detalle</v-stepper-step
                         >
                       </v-stepper-header>
-
                       <v-stepper-items>
                         <v-stepper-content step="1">
                           <form @keydown.enter.prevent="fetchUserByRut()">
@@ -412,8 +407,8 @@ export default {
       const { data } = await axios.get('v1/courses')
 
       if (data.success) {
-        this.courses = data.data
-        this.courses.push({ id: 0, description: 'Todos', status: 1 })
+        this.courses = data.data.collections
+        // this.courses.push({ id: 0, description: 'Todos', status: 1 })
       }
     },
     async fetchTickets() {
@@ -482,9 +477,9 @@ export default {
       return this.courses
         .map(course => {
           return {
-            id: course.id,
-            name: course.description,
-            status: course.status
+            id: course.properties.id,
+            name: course.properties.description,
+            status: course.properties.status
           }
         })
         .filter(course => {

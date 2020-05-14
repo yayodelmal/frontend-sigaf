@@ -1,5 +1,7 @@
 import axios from '../../services/axios'
 
+const BASE_URL = '/api/auth'
+
 export default {
   namespaced: true,
   state: {
@@ -28,7 +30,7 @@ export default {
   actions: {
     login: async (_, credentials) => {
       try {
-        const { data } = await axios.post('auth/login', credentials)
+        const { data } = await axios.post(`${BASE_URL}/login`, credentials)
 
         return { success: true, token: data.access_token }
       } catch (error) {
@@ -45,7 +47,7 @@ export default {
       }
 
       try {
-        const { data } = await axios.get('auth/user')
+        const { data } = await axios.get(`${BASE_URL}/user`)
 
         commit('SET_LOGIN_USER', data.user)
 
