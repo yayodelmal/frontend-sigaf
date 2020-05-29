@@ -1,5 +1,4 @@
 import axios from '../../services/axios'
-import StatusTicket from '../../models/StatusTicket'
 
 const BASE_URL = '/api/v2/status-tickets'
 
@@ -30,7 +29,6 @@ export default {
       const editedIndex = state.statusTickets.findIndex(
         find => find.properties.id === statusTicket.id
       )
-
       state.statusTickets.splice(editedIndex, 1)
     }
   },
@@ -96,7 +94,7 @@ export default {
       try {
         const { data } = await axios.post(BASE_URL, statusTicket)
 
-        console.log(StatusTicket)
+        console.log(statusTicket)
 
         const { _data, success, error, message } = data
 
@@ -121,6 +119,7 @@ export default {
           `${BASE_URL}/${statusTicket.id}`,
           statusTicket
         )
+
         if (status === 200) {
           const { _data, success, error, message } = data
 
