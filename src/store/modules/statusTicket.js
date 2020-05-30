@@ -3,7 +3,7 @@ import axios from '../../services/axios'
 const BASE_URL = '/api/v2/status-tickets'
 
 export default {
-  namespaces: true,
+  namespaced: true,
   state: {
     statusTickets: [],
     tickets: []

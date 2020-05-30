@@ -23,7 +23,7 @@
                 <base-button
                   icon="mdi-plus-circle"
                   v-on="on"
-                  label="Crear prioridad ticket"
+                  label="Crear estado ticket"
                 ></base-button>
               </template>
               <v-form>
@@ -187,9 +187,9 @@ export default {
   methods: {
     ...mapActions({
       fetchItems: 'statusTicket/fetchStatusTickets',
-      postItem: 'statusTicket/postStatusTickets',
-      putItem: 'statusTicket/putStatusTickets',
-      removeItem: 'statusTicket/deleteStatusTickets',
+      postItem: 'statusTicket/postStatusTicket',
+      putItem: 'statusTicket/putStatusTicket',
+      removeItem: 'statusTicket/deleteStatusTicket',
       fetchTickets: 'statusTicket/fetchTickets'
     }),
     editItem(item) {
