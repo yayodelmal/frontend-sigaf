@@ -91,6 +91,14 @@ const routes = [
                 /* webpackChunkName: "PriodidadTicket" */ '../views/maintenance/PriorityTicket.vue'
               ),
             meta: { requiresAuth: true }
+          },
+          {
+            path: 'origen-ticket',
+            component: () =>
+              import(
+                /* webpackChunkName: "OrigenTicket" */ '../views/maintenance/SourceTicket.vue'
+              ),
+            meta: { requiresAuth: true }
           }
         ]
       }
