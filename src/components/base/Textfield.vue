@@ -8,6 +8,7 @@
 </template>
 <script>
 export default {
-  inheritAttrs: false
+  inheritAttrs: false,
+  name: 'BaseTextfield'
 }
 </script>

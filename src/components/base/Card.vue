@@ -46,7 +46,7 @@
 <script>
 export default {
   inheritAttrs: false,
-
+  name: 'BaseCard',
   props: {
     avatar: {
       type: String,
