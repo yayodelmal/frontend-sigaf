@@ -12,6 +12,7 @@ import activity from './modules/activity'
 import course from './modules/course'
 import ticket from './modules/ticket'
 import auth from './modules/auth'
+import role from './modules/role'
 
 Vue.use(Vuex)
 
@@ -28,6 +29,7 @@ export default new Vuex.Store({
     activity,
     course,
     ticket,
-    auth
+    auth,
+    role
   }
 })
