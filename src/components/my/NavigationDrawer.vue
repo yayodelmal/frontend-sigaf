@@ -74,10 +74,6 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'NavigationDrawerApp',
   data: () => ({
-    items: [
-      { title: 'Home', icon: 'dashboard' },
-      { title: 'About', icon: 'question_answer' }
-    ],
     mini: true,
     links: {
       main: [
@@ -100,7 +96,7 @@ export default {
       secondary: [
         {
           name: 'Mantenedor',
-          icon: 'mdi-cog-outline',
+          icon: 'mdi-hammer-wrench',
           links: [
             {
               name: 'Aula',
@@ -147,6 +143,11 @@ export default {
               to: { name: 'Profile' }
             }
           ]
+        },
+        {
+          name: 'Configuración',
+          icon: 'mdi-cog-outline',
+          links: [{ name: 'Cargar estudiantes', to: { name: 'LoadStudents' } }]
         }
       ]
     }

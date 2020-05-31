@@ -143,6 +143,26 @@ const routes = [
             meta: { requiresAuth: true }
           }
         ]
+      },
+      {
+        path: 'configuracion',
+        name: 'Configuration',
+        component: () =>
+          import(
+            /* webpackChunkName: "Mantenedor" */ '../views/configuration/Index.vue'
+          ),
+        meta: { requiresAuth: true },
+        children: [
+          {
+            name: 'LoadStudents',
+            path: 'cargar-estudiantes',
+            component: () =>
+              import(
+                /* webpackChunkName: "Perfil" */ '../views/configuration/LoadStudent.vue'
+              ),
+            meta: { requiresAuth: true }
+          }
+        ]
       }
     ]
   }

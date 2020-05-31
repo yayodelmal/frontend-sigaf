@@ -3,7 +3,6 @@
     <v-container class="fill-height" fluid>
       <v-app-bar app clipped-right flat color="white">
         <v-app-bar-nav-icon @click.stop="setDrawer()"></v-app-bar-nav-icon>
-        <v-toolbar-title>{{ $route.name }}</v-toolbar-title>
       </v-app-bar>
       <navigation-drawer-app :drawer.sync="drawer"></navigation-drawer-app>
       <router-view></router-view>
