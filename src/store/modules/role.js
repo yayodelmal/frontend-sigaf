@@ -30,14 +30,10 @@ export default {
   },
   getters: {
     roles: state => {
-      return state.roles.map(({ properties, relationships }) => {
+      return state.roles.map(({ properties }) => {
         return {
           id: properties.id,
-          description: properties.description,
-          users: {
-            numberOfElements: relationships.numberOfElements,
-            href: relationships.links.href
-          }
+          description: properties.description
         }
       })
     }
