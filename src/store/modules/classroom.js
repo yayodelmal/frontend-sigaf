@@ -5,7 +5,7 @@ const BASE_URL = '/api/v2/classrooms'
 export default {
   namespaced: true,
   state: {
-    profiles: []
+    classrooms: []
   },
   mutations: {
     SET_CLASSROOMS: (state, classrooms) => {
