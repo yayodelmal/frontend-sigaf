@@ -132,6 +132,15 @@ const routes = [
                 /* webpackChunkName: "Rol" */ '../views/maintenance/Role.vue'
               ),
             meta: { requiresAuth: true }
+          },
+          {
+            name: 'Profile',
+            path: 'perfil',
+            component: () =>
+              import(
+                /* webpackChunkName: "Perfil" */ '../views/maintenance/Profile.vue'
+              ),
+            meta: { requiresAuth: true }
           }
         ]
       }
