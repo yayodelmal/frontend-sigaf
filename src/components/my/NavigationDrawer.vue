@@ -16,7 +16,12 @@
     <v-divider></v-divider>
 
     <v-list dense nav shaped>
-      <v-list-item v-for="link in links.main" :key="link" :to="link.to" link>
+      <v-list-item
+        v-for="link in links.main"
+        :key="link.name"
+        :to="link.to"
+        link
+      >
         <v-list-item-icon>
           <v-icon>{{ link.icon }}</v-icon>
         </v-list-item-icon>
@@ -29,7 +34,7 @@
     <v-list dense nav shaped>
       <v-list-group
         v-for="link in links.secondary"
-        :key="link"
+        :key="link.name"
         no-action
         :append-icon="link.icon"
         color
@@ -41,7 +46,7 @@
         </template>
         <v-list-item
           v-for="internalLink in link.links"
-          :key="internalLink"
+          :key="internalLink.name"
           :to="internalLink.to"
           link
         >
