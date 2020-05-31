@@ -45,6 +45,7 @@ const routes = [
         children: [
           {
             path: 'aula',
+            name: 'Classroom',
             component: () =>
               import(
                 /* webpackChunkName: "Aula" */ '../views/maintenance/Classroom.vue'
@@ -53,6 +54,7 @@ const routes = [
           },
           {
             path: 'estado-ticket',
+            name: 'StatusTicket',
             component: () =>
               import(
                 /* webpackChunkName: "EstadoTicket" */ '../views/maintenance/StatusTicket.vue'
@@ -61,6 +63,7 @@ const routes = [
           },
           {
             path: 'estado-final',
+            name: 'FinalStatus',
             component: () =>
               import(
                 /* webpackChunkName: "EstadoFinal" */ '../views/maintenance/FinalStatus.vue'
@@ -69,6 +72,7 @@ const routes = [
           },
           {
             path: 'motivo-ticket',
+            name: 'MotiveTicket',
             component: () =>
               import(
                 /* webpackChunkName: "MotivoTicket" */ '../views/maintenance/MotiveTicket.vue'
@@ -76,7 +80,7 @@ const routes = [
             meta: { requiresAuth: true }
           },
           {
-            name: 'Tipo de ticket',
+            name: 'TypeTicket',
             path: 'tipo-ticket',
             component: () =>
               import(
@@ -86,6 +90,7 @@ const routes = [
           },
           {
             path: 'prioridad-ticket',
+            name: 'PriorityTicket',
             component: () =>
               import(
                 /* webpackChunkName: "PriodidadTicket" */ '../views/maintenance/PriorityTicket.vue'
@@ -94,9 +99,28 @@ const routes = [
           },
           {
             path: 'origen-ticket',
+            name: 'SourceTicket',
             component: () =>
               import(
                 /* webpackChunkName: "OrigenTicket" */ '../views/maintenance/SourceTicket.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'Section',
+            path: 'seccion',
+            component: () =>
+              import(
+                /* webpackChunkName: "Sección" */ '../views/maintenance/Section.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'Activity',
+            path: 'actividad',
+            component: () =>
+              import(
+                /* webpackChunkName: "Actividad" */ '../views/maintenance/Activity.vue'
               ),
             meta: { requiresAuth: true }
           }
