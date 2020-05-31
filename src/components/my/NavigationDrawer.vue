@@ -75,6 +75,11 @@
             <v-list-item-title>Prioridad ticket</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item to="/my/mantenedor/origen-ticket" link>
+          <v-list-item-content>
+            <v-list-item-title>Origen ticket</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list-group>
     </v-list>
   </v-navigation-drawer>
