@@ -16,64 +16,41 @@
     <v-divider></v-divider>
 
     <v-list dense nav shaped>
-      <v-list-item to="/my/dashboard" link>
+      <v-list-item v-for="link in links.main" :key="link" :to="link.to" link>
         <v-list-item-icon>
-          <v-icon>mdi-view-dashboard</v-icon>
+          <v-icon>{{ link.icon }}</v-icon>
         </v-list-item-icon>
-        <v-list-item-title>Dashboard</v-list-item-title>
-      </v-list-item>
-      <v-list-item link>
-        <v-list-item-icon>
-          <v-icon>mdi-google-classroom</v-icon>
-        </v-list-item-icon>
-        <v-list-item-title>Cursos</v-list-item-title>
-      </v-list-item>
-      <v-list-item :to="{ name: 'Ticket' }" link>
-        <v-list-item-icon>
-          <v-icon>mdi-ticket-account</v-icon>
-        </v-list-item-icon>
-        <v-list-item-title>Ticket</v-list-item-title>
+        <v-list-item-title>{{ link.name }}</v-list-item-title>
       </v-list-item>
     </v-list>
 
     <v-divider></v-divider>
 
     <v-list dense nav shaped>
-      <v-list-group no-action prepend-icon="mdi-cog-outline" color>
+      <v-list-group
+        v-for="link in links.secondary"
+        :key="link"
+        no-action
+        :append-icon="link.icon"
+        color
+      >
         <template v-slot:activator>
           <v-list-item>
-            <v-list-item-title>Mantenedor</v-list-item-title>
+            <v-list-item-title>{{ link.name }}</v-list-item-title>
           </v-list-item>
         </template>
-        <v-list-item to="/my/mantenedor/aulas" link>
+        <v-list-item
+          v-for="internalLink in link.links"
+          :key="internalLink"
+          :to="internalLink.to"
+          link
+        >
           <v-list-item-content>
-            <v-list-item-title>Aula</v-list-item-title>
+            <v-list-item-title>{{ internalLink.name }}</v-list-item-title>
           </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/my/mantenedor/estado-ticket" link>
-          <v-list-item-content>
-            <v-list-item-title>Estado ticket</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/my/mantenedor/estado-final" link>
-          <v-list-item-content>
-            <v-list-item-title>Estado final alumno</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/my/mantenedor/tipo-ticket" link>
-          <v-list-item-content>
-            <v-list-item-title>Tipo ticket</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/my/mantenedor/motivo-ticket" link>
-          <v-list-item-content>
-            <v-list-item-title>Motivo ticket</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item to="/my/mantenedor/prioridad-ticket" link>
-          <v-list-item-content>
-            <v-list-item-title>Prioridad ticket</v-list-item-title>
-          </v-list-item-content>
+          <v-list-item-icon v-if="internalLink.icon !== undefined">
+            <v-icon>{{ internalLink.icon }}</v-icon>
+          </v-list-item-icon>
         </v-list-item>
       </v-list-group>
     </v-list>
@@ -89,8 +66,66 @@ export default {
       { title: 'Home', icon: 'dashboard' },
       { title: 'About', icon: 'question_answer' }
     ],
-    links: ['Home', 'Contacts', 'Settings'],
-    mini: true
+    mini: true,
+    links: {
+      main: [
+        {
+          name: 'Dashboard',
+          icon: 'mdi-view-dashboard',
+          to: { name: 'Dashboard' }
+        },
+        {
+          name: 'Cursos',
+          icon: 'mdi-google-classroom',
+          to: { name: 'Classroom' }
+        },
+        {
+          name: 'Ticket',
+          icon: 'mdi-ticket-account',
+          to: { name: 'Ticket' }
+        }
+      ],
+      secondary: [
+        {
+          name: 'Mantenedor',
+          icon: 'mdi-cog-outline',
+          links: [
+            {
+              name: 'Aula',
+              to: { name: 'Classroom' }
+            },
+            {
+              name: 'Estado ticket',
+              to: { name: 'StatusTicket' }
+            },
+            {
+              name: 'Estado final alumno',
+              to: { name: 'FinalStatus' }
+            },
+            {
+              name: 'Tipo ticket',
+              to: { name: 'TypeTicket' }
+            },
+            {
+              name: 'Motivo ticket',
+              to: { name: 'MotiveTicket' }
+            },
+            {
+              name: 'Prioridad ticket',
+              to: { name: 'PriorityTicket' }
+            },
+            {
+              name: 'Sección',
+              to: { name: 'Section' }
+            },
+            {
+              name: 'Actividades',
+              to: { name: 'Activity' }
+            }
+          ]
+        }
+      ]
+    }
   }),
   props: {
     drawer: {

@@ -6,6 +6,9 @@ import finalStatus from './modules/finalStatus'
 import typeTicket from './modules/typeTicket'
 import motiveTicket from './modules/motiveTicket'
 import priorityTicket from './modules/priorityTicket'
+import section from './modules/section'
+import activity from './modules/activity'
+import course from './modules/course'
 import ticket from './modules/ticket'
 import auth from './modules/auth'
 
@@ -19,6 +22,9 @@ export default new Vuex.Store({
     typeTicket,
     motiveTicket,
     priorityTicket,
+    section,
+    activity,
+    course,
     ticket,
     auth
   }
