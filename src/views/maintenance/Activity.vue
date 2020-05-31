@@ -3,7 +3,7 @@
     <base-card color="blueS" class="px-5 py-3" title="Actividades">
       <v-data-table
         :headers="headers"
-        :items="filterActivitiesByCourse"
+        :items="activitiesFiltered"
         class="elevation-1 grayS--text"
         :loading="loading"
         loading-text="Cargando... por favor espere"
@@ -19,11 +19,12 @@
           <v-toolbar flat color="white">
             <v-spacer></v-spacer>
             <base-autocomplete
-              v-model="course.id"
-              :items="coursesItems"
-              label="Cursos"
+              v-model="category"
+              :items="categoryItems"
+              label="Categoría"
               item-value="id"
               item-text="description"
+              return-object
             >
             </base-autocomplete>
             <v-dialog v-model="dialog" max-width="500px" persistent>
@@ -202,21 +203,30 @@ export default {
     snackbar: false,
     timeout: 3000,
     loading: false,
-    courses: [],
-    course: {
-      id: 0
-    },
+    activitiesFiltered: [],
+    category: null,
     sectionModel: null
   }),
+  watch: {
+    category() {
+      if (this.category !== null) {
+        this.filterActivitiesByCategories()
+      }
+    }
+  },
   computed: {
     ...mapGetters({
       activitiesItems: 'activity/activities',
       coursesItems: 'course/courses',
-      sectionItems: 'section/sections'
+      coursesByCategory: 'course/coursesByCategory',
+      sectionItems: 'section/sections',
+      categoryItems: 'category/categories'
     }),
-    filterActivitiesByCourse() {
+    activitiesByCategory() {
+      if (this.category === null) return []
+
       return this.activitiesItems.filter(activity => {
-        return activity.course.id === this.course.id
+        activity.course.id === this.courses[0].id
       })
     },
     descriptionErrors() {
@@ -258,19 +268,33 @@ export default {
     this.fetchDataActivities()
     this.fetchDataCourses()
     this.fetchDataSections()
+    this.fetchDataCategories()
   },
   methods: {
     ...mapActions({
       fetchActivityItems: 'activity/fetchActivities',
       fetchCourseItems: 'course/fetchCourses',
+      fetchCourseByCategory: 'course/getCoursesByCategory',
       fetchSectionItems: 'section/fetchSections',
+      fetchCategoryItems: 'category/fetchCategories',
       putItem: 'activity/putActivity'
     }),
     editItem(item) {
-      this.editedIndex = this.filterActivitiesByCourse.indexOf(item)
+      this.editedIndex = this.activitiesFiltered.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
       this.dialog = true
+    },
+    async filterActivitiesByCategories() {
+      if (this.category !== null) {
+        await this.fetchCourseByCategory(this.category.getLinkCourses)
+
+        this.coursesByCategory.forEach(course => {
+          this.activitiesFiltered = this.activitiesItems.filter(activity => {
+            return activity.course.id === course.properties.id
+          })
+        })
+      }
     },
     async fetchDataActivities() {
       this.loading = true
@@ -284,6 +308,16 @@ export default {
     async fetchDataCourses() {
       this.loading = true
       const { success, message } = await this.fetchCourseItems()
+      if (!success) {
+        this.snackbar = true
+        this.message = message
+      }
+      this.loading = false
+    },
+    async fetchDataCategories() {
+      this.loading = true
+      const { success, message } = await this.fetchCategoryItems()
+      console.log()
       if (!success) {
         this.snackbar = true
         this.message = message
@@ -312,6 +346,7 @@ export default {
         if (success) {
           this.snackbar = true
           this.message = this.successMessage
+          this.filterActivitiesByCategories()
         } else {
           this.snackbar = true
           this.message = message

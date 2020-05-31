@@ -5,21 +5,18 @@ const BASE_URL = '/api/v2/activities'
 export default {
   namespaced: true,
   state: {
-    activities: []
+    activities: [],
+    activity: null
   },
   mutations: {
     SET_ACTIVITIES: (state, activities) => {
       state.activities = activities
     },
     POST_ACTIVITY: (state, activity) => {
-      const section = { properties: activity.section }
-      const storeActivity = {
-        properties: { ...activity, section }
-      }
-      console.log(storeActivity)
-      state.activities.push(storeActivity)
+      state.activities.push(activity)
     },
     PUT_ACTIVITY: (state, activity) => {
+      console.log('mutated', activity)
       const editedIndex = state.activities.findIndex(
         find => find.properties.id === activity.properties.id
       )
@@ -31,6 +28,9 @@ export default {
         find => find.properties.id === activity.id
       )
       state.activities.splice(editedIndex, 1)
+    },
+    FIND_ACTIVITY: (state, activity) => {
+      state.activity = activity
     }
   },
   getters: {
@@ -44,6 +44,9 @@ export default {
           course: properties.course.properties
         }
       })
+    },
+    activity: state => {
+      return state.activity
     }
   },
   actions: {
@@ -135,6 +138,34 @@ export default {
 
           if (success) {
             commit('DELETE_ACTIVITY', activity)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    findActivity: async ({ commit }, idActivity) => {
+      try {
+        const { status, data } = await axios.get(`${BASE_URL}/${idActivity}`)
+
+        if (status === 200) {
+          const { success, error, message } = data
+
+          if (success) {
+            commit('FIND_ACTIVITY', data._data)
           } else {
             console.log(error)
           }
