@@ -1,6 +1,6 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Perfil plataforma">
+    <base-card color="blueS" class="px-5 py-3" title="Perfil de plataforma">
       <v-data-table
         :headers="headers"
         :items="items"

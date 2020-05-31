@@ -174,8 +174,8 @@ export default {
     },
     formTitle() {
       return this.editedIndex === -1
-        ? 'Crear Estado ticket'
-        : 'Editar Estado ticket'
+        ? 'Crear motivo ticket'
+        : 'Editar motivo ticket'
     },
     description() {
       return this.editedItem.description
@@ -190,7 +190,7 @@ export default {
       postItem: 'motiveTicket/postMotiveTicket',
       putItem: 'motiveTicket/putMotiveTicket',
       removeItem: 'motiveTicket/deleteMotiveTicket',
-      fetchTickets: 'priorityTicket/fetchTickets'
+      fetchTickets: 'motiveTicket/fetchTickets'
     }),
     editItem(item) {
       this.editedIndex = this.items.indexOf(item)
