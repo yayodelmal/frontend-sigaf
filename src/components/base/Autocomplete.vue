@@ -9,6 +9,7 @@
 
 <script>
 export default {
-  inheritAttrs: false
+  inheritAttrs: false,
+  name: 'BaseAutocomplete'
 }
 </script>

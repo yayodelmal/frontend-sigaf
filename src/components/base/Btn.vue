@@ -7,14 +7,15 @@
 <script>
 export default {
   inheritAttrs: false,
+  name: 'BaseButton',
   props: {
     icon: {
       type: String,
-      default: undefined
+      default: 'mdi-alert-circle'
     },
     label: {
       type: String,
-      default: undefined
+      default: 'Error'
     }
   }
 }
