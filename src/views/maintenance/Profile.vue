@@ -1,6 +1,6 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Estado de ticket">
+    <base-card color="blueS" class="px-5 py-3" title="Perfil de plataforma">
       <v-data-table
         :headers="headers"
         :items="items"
@@ -23,7 +23,7 @@
                 <base-button
                   icon="mdi-plus-circle"
                   v-on="on"
-                  label="Crear estado ticket"
+                  label="Crear perfil plataforma"
                 ></base-button>
               </template>
               <v-form>
@@ -122,7 +122,7 @@
 </template>
 
 <script>
-import StatusTicket from '../../models/StatusTicket'
+import Profile from '../../models/Profile'
 import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
@@ -150,8 +150,8 @@ export default {
       }
     ],
     editedIndex: -1,
-    editedItem: new StatusTicket(),
-    defaultItem: new StatusTicket(),
+    editedItem: new Profile(),
+    defaultItem: new Profile(),
     message: '',
     successMessage: 'Operación realizada con éxito.',
     errorMEssage: 'Ha ocurrido un error.',
@@ -160,7 +160,7 @@ export default {
     loading: false
   }),
   computed: {
-    ...mapGetters({ items: 'statusTicket/statusTickets' }),
+    ...mapGetters({ items: 'profile/profiles' }),
     descriptionErrors() {
       const errors = []
 
@@ -174,8 +174,8 @@ export default {
     },
     formTitle() {
       return this.editedIndex === -1
-        ? 'Crear estado ticket'
-        : 'Editar estado ticket'
+        ? 'Crear perfil plataforma'
+        : 'Editar perfil plataforma'
     },
     description() {
       return this.editedItem.description
@@ -186,18 +186,16 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchItems: 'statusTicket/fetchStatusTickets',
-      postItem: 'statusTicket/postStatusTicket',
-      putItem: 'statusTicket/putStatusTicket',
-      removeItem: 'statusTicket/deleteStatusTicket',
-      fetchTickets: 'statusTicket/fetchTickets'
+      fetchItems: 'profile/fetchprofiles',
+      postItem: 'profile/postprofile',
+      putItem: 'profile/putprofile',
+      removeItem: 'profile/deleteprofile'
     }),
     editItem(item) {
       this.editedIndex = this.items.indexOf(item)
+
       this.editedItem = Object.assign({}, item)
       this.dialog = true
-
-      this.fetchTickets(1)
     },
     async fetchData() {
       this.loading = true

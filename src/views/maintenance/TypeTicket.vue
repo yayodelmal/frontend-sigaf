@@ -174,8 +174,8 @@ export default {
     },
     formTitle() {
       return this.editedIndex === -1
-        ? 'Crear Tipo ticket'
-        : 'Editar Tipo ticket'
+        ? 'Crear tipo ticket'
+        : 'Editar tipo ticket'
     },
     description() {
       return this.editedItem.description

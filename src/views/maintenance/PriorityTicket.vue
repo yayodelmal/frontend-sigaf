@@ -174,8 +174,8 @@ export default {
     },
     formTitle() {
       return this.editedIndex === -1
-        ? 'Crear Prioridad ticket'
-        : 'Editar Prioridad ticket'
+        ? 'Crear prioridad ticket'
+        : 'Editar prioridad ticket'
     },
     description() {
       return this.editedItem.description

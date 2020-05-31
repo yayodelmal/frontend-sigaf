@@ -23,7 +23,7 @@
                 <base-button
                   icon="mdi-plus-circle"
                   v-on="on"
-                  label="Crear rol de usuario"
+                  label="Crear rol usuario"
                 ></base-button>
               </template>
               <v-form>
@@ -174,8 +174,8 @@ export default {
     },
     formTitle() {
       return this.editedIndex === -1
-        ? 'Crear rol de usuario'
-        : 'Editar rol de usuario'
+        ? 'Crear rol usuario'
+        : 'Editar rol usuario'
     },
     description() {
       return this.editedItem.description

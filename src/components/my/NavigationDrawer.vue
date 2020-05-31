@@ -134,6 +134,10 @@ export default {
             {
               name: 'Rol Usuario',
               to: { name: 'Role' }
+            },
+            {
+              name: 'Perfil plataforma',
+              to: { name: 'Profile' }
             }
           ]
         }
