@@ -43,6 +43,7 @@ export default {
         const { data } = await axios.get(BASE_URL)
 
         const { _data, success, error, message } = data
+
         if (success) {
           commit('SET_CLASSROOMS', _data.collections)
         } else {
@@ -52,6 +53,7 @@ export default {
         return { success, message }
       } catch (error) {
         const { data } = error.response
+        console.log(error)
         return {
           success: data.success,
           message: data.message
