@@ -1,5 +1,12 @@
 <template>
-  <v-navigation-drawer app overflow left :mini-variant.sync="drawerLocal" dark>
+  <v-navigation-drawer
+    app
+    overflow
+    left
+    :mini-variant.sync="drawerLocal"
+    dark
+    permanent
+  >
     <v-list>
       <v-list-item link>
         <v-list-item-content>
@@ -36,7 +43,7 @@
         v-for="link in links.secondary"
         :key="link.name"
         no-action
-        :append-icon="link.icon"
+        :prepend-icon="link.icon"
         color
       >
         <template v-slot:activator>
