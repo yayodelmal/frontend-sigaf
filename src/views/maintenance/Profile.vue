@@ -186,10 +186,10 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchItems: 'profile/fetchprofiles',
-      postItem: 'profile/postprofile',
-      putItem: 'profile/putprofile',
-      removeItem: 'profile/deleteprofile'
+      fetchItems: 'profile/fetchProfiles',
+      postItem: 'profile/postProfile',
+      putItem: 'profile/putProfile',
+      removeItem: 'profile/deleteProfile'
     }),
     editItem(item) {
       this.editedIndex = this.items.indexOf(item)
