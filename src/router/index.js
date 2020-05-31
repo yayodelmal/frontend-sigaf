@@ -123,6 +123,15 @@ const routes = [
                 /* webpackChunkName: "Actividad" */ '../views/maintenance/Activity.vue'
               ),
             meta: { requiresAuth: true }
+          },
+          {
+            name: 'Role',
+            path: 'rol',
+            component: () =>
+              import(
+                /* webpackChunkName: "Rol" */ '../views/maintenance/Role.vue'
+              ),
+            meta: { requiresAuth: true }
           }
         ]
       }

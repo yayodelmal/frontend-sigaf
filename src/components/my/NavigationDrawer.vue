@@ -130,6 +130,10 @@ export default {
             {
               name: 'Origen Ticket',
               to: { name: 'SourceTicket' }
+            },
+            {
+              name: 'Rol Usuario',
+              to: { name: 'Role' }
             }
           ]
         }
