@@ -1,19 +1,17 @@
 <template>
   <v-app>
-    <v-content>
-      <router-view></router-view>
-    </v-content>
+    <router-view></router-view>
   </v-app>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld'
+// import Login from './views/Login'
 
 export default {
   name: 'App',
 
   // components: {
-  //   HelloWorld
+  //   Login
   // },
 
   data: () => ({

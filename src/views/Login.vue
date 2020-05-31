@@ -1,14 +1,21 @@
 <template>
-  <v-container class="fill-height orange lighten-5" fluid>
+  <v-container class="fill-height" fluid>
     <nav-bar-component></nav-bar-component>
-    <v-col class="mx-auto" cols="12" sm="8" md="4">
-      <v-card>
-        <v-toolbar flat color="secondary" dark>
-          <v-toolbar-title>Iniciar sesión</v-toolbar-title>
-        </v-toolbar>
-        <v-form>
+    <v-col cols="6" md="4" sm="4" xs="4" lg="4">
+      <v-card tile flat align="center" justify="center">
+        <v-img
+          src="..\assets\logo_iie.jpeg"
+          aspect-ratio="1.7"
+          max-width="300"
+          contain
+        ></v-img>
+      </v-card>
+    </v-col>
+    <v-col class="mx-auto" cols="6" md="6" sm="6" xs="6" lg="6">
+      <base-card color="blueS" title="Iniciar Sesión">
+        <v-form ref="form">
           <v-card-text>
-            <v-text-field
+            <base-textfield
               v-model="userEdited.email"
               label="E-mail"
               type="email"
@@ -17,8 +24,8 @@
               @input="$v.email.$touch()"
               @blur="$v.email.$touch()"
               :error-messages="emailErrors"
-            ></v-text-field>
-            <v-text-field
+            ></base-textfield>
+            <base-textfield
               v-model="userEdited.password"
               label="Contraseña"
               type="password"
@@ -26,33 +33,29 @@
               required
               @input="$v.password.$touch()"
               @blur="$v.password.$touch()"
+              @keypress.enter="submit"
               :error-messages="passwordErrors"
-            ></v-text-field>
+            ></base-textfield>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn
-              class="mr-4"
-              text
-              rounded
-              dark
-              color="secondary"
+            <base-button
+              icon="mdi-check-circle"
+              label="Entrar"
               @click="submit"
-              >Entrar</v-btn
-            >
+            ></base-button>
           </v-card-actions>
         </v-form>
-      </v-card>
-      <v-snackbar v-model="snackbar" :timeout="timeout">
+      </base-card>
+      <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
         {{ message }}
-        <v-btn color="blue" text @click="snackbar = false">
+        <v-btn text @click="snackbar = false">
           Cerrar
         </v-btn>
       </v-snackbar>
     </v-col>
   </v-container>
 </template>
-
 <script>
 import Navbar from '../components/my/Navbar'
 import User from '../models/User'
@@ -70,17 +73,20 @@ export default {
     email: { required, email }
   },
   data: () => ({
-    userEdited: new User('', ''),
-    userDefault: new User('', ''),
+    userEdited: new User(),
+    userDefault: new User(),
     snackbar: false,
     timeout: 3000,
-    message: ''
+    message: '',
+    userCurrent: null
   }),
   computed: {
     ...mapGetters({
       authenticated: 'auth/authenticated',
       user: 'auth/user'
     }),
+
+    // ...mapGetters(['user', 'authenticated']),
     passwordErrors() {
       const errors = []
       if (!this.$v.password.$dirty) return errors

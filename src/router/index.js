@@ -13,9 +13,7 @@ const routes = [
   {
     path: '/my',
     name: 'My',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
+
     component: () => import(/* webpackChunkName: "My" */ '../views/My.vue'),
     meta: { requiresAuth: true },
     children: [
@@ -33,7 +31,8 @@ const routes = [
         name: 'Ticket',
         component: () =>
           import(/* webpackChunkName: "Ticket" */ '../views/Ticket.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true },
+        props: true
       },
       {
         path: 'mantenedor',
@@ -77,6 +76,7 @@ const routes = [
             meta: { requiresAuth: true }
           },
           {
+            name: 'Tipo de ticket',
             path: 'tipo-ticket',
             component: () =>
               import(

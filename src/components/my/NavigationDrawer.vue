@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer permanent expand-on-hover app dark clipped>
+  <v-navigation-drawer app overflow left :mini-variant.sync="drawerLocal" dark>
     <v-list>
       <v-list-item link>
         <v-list-item-content>
@@ -28,7 +28,7 @@
         </v-list-item-icon>
         <v-list-item-title>Cursos</v-list-item-title>
       </v-list-item>
-      <v-list-item to="/my/ticket" link>
+      <v-list-item :to="{ name: 'Ticket' }" link>
         <v-list-item-icon>
           <v-icon>mdi-ticket-account</v-icon>
         </v-list-item-icon>
@@ -97,10 +97,24 @@ export default {
     links: ['Home', 'Contacts', 'Settings'],
     mini: true
   }),
+  props: {
+    drawer: {
+      type: Boolean,
+      default: false
+    }
+  },
   computed: {
     ...mapGetters({
       user: 'auth/user'
-    })
+    }),
+    drawerLocal: {
+      get: function() {
+        return this.drawer
+      },
+      set: function(value) {
+        this.$emit('update:drawer', value)
+      }
+    }
   }
 }
 </script>
