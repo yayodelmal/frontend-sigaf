@@ -1,6 +1,9 @@
 import axios from '../../services/axios'
 
+const BASE_URL = '/api/v2/finalStatuses'
+
 export default {
+  namespaced: true,
   state: {
     finalStatuses: []
   },
@@ -13,7 +16,7 @@ export default {
     },
     PUT_FINAL_STATUS: (state, finalStatus) => {
       const editedIndex = state.finalStatuses.findIndex(
-        find => find.id === finalStatus.id
+        find => find.properties.id === finalStatus.properties.id
       )
       Object.assign(state.finalStatuses[editedIndex], finalStatus)
     },
@@ -25,11 +28,11 @@ export default {
     }
   },
   getters: {
-    finalStatusesDataTable: state => {
-      return state.finalStatuses.map(finalStatus => {
+    finalStatuses: state => {
+      return state.finalStatuses.map(({ properties }) => {
         return {
-          id: finalStatus.id,
-          description: finalStatus.description
+          id: properties.id,
+          description: properties.description
         }
       })
     }
@@ -37,22 +40,41 @@ export default {
   actions: {
     fetchFinalStatuses: async ({ commit }) => {
       try {
-        const { data } = await axios.get('final-status')
-        commit('SET_FINAL_STATUSES', data.finalStatuses)
-        return { success: data.success, error: data.error }
+        const { data } = await axios.get(BASE_URL)
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('SET_FINAL_STATUSES', _data.collections)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
       } catch (error) {
         const { data } = error.response
+        console.log(error)
         return {
           success: data.success,
-          error: 'Error grave. Contacte al Administrador.'
+          message: data.message
         }
       }
     },
     postFinalStatus: async ({ commit }, finalStatus) => {
       try {
-        const { data } = await axios.post('final-status', finalStatus)
-        commit('POST_FINAL_STATUS', data.finalStatus)
-        return { success: data.success, error: data.error }
+        const { data } = await axios.post(BASE_URL, finalStatus)
+
+        console.log(finalStatus)
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('POST_FINAL_STATUS', _data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
       } catch (error) {
         const { data } = error.response
         return {
@@ -64,12 +86,19 @@ export default {
     putFinalStatus: async ({ commit }, finalStatus) => {
       try {
         const { data, status } = await axios.put(
-          `final-status/${finalStatus.id}`,
+          `${BASE_URL}/${finalStatus.id}`,
           finalStatus
         )
         if (status === 200) {
-          commit('PUT_FINAL_STATUS', data.finalStatus)
-          return { success: data.success, error: data.error }
+          const { _data, success, error, message } = data
+
+          if (success) {
+            commit('PUT_FINAL_STATUS', _data)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
         } else {
           return {
             success: data.success,
@@ -87,12 +116,19 @@ export default {
     deleteFinalStatus: async ({ commit }, finalStatus) => {
       try {
         const { status, data } = await axios.delete(
-          `final-status/${finalStatus.id}`
+          `${BASE_URL}/${finalStatus.id}`
         )
 
         if (status === 200) {
-          commit('DELETE_FINAL_STATUS', finalStatus)
-          return { success: data.success, error: data.error }
+          const { success, error, message } = data
+
+          if (success) {
+            commit('DELETE_FINAL_STATUS', finalStatus)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
         } else {
           return {
             success: data.success,
@@ -100,9 +136,9 @@ export default {
           }
         }
       } catch (error) {
-        const { data } = error.response
+        console.log(error)
         return {
-          success: data.success,
+          success: false,
           error: 'Error grave. Contacte al Administrador.'
         }
       }
