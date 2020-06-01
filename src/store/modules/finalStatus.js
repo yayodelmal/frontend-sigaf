@@ -1,6 +1,6 @@
 import axios from '../../services/axios'
 
-const BASE_URL = '/api/v2/finalStatuses'
+const BASE_URL = '/api/v2/final-statuses'
 
 export default {
   namespaced: true,
