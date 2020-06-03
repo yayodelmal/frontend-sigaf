@@ -22,12 +22,22 @@
         @click="sendFile"
       ></base-button>
     </v-card-actions>
-    <ul>
-      <li v-for="d in data" :key="d.dv">
-        Rut: {{ d.rut }} - {{ d.dv }} Nombre: {{ d.nombre }} Apellidos:
-        {{ d.apellidoPaterno }}
-      </li>
-    </ul>
+    <v-card>
+      <ul>
+        <li v-for="d in data" :key="d.rut">
+          Rut: {{ d.rut }} Nombre: {{ d.nombre }} Apellidos:
+          {{ d.apellidoPaterno }}
+        </li>
+      </ul>
+    </v-card>
+    <br /><br />
+    <v-card>
+      <ul>
+        <li v-for="d in dataMoodle" :key="d.id">
+          id: {{ d.id }} Rut: {{ d.rut }} Nombre: {{ d.nombre }}
+        </li>
+      </ul>
+    </v-card>
   </base-card>
 </template>
 
@@ -36,7 +46,8 @@ import axios from '../../services/axios'
 export default {
   data: () => ({
     file: null,
-    data: []
+    data: [],
+    dataMoodle: []
   }),
   methods: {
     async sendFile() {
@@ -49,7 +60,10 @@ export default {
       const response = await axios.post('/api/v2/upload-file', formData, config)
 
       this.data = response.data.success
-      console.log(response)
+
+      const student = await axios.get('/api/v2/sync-moodle-student')
+
+      this.dataMoodle = student.data
     }
   }
 }
