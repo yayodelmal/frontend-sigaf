@@ -11,11 +11,12 @@
           <v-row justify="center">
             <v-col cols="12" md="6">
               <base-autocomplete
-                v-model="course.id"
-                :items="coursesComputed"
-                label="Cursos"
+                v-model="category"
+                :items="categoryItems"
+                label="Categoria"
                 item-value="id"
-                item-text="name"
+                item-text="description"
+                return-object
               >
               </base-autocomplete>
             </v-col>
@@ -27,281 +28,679 @@
                 single-line
               ></base-textfield>
             </v-col>
-            <v-spacer></v-spacer>
-            <v-col cols="12" md="2">
-              <v-dialog
-                v-model="dialog"
-                fullscreen
-                hide-overlay
-                transition="dialog-bottom-transition"
-              >
-                <template v-slot:activator="{ on }">
-                  <base-button
-                    icon="mdi-plus-circle"
-                    v-on="on"
-                    label="Crear Ticket"
-                  ></base-button>
-                </template>
-                <v-card>
-                  <v-card-title>
-                    <span class="headline">Ticket</span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container>
-                      <v-stepper alt-labels non-linear v-model="e1">
-                        <v-stepper-header>
-                          <v-stepper-step
-                            color="redS"
-                            dark
-                            editable
-                            :complete="e1 > 1"
-                            step="1"
-                            >Usuario</v-stepper-step
-                          >
-                          <v-divider></v-divider>
-                          <v-stepper-step
-                            color="redS"
-                            dark
-                            editable
-                            :complete="e1 > 2"
-                            step="2"
-                            >Ticket</v-stepper-step
-                          >
-                          <v-divider></v-divider>
-                          <v-stepper-step color="redS" dark editable step="3"
-                            >Detalle</v-stepper-step
-                          >
-                        </v-stepper-header>
-                        <v-stepper-items>
-                          <v-stepper-content step="1">
-                            <form @keydown.enter.prevent="fetchUserByRut()">
-                              <v-row>
-                                <v-col cols="12" sm="6" md="6">
-                                  <v-label>Último acceso:</v-label>
-                                  <v-chip
-                                    v-if="user"
-                                    :color="colorLastAccess"
-                                    label
-                                    dark
-                                    class="ma-2"
-                                  >
-                                    <v-icon left>{{ iconLastAccess }}</v-icon>
-                                    {{ user.last_access_registered_moodle }}
-                                  </v-chip>
-                                </v-col>
-                                <v-spacer />
-                                <v-col cols="10" sm="4" md="4">
-                                  <base-textfield
-                                    label="Rut"
-                                    required
-                                    color="blueS"
-                                    v-model="rut"
-                                    clearable
-                                    :loading="searchRutLoading"
-                                    hint="Formato 12.345.678-9"
-                                  ></base-textfield>
-                                </v-col>
-                                <v-col cols="2" sm="1" md="1">
-                                  <v-btn
-                                    color="blueS"
-                                    elevation="1"
-                                    fab
-                                    small
-                                    dark
-                                    @click.stop="fetchUserByRut()"
-                                  >
-                                    <v-icon>mdi-magnify</v-icon>
-                                  </v-btn>
-                                </v-col>
-                              </v-row>
-                            </form>
-                            <v-row>
-                              <v-col cols="12" sm="6" md="6">
-                                <base-textfield
-                                  label="Nombre"
-                                  required
-                                  color="blueS"
-                                  v-model="
-                                    user.registered_user.name_registered_moodle
-                                  "
-                                ></base-textfield>
-                              </v-col>
-                              <v-col cols="12" sm="6" md="6">
-                                <base-textfield
-                                  label="Correo electrónico"
-                                  required
-                                  color="blueS"
-                                  v-model="
-                                    user.registered_user.email_registered_moodle
-                                  "
-                                ></base-textfield>
-                              </v-col>
-                            </v-row>
-                            <v-row>
-                              <v-col cols="12">
-                                <base-textfield
-                                  label="Curso"
-                                  required
-                                  dense
-                                  v-model="user.course.description"
-                                ></base-textfield>
-                              </v-col>
-                            </v-row>
-                            <v-row>
-                              <v-col cols="12">
-                                <base-textfield
-                                  label="Test"
-                                  type="password"
-                                ></base-textfield>
-                              </v-col>
-                            </v-row>
-                            <base-button
-                              @click="e1 = 2"
-                              icon="mdi-arrow-right-bold-circle"
-                              label="Continuar"
-                            ></base-button>
-
-                            <v-btn text color="grayS">
-                              <v-icon size="30" left>mdi-close-circle</v-icon>
-                              Cancelar</v-btn
-                            >
-                          </v-stepper-content>
-
-                          <v-stepper-content step="2">
-                            <v-row>
-                              <v-col cols="12" sm="4">
-                                <base-autocomplete
-                                  :items="['Urgente', 'Alta', 'Media', 'Baja']"
-                                  label="Prioridad"
-                                ></base-autocomplete>
-                              </v-col>
-                              <v-col cols="12" sm="4">
-                                <v-combobox
-                                  :items="['Tipo 1', 'Tipo 2']"
-                                  label="Tipo"
-                                  chips
-                                >
-                                  <template v-slot:selection="data">
-                                    <v-chip
-                                      :key="JSON.stringify(data.item)"
-                                      v-bind="data.attrs"
-                                      :input-value="data.selected"
-                                      :disabled="data.disabled"
-                                      @click:close="
-                                        data.parent.selectItem(data.item)
-                                      "
-                                    >
-                                      <v-avatar
-                                        class="red white--text"
-                                        left
-                                        v-text="
-                                          data.item.slice(0, 1).toUpperCase()
-                                        "
-                                      ></v-avatar>
-                                      {{ data.item }}
-                                    </v-chip>
-                                  </template></v-combobox
-                                >
-                              </v-col>
-                              <v-col cols="12" sm="4">
-                                <v-autocomplete
-                                  :items="['Motivo 1', 'Motivo 2']"
-                                  label="Motivo"
-                                ></v-autocomplete>
-                              </v-col>
-                            </v-row>
-                            <v-row>
-                              <v-col cols="12" sm="6" md="4">
-                                <v-menu
-                                  v-model="menu"
-                                  :close-on-content-click="false"
-                                  :nudge-right="40"
-                                  transition="scale-transition"
-                                  offset-y
-                                  min-width="290px"
-                                >
-                                  <template v-slot:activator="{ on }">
-                                    <base-textfield
-                                      v-model="date"
-                                      label="Fecha apertura"
-                                      readonly
-                                      v-on="on"
-                                    ></base-textfield>
-                                  </template>
-                                  <v-date-picker
-                                    :weekday-format="getDay"
-                                    show-week
-                                    landscape
-                                    locale="es"
-                                    v-model="date"
-                                    header-color="blueS"
-                                    color="redS"
-                                    @input="menu = false"
-                                  ></v-date-picker>
-                                </v-menu>
-                              </v-col>
-                              <v-col cols="12" sm="4">
-                                <v-autocomplete
-                                  :items="['Tipo 1', 'Tipo 2']"
-                                  label="Tipo"
-                                ></v-autocomplete>
-                              </v-col>
-                              <v-col cols="12" sm="4">
-                                <v-autocomplete
-                                  :items="['Motivo 1', 'Motivo 2']"
-                                  label="Motivo"
-                                ></v-autocomplete>
-                              </v-col>
-                            </v-row>
-
-                            <base-button
-                              @click="e1 = 3"
-                              icon="mdi-arrow-right-bold-circle"
-                              label="Continuar"
-                            ></base-button>
-
-                            <v-btn text color="grayS">
-                              <v-icon size="30" left>mdi-close-circle</v-icon>
-                              Cancelar</v-btn
-                            >
-                          </v-stepper-content>
-
-                          <v-stepper-content step="3">
-                            <v-card
-                              class="mb-12"
-                              color="grey lighten-1"
-                              height="200px"
-                            ></v-card>
-
-                            <base-button
-                              @click="e1 = 1"
-                              icon="mdi-arrow-right-bold-circle"
-                              label="Continuar"
-                            ></base-button>
-
-                            <v-btn text color="grayS">
-                              <v-icon size="30" left>mdi-close-circle</v-icon>
-                              Cancelar</v-btn
-                            >
-                          </v-stepper-content>
-                        </v-stepper-items>
-                      </v-stepper>
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blueS" text @click="dialog = false"
-                      >Cerrar</v-btn
-                    >
-                    <v-btn color="blueS" text @click="dialog = false"
-                      >Crear ticket</v-btn
-                    >
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
-            </v-col>
           </v-row>
         </template>
+        <v-row>
+          <v-col cols="12" md="3">
+            <template>
+              <v-col cols="12" md="2">
+                <v-dialog
+                  v-model="dialog"
+                  fullscreen
+                  hide-overlay
+                  transition="dialog-bottom-transition"
+                >
+                  <template v-slot:activator="{ on }">
+                    <base-button
+                      icon="mdi-plus-circle"
+                      v-on="on"
+                      label="Crear Ticket"
+                    ></base-button>
+                  </template>
+                  <v-card>
+                    <v-card-title>
+                      <span class="headline">Ticket</span>
+                    </v-card-title>
+                    <v-card-text>
+                      <v-container>
+                        <v-stepper alt-labels non-linear v-model="e1">
+                          <v-stepper-header>
+                            <v-stepper-step
+                              color="redS"
+                              dark
+                              editable
+                              :complete="e1 > 1"
+                              step="1"
+                              >Destinatario</v-stepper-step
+                            >
+                            <v-divider></v-divider>
+                            <v-stepper-step
+                              color="redS"
+                              dark
+                              editable
+                              :complete="e1 > 2"
+                              step="2"
+                              >Ticket</v-stepper-step
+                            >
+                            <v-divider></v-divider>
+                            <v-stepper-step color="redS" dark editable step="3"
+                              >Detalle</v-stepper-step
+                            >
+                          </v-stepper-header>
+                          <v-stepper-items>
+                            <v-stepper-content step="1">
+                              <form @keydown.enter.prevent="fetchUserByRut()">
+                                <v-row>
+                                  <v-spacer />
+                                  <v-col cols="10" sm="4" md="4">
+                                    <base-textfield
+                                      label="Rut"
+                                      required
+                                      color="blueS"
+                                      v-model="rut"
+                                      clearable
+                                      :loading="searchRutLoading"
+                                      hint="Formato 12.345.678-9"
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="2" sm="1" md="1">
+                                    <v-btn
+                                      color="blueS"
+                                      elevation="1"
+                                      fab
+                                      small
+                                      dark
+                                      @click.stop="fetchUserByRut()"
+                                    >
+                                      <v-icon>mdi-magnify</v-icon>
+                                    </v-btn>
+                                  </v-col>
+                                  <v-spacer />
+                                </v-row>
+                              </form>
+                              <template v-if="user.isActive !== null">
+                                <v-row>
+                                  <v-col cols="12" sm="6" md="6">
+                                    <v-label>Último acceso:</v-label>
+                                    <v-chip
+                                      v-if="user"
+                                      :color="colorLastAccess"
+                                      label
+                                      dark
+                                      class="ma-2"
+                                    >
+                                      <v-icon left>{{ iconLastAccess }}</v-icon>
+                                      {{ user.last_access_registered_moodle }}
+                                    </v-chip>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="6">
+                                    <v-label>Estado participante:</v-label>
+                                    <v-chip
+                                      v-if="user"
+                                      :color="colorStatusStudent"
+                                      label
+                                      dark
+                                      class="ma-2"
+                                    >
+                                      <v-icon left>{{
+                                        iconStatusStudent
+                                      }}</v-icon>
+                                      {{
+                                        user.isActive === null
+                                          ? ''
+                                          : user.isActive
+                                          ? 'ACTIVO'
+                                          : 'RENUNCIADO'
+                                      }}
+                                    </v-chip>
+                                  </v-col>
+                                </v-row>
+                                <v-row>
+                                  <v-col cols="12" sm="4" md="4">
+                                    <base-textfield
+                                      label="Nombre"
+                                      required
+                                      color="blueS"
+                                      v-model="
+                                        user.registered_user
+                                          .name_registered_moodle
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="4" md="4">
+                                    <base-textfield
+                                      label="Correo electrónico"
+                                      required
+                                      color="blueS"
+                                      v-model="
+                                        user.registered_user
+                                          .email_registered_moodle
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="4" md="4">
+                                    <base-textfield
+                                      label="Teléfono"
+                                      required
+                                      color="blueS"
+                                      v-model="user.registered_user.mobile"
+                                    ></base-textfield>
+                                  </v-col>
+                                </v-row>
+                                <v-row>
+                                  <v-col cols="12">
+                                    <base-textfield
+                                      label="Curso"
+                                      required
+                                      dense
+                                      v-model="user.course.description"
+                                    ></base-textfield>
+                                  </v-col>
+                                </v-row>
+                                <base-button
+                                  @click="e1 = 2"
+                                  icon="mdi-arrow-right-bold-circle"
+                                  label="Continuar"
+                                ></base-button>
+                                <v-btn
+                                  text
+                                  color="grayS"
+                                  @click="dialog = false"
+                                >
+                                  <v-icon size="30" left
+                                    >mdi-close-circle</v-icon
+                                  >
+                                  Cancelar</v-btn
+                                >
+                              </template>
+                            </v-stepper-content>
+
+                            <v-stepper-content step="2">
+                              <v-row>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="priorityTicketItems"
+                                    label="Prioridad"
+                                    v-model="priority"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="sourceTicketItems"
+                                    label="Origen"
+                                    v-model="source"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="typeTicketItems"
+                                    label="Tipo"
+                                    v-model="type"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col cols="12" sm="6" md="4">
+                                  <v-menu
+                                    v-model="menu"
+                                    :close-on-content-click="false"
+                                    :nudge-right="40"
+                                    transition="scale-transition"
+                                    offset-y
+                                    min-width="290px"
+                                  >
+                                    <template v-slot:activator="{ on }">
+                                      <base-textfield
+                                        v-model="dateSingle"
+                                        label="Fecha apertura"
+                                        readonly
+                                        v-on="on"
+                                      ></base-textfield>
+                                    </template>
+                                    <v-date-picker
+                                      :weekday-format="getDay"
+                                      show-week
+                                      landscape
+                                      locale="es"
+                                      v-model="dateSingle"
+                                      header-color="blueS"
+                                      color="redS"
+                                      @input="menu = false"
+                                    ></v-date-picker>
+                                  </v-menu>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="motiveTicketItems"
+                                    label="Motivo"
+                                    v-model="motive"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="userItems"
+                                    label="Operador"
+                                    v-model="operator"
+                                    item-value="properties.id"
+                                    item-text="properties.name"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+
+                              <base-button
+                                @click="e1 = 3"
+                                icon="mdi-arrow-right-bold-circle"
+                                label="Continuar"
+                              ></base-button>
+
+                              <v-btn text color="grayS" @click="dialog = false">
+                                <v-icon size="30" left>mdi-close-circle</v-icon>
+                                Cancelar</v-btn
+                              >
+                            </v-stepper-content>
+
+                            <v-stepper-content step="3">
+                              <v-row>
+                                <v-col cols="12" sm="4" md="4">
+                                  <base-autocomplete
+                                    prepend-icon="mdi-comment"
+                                    :items="motiveTicketItems"
+                                    label="Motivo"
+                                    v-model="motive"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="8" md="8">
+                                  <v-textarea
+                                    color="blueS"
+                                    dense
+                                    auto-grow
+                                    counter
+                                    clearable
+                                    clear-icon="mdi-cancel"
+                                    label="Observaciones"
+                                    rows="1"
+                                    prepend-icon="mdi-comment"
+                                  ></v-textarea>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col>
+                                  <v-label>Estado detalle</v-label>
+                                  <v-label>Comentarios</v-label>
+                                </v-col>
+                                <v-card> </v-card>
+                              </v-row>
+
+                              <v-row>
+                                <v-spacer />
+                                <v-col cols="12" md="4">
+                                  <base-autocomplete
+                                    :items="statusTicketItems"
+                                    label="Estado"
+                                    v-model="status"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <base-button
+                                @click="saveTicket()"
+                                icon="mdi-arrow-right-bold-circle"
+                                label="Generar Ticket"
+                              ></base-button>
+
+                              <v-btn text color="grayS" @click="dialog = false">
+                                <v-icon size="30" left>mdi-close-circle</v-icon>
+                                Cancelar</v-btn
+                              >
+                            </v-stepper-content>
+                          </v-stepper-items>
+                        </v-stepper>
+                      </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="blueS" text @click="dialog = false"
+                        >Cerrar</v-btn
+                      >
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-col>
+            </template>
+          </v-col>
+          <v-col cols="12" md="3">
+            <template>
+              <v-col cols="12" md="2">
+                <v-dialog
+                  v-model="dialogMassive"
+                  fullscreen
+                  hide-overlay
+                  transition="dialog-bottom-transition"
+                >
+                  <template v-slot:activator="{ on }">
+                    <base-button
+                      icon="mdi-plus-circle"
+                      v-on="on"
+                      label="Crear Ticket Masivo"
+                    ></base-button>
+                  </template>
+                  <v-card>
+                    <v-card-title>
+                      <span class="headline">Ticket</span>
+                    </v-card-title>
+                    <v-card-text>
+                      <v-container>
+                        <v-stepper alt-labels non-linear v-model="em1">
+                          <v-stepper-header>
+                            <v-stepper-step
+                              color="redS"
+                              dark
+                              editable
+                              :complete="em1 > 1"
+                              step="1"
+                              >Destinatarios</v-stepper-step
+                            >
+                            <v-divider></v-divider>
+                            <v-stepper-step
+                              color="redS"
+                              dark
+                              editable
+                              :complete="em1 > 2"
+                              step="2"
+                              >Ticket</v-stepper-step
+                            >
+                            <v-divider></v-divider>
+                            <v-stepper-step color="redS" dark editable step="3"
+                              >Detalle</v-stepper-step
+                            >
+                          </v-stepper-header>
+                          <v-stepper-items>
+                            <v-stepper-content step="1">
+                              <v-row justify="center">
+                                <v-col cols="12">
+                                  <base-autocomplete
+                                    v-model="categoryTicket"
+                                    :items="categoryItems"
+                                    label="Curso"
+                                    item-value="id"
+                                    item-text="description"
+                                    @change="filterUsersByCategoriesTicket()"
+                                    return-object
+                                    outlined
+                                  >
+                                  </base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col cols="12" sm="8" md="8">
+                                  <v-autocomplete
+                                    :items="classroomItems"
+                                    label="Filtrar aula"
+                                    chips
+                                    dense
+                                    item-text="description"
+                                    item-value="description"
+                                    return-object
+                                    v-model="classrooms"
+                                    @change="filterUsersByCategoriesTicket()"
+                                    multiple
+                                    color="blueS"
+                                    outlined
+                                  >
+                                    <template v-slot:selection="data">
+                                      <v-chip
+                                        :key="JSON.stringify(data.item)"
+                                        v-bind="data.attrs"
+                                        :input-value="data.selected"
+                                        :disabled="data.disabled"
+                                        close
+                                        small
+                                        @click:close="
+                                          data.parent.selectItem(data.item)
+                                        "
+                                      >
+                                        <v-avatar
+                                          class="redS whiteS--text"
+                                          left
+                                          v-text="
+                                            `${data.item.description
+                                              .split(' ')[0]
+                                              .slice(0, 1)
+                                              .toUpperCase()}${data.item.description
+                                              .split(' ')[1]
+                                              .slice(0, 2)
+                                              .toUpperCase()}`
+                                          "
+                                        ></v-avatar>
+                                        {{ data.item.description }}
+                                      </v-chip>
+                                    </template></v-autocomplete
+                                  >
+                                </v-col>
+                                <v-spacer />
+                                <v-col cols="12" sm="4" md="4">
+                                  <v-text-field
+                                    v-model="searchMassiveTicket"
+                                    append-icon="mdi-magnify"
+                                    label="Buscar"
+                                    color="blueS"
+                                    dense
+                                    outlined
+                                  ></v-text-field>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col cols="12">
+                                  <v-data-table
+                                    v-model="selected"
+                                    :headers="headersTicket"
+                                    :items="userRegisteredFiltered"
+                                    item-key="rut"
+                                    show-select
+                                    class="elevation-1"
+                                    :search="searchMassiveTicket"
+                                    disable-pagination
+                                    hide-default-footer
+                                  >
+                                  </v-data-table>
+                                </v-col>
+                              </v-row>
+                              <base-button
+                                @click="em1 = 2"
+                                icon="mdi-arrow-right-bold-circle"
+                                label="Continuar"
+                              ></base-button>
+
+                              <v-btn text color="grayS">
+                                <v-icon size="30" left>mdi-close-circle</v-icon>
+                                Cancelar</v-btn
+                              >
+                            </v-stepper-content>
+
+                            <v-stepper-content step="2">
+                              <v-row>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="priorityTicketItems"
+                                    label="Prioridad"
+                                    v-model="priority"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="sourceTicketItems"
+                                    label="Origen"
+                                    v-model="source"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="typeTicketItems"
+                                    label="Tipo"
+                                    v-model="type"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col cols="12" sm="6" md="4">
+                                  <v-menu
+                                    v-model="menu"
+                                    :close-on-content-click="false"
+                                    :nudge-right="40"
+                                    transition="scale-transition"
+                                    offset-y
+                                    min-width="290px"
+                                  >
+                                    <template v-slot:activator="{ on }">
+                                      <base-textfield
+                                        v-model="dateMassive"
+                                        label="Fecha apertura"
+                                        readonly
+                                        v-on="on"
+                                      ></base-textfield>
+                                    </template>
+                                    <v-date-picker
+                                      :weekday-format="getDay"
+                                      show-week
+                                      landscape
+                                      locale="es"
+                                      v-model="dateMassive"
+                                      header-color="blueS"
+                                      color="redS"
+                                      @input="menu = false"
+                                    ></v-date-picker>
+                                  </v-menu>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="motiveTicketItems"
+                                    label="Motivo"
+                                    v-model="motive"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="userItems"
+                                    label="Operador"
+                                    v-model="operator"
+                                    item-value="properties.id"
+                                    item-text="properties.name"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+
+                              <base-button
+                                @click="em1 = 3"
+                                icon="mdi-arrow-right-bold-circle"
+                                label="Continuar"
+                              ></base-button>
+
+                              <v-btn text color="grayS" @click="dialog = false">
+                                <v-icon size="30" left>mdi-close-circle</v-icon>
+                                Cancelar</v-btn
+                              >
+                            </v-stepper-content>
+
+                            <v-stepper-content step="3">
+                              <v-row>
+                                <v-col cols="12" sm="4" md="4">
+                                  <base-autocomplete
+                                    prepend-icon="mdi-comment"
+                                    :items="motiveTicketItems"
+                                    label="Motivo"
+                                    v-model="motive"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="8" md="8">
+                                  <v-textarea
+                                    color="blueS"
+                                    dense
+                                    auto-grow
+                                    counter
+                                    clearable
+                                    clear-icon="mdi-cancel"
+                                    label="Observaciones"
+                                    rows="1"
+                                    prepend-icon="mdi-comment"
+                                  ></v-textarea>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col>
+                                  <v-label>Estado detalle</v-label>
+                                  <v-label>Comentarios</v-label>
+                                </v-col>
+                                <v-card> </v-card>
+                              </v-row>
+
+                              <v-row>
+                                <v-spacer />
+                                <v-col cols="12" md="4">
+                                  <base-autocomplete
+                                    :items="statusTicketItems"
+                                    label="Estado"
+                                    v-model="status"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <base-button
+                                @click="em1 = 1"
+                                icon="mdi-arrow-right-bold-circle"
+                                label="Continuar"
+                              ></base-button>
+
+                              <v-btn text color="grayS" @click="dialog = false">
+                                <v-icon size="30" left>mdi-close-circle</v-icon>
+                                Cancelar</v-btn
+                              >
+                            </v-stepper-content>
+                          </v-stepper-items>
+                        </v-stepper>
+                      </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="blueS" text @click="dialogMassive = false"
+                        >Cerrar</v-btn
+                      >
+                      <v-btn color="blueS" text @click="dialogMassive = false"
+                        >Crear ticket</v-btn
+                      >
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-col>
+            </template>
+          </v-col>
+        </v-row>
+
         <v-data-table
           :headers="headers"
           :search="search"
@@ -388,6 +787,12 @@
         </template>
       </base-card>
     </v-col>
+    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
+      {{ message }}
+      <v-btn dark text @click="snackbar = false">
+        Cerrar
+      </v-btn>
+    </v-snackbar>
   </v-row>
 </template>
 
@@ -403,6 +808,7 @@ export default {
       search: '',
       loading: false,
       searchRutLoading: false,
+      searchMassiveTicket: '',
       headers: [
         {
           text: '#',
@@ -426,28 +832,135 @@ export default {
         },
         { text: 'Opciones', value: 'actions', sortable: false }
       ],
+      headersTicket: [
+        {
+          text: 'RUT',
+          value: 'registered_user.rut_registered_moodle',
+          class: 'redS--text'
+        },
+        {
+          text: 'Nombre participante',
+          value: 'registered_user.name_registered_moodle',
+          class: 'redS--text'
+        },
+        { text: 'Aula', value: 'classroom.description', class: 'redS--text' },
+        {
+          text: 'Última conexión',
+          value: 'last_access_registered_moodle',
+          class: 'redS--text'
+        }
+      ],
       courses: [],
       course: {
         id: 0
       },
+      category: null,
+      categoryTicket: null,
+      priority: null,
+      source: null,
+      type: null,
+      motive: null,
+      status: null,
+      operator: null,
+      classrooms: [],
+      userRegisteredFiltered: [],
       ticket: {},
       usersCourse: [],
       userCourse: {},
       dialog: false,
-      date: new Date().toISOString().substr(0, 10),
+      dialogMassive: false,
+      singleSelect: false,
+      selected: [],
+      dateSingle: new Date().toISOString().substr(0, 10),
+      dateMassive: new Date().toISOString().substr(0, 10),
       menu: false,
       user: {
         registered_user: {},
-        course: {}
+        course: {},
+        activities: [],
+        isActive: null
       },
-      rut: '17.057.394-3',
-      e1: 1
+      rut: '',
+      rutACTIVO: '17.057.394-3',
+      rutRenunciado: '12.122.260-4',
+      e1: 1,
+      em1: 1,
+      message: '',
+      successMessage: 'Operación realizada con éxito.',
+      errorMEssage: 'Ha ocurrido un error.',
+      snackbar: false,
+      timeout: 3000
     }
   },
   methods: {
     ...mapActions({
-      fetchItems: 'ticket/fetchTickets'
+      fetchItems: 'ticket/fetchTickets',
+      fetchCourseItems: 'course/fetchCourses',
+      fetchCourseByCategory: 'course/getCoursesByCategory',
+      fetchCategoryItems: 'category/fetchCategories',
+      fetchCourseRegisteredUserItems:
+        'courseRegisteredUser/fetchCourseRegisteredUsers'
     }),
+
+    saveTicket() {
+      console.log('save')
+    },
+    async filterUsersByCategories() {
+      if (this.category !== null) {
+        await this.fetchCourseByCategory(this.category.getLinkCourses)
+        this.coursesByCategory.forEach(course => {
+          this.userRegisteredFiltered = this.usersCourse.filter(userCourse => {
+            return userCourse.course.id === course.properties.id
+          })
+        })
+      }
+    },
+    async filterUsersByCategoriesTicket() {
+      this.userRegisteredFiltered = []
+      if (this.categoryTicket !== null) {
+        await this.fetchCourseByCategory(this.categoryTicket.getLinkCourses)
+        this.coursesByCategory.forEach(course => {
+          if (this.classrooms.length === 0) {
+            this.userRegisteredFiltered = this.courseRegisteredUserItems.filter(
+              userCourse => {
+                return userCourse.course.id === course.properties.id
+              }
+            )
+          } else {
+            this.courseRegisteredUserItems.forEach(userCourse => {
+              this.classrooms.forEach(classroom => {
+                if (
+                  userCourse.course.id === course.properties.id &&
+                  userCourse.classroom.description === classroom.description
+                ) {
+                  this.userRegisteredFiltered.push(userCourse)
+                }
+              })
+            })
+          }
+        })
+      }
+    },
+    async fetchDataCourses() {
+      this.loading = true
+      const { success, message } = await this.fetchCourseItems()
+      if (!success) {
+        this.snackbar = true
+
+        this.message = message
+      }
+      this.loading = false
+    },
+    async fetchDataCategories() {
+      this.loading = true
+      const { success, message } = await this.fetchCategoryItems()
+      console.log()
+      if (!success) {
+        this.snackbar = true
+        this.message = message
+      }
+      this.loading = false
+    },
     getColor(priority) {
       if (priority === 'Alta') return 'red'
       else if (priority === 'Media') return 'orange'
@@ -468,73 +981,96 @@ export default {
       let i = new Date(date).getDay(date)
       return daysOfWeek[i]
     },
-    async fetchCourseRegisteredUser() {
-      const { data } = await axios.get('/api/v2/course-registered-user')
-      console.log(data)
-
-      if (data.success) {
-        this.usersCourse = data.data
-      }
-    },
-    async fetchCourses() {
-      const { data } = await axios.get('/api/v2/courses')
-
-      if (data.success) {
-        this.courses = data._data.collections
-        console.log(this.courses)
-        this.courses.push({
-          properties: { id: 0, description: 'Todos', status: 1 }
-        })
-      }
-    },
     async fetchUserByRut() {
       this.searchRutLoading = true
 
+      const vm = this
       setTimeout(async () => {
         const { data } = await axios.get(`/api/v2/registered-user/${this.rut}`)
 
-        console.log(data)
-        this.userCourse = data.registeredUser
+        if (data.registeredUser !== null) {
+          this.userCourse = data.registeredUser
 
-        const userInter = this.usersCourse.filter(userCourse => {
-          return userCourse.registered_user.id === this.userCourse.id
-        })[0]
-        this.user = userInter
+          const userInter = this.courseRegisteredUserItems.filter(
+            userCourse => {
+              return userCourse.registered_user.id === this.userCourse.id
+            }
+          )[0]
 
-        this.findActivity(this.user.id)
+          this.user = { ...this.user, ...userInter }
+
+          this.findActivities(this.user.id)
+        } else {
+          vm.snackbar = true
+          vm.message = 'El alumno no se encuentra registrado'
+        }
 
         this.searchRutLoading = false
       }, 1000)
     },
-    async findActivity(id) {
+    async findActivities(id) {
       const { data } = await axios.get(
         `/api/v2/activity-course-registered-user/${id}`
       )
 
-      console.log(data)
+      this.user.activities = data.activityCourseRegisteredUser
+
+      this.user.activities.forEach(activity => {
+        if (
+          activity.activity.description === 'Formulario de Renuncia' &&
+          activity.status_moodle === 'Finalizado'
+        ) {
+          this.user.isActive = false
+        } else {
+          this.user.isActive = true
+        }
+      })
     }
   },
   created() {
-    this.fetchCourseRegisteredUser()
-    this.fetchCourses()
+    this.fetchCourseRegisteredUserItems()
     // this.fetchTickets()
-    this.fetchUserByRut()
     this.fetchItems()
+    this.fetchDataCourses()
+    this.fetchDataCategories()
+    this.filterUsersByCategories()
   },
-  watch: {},
+  watch: {
+    category() {
+      if (this.category !== null) {
+        this.filterUsersByCategories()
+      }
+    }
+  },
   computed: {
     ...mapGetters({
-      items: 'ticket/tickets'
+      items: 'ticket/tickets',
+      coursesByCategory: 'course/coursesByCategory',
+      categoryItems: 'category/categories',
+      courseRegisteredUserItems: 'courseRegisteredUser/courseRegisteredUsers',
+      motiveTicketItems: 'motiveTicket/motiveTickets',
+      priorityTicketItems: 'priorityTicket/priorityTickets',
+      sourceTicketItems: 'sourceTicket/sourceTickets',
+      typeTicketItems: 'typeTicket/typeTickets',
+      userItems: 'user/users',
+      statusTicketItems: 'statusTicket/statusTickets',
+      classroomItems: 'classroom/classrooms'
     }),
     colorLastAccess() {
       return this.user.last_access_registered_moodle === 'Nunca'
         ? 'redS'
         : 'blueS'
     },
+    colorStatusStudent() {
+      return this.user.isActive ? 'blueS' : 'redS'
+    },
     iconLastAccess() {
       return this.user.last_access_registered_moodle === 'Nunca'
         ? 'mdi-alert-circle'
         : 'mdi-check-circle'
+    },
+    iconStatusStudent() {
+      return this.user.isActive ? 'mdi-check-circle' : 'mdi-alert-circle'
     },
     coursesComputed() {
       return this.courses
@@ -560,6 +1096,9 @@ export default {
     },
     courseId() {
       return this.course.id
+    },
+    activities() {
+      return this.user.activities
     }
   }
 }
