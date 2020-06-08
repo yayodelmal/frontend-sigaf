@@ -17,6 +17,7 @@ store.dispatch('typeTicket/fetchTypeTickets')
 store.dispatch('user/fetchUsers')
 store.dispatch('statusTicket/fetchStatusTickets')
 store.dispatch('classroom/fetchClassrooms')
+store.dispatch('statusDetailTicket/fetchStatusDetailTickets')
 
 new Vue({
   router,

@@ -10,6 +10,9 @@ export default {
   mutations: {
     SET_TICKETS: (state, tickets) => {
       state.tickets = tickets
+    },
+    POST_TICKET: (state, ticket) => {
+      state.tickets.push(ticket)
     }
   },
   getters: {
@@ -31,6 +34,31 @@ export default {
       } else {
         console.log(error)
         return { success, error, message }
+      }
+    },
+    postTicket: async ({ commit }, ticket) => {
+      try {
+        const { data } = await axios.post(BASE_URL, ticket)
+
+        console.log(ticket)
+
+        const { _data, success, error, message } = data
+
+        console.log()
+
+        if (success) {
+          commit('POST_TICKET', _data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
       }
     }
   }

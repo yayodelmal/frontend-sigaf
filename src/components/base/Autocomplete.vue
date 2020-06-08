@@ -2,6 +2,7 @@
   <v-autocomplete
     color="blueS"
     dense
+    outlined
     v-bind="$attrs"
     v-on="$listeners"
   ></v-autocomplete>

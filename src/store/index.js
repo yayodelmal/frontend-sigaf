@@ -16,6 +16,7 @@ import auth from './modules/auth'
 import role from './modules/role'
 import profile from './modules/profile'
 import user from './modules/user'
+import statusDetailTicket from './modules/statusDetailTicket'
 import courseRegisteredUser from './modules/courseRegisteredUser'
 
 Vue.use(Vuex)
@@ -38,6 +39,7 @@ export default new Vuex.Store({
     role,
     profile,
     user,
+    statusDetailTicket,
     courseRegisteredUser
   }
 })
