@@ -15,6 +15,10 @@ import category from './modules/category'
 import auth from './modules/auth'
 import role from './modules/role'
 import profile from './modules/profile'
+import user from './modules/user'
+import statusDetailTicket from './modules/statusDetailTicket'
+import detailTicket from './modules/detailTicket'
+import courseRegisteredUser from './modules/courseRegisteredUser'
 
 Vue.use(Vuex)
 
@@ -34,6 +38,10 @@ export default new Vuex.Store({
     category,
     auth,
     role,
-    profile
+    profile,
+    user,
+    detailTicket,
+    statusDetailTicket,
+    courseRegisteredUser
   }
 })
