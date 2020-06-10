@@ -9,7 +9,7 @@
       >
         <template v-slot:searchInput>
           <v-row justify="center">
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="8">
               <base-autocomplete
                 v-model="category"
                 :items="categoryItems"
@@ -20,6 +20,7 @@
               >
               </base-autocomplete>
             </v-col>
+            <v-spacer />
             <v-col cols="12" md="3">
               <base-textfield
                 v-model="search"
@@ -30,10 +31,10 @@
             </v-col>
           </v-row>
         </template>
-        <v-row>
+        <v-row justify="center">
           <v-col cols="12" md="3">
             <template>
-              <v-col cols="12" md="2">
+              <v-col cols="6" md="4">
                 <v-dialog
                   v-model="dialog"
                   fullscreen
@@ -215,7 +216,7 @@
                                     item-value="id"
                                     item-text="description"
                                     return-object
-                                    @change="$v.source.$touch()"
+                                    @change="setSource($event)"
                                     @blur="$v.source.$touch()"
                                     :error-messages="sourceErrors"
                                   ></base-autocomplete>
@@ -229,7 +230,7 @@
                                     item-value="id"
                                     item-text="description"
                                     return-object
-                                    @change="$v.type.$touch()"
+                                    @change="setType($event)"
                                     @blur="$v.type.$touch()"
                                     :error-messages="typeErrors"
                                   ></base-autocomplete>
@@ -273,7 +274,7 @@
                                     item-value="id"
                                     item-text="description"
                                     return-object
-                                    @change="$v.motive.$touch()"
+                                    @change="setMotive($event)"
                                     @blur="$v.motive.$touch()"
                                     :error-messages="motiveErrors"
                                   ></base-autocomplete>
@@ -287,7 +288,7 @@
                                     item-value="id"
                                     item-text="description"
                                     return-object
-                                    @change="$v.priority.$touch()"
+                                    @change="setPriority($event)"
                                     @blur="$v.priority.$touch()"
                                     :error-messages="priorityErrors"
                                   ></base-autocomplete>
@@ -301,7 +302,7 @@
                                     item-value="properties.id"
                                     item-text="properties.name"
                                     return-object
-                                    @change="$v.operator.$touch()"
+                                    @change="setOperator($event)"
                                     @blur="$v.operator.$touch()"
                                     :error-messages="operatorErrors"
                                   ></base-autocomplete>
@@ -366,7 +367,7 @@
                                     item-value="id"
                                     item-text="description"
                                     return-object
-                                    @change="$v.status.$touch()"
+                                    @change="setStatus($event)"
                                     @blur="$v.status.$touch()"
                                     :error-messages="statusErrors"
                                   ></base-autocomplete>
@@ -399,7 +400,7 @@
               </v-col>
             </template>
           </v-col>
-          <v-col cols="12" md="3">
+          <v-col cols="6" md="4">
             <template>
               <v-col cols="12" md="2">
                 <v-dialog
@@ -849,6 +850,7 @@
 <script>
 import axios from '../services/axios'
 import Ticket from '../models/Ticket'
+import DetailTicket from '../models/DetailTicket'
 import { validationMixin } from 'vuelidate'
 import { required, minValue, maxValue } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
@@ -879,6 +881,9 @@ export default {
     operator: {
       required
     },
+    // statusDetail: {
+    //   required
+    // },
     observation: {
       minValue: minValue(0),
       maxValue: maxValue(255)
@@ -947,10 +952,10 @@ export default {
       category: null,
       categoryMassiveTicket: null,
       priority: null,
-      source: null,
       type: null,
       motive: null,
       status: null,
+      source: null,
       operator: null,
       statusDetail: null,
       observation: '',
@@ -982,9 +987,11 @@ export default {
       errorMEssage: 'Ha ocurrido un error.',
       snackbar: false,
       timeout: 3000,
-      editedIndex: -1,
-      editedItem: new Ticket(),
-      defaultItem: new Ticket()
+      editedTicketIndex: -1,
+      editedTicketItem: new Ticket(),
+      defaultTicketItem: new Ticket(),
+      editedDetailTicketItem: new DetailTicket(),
+      defaultDetailTicketItem: new DetailTicket()
     }
   },
   methods: {
@@ -995,8 +1002,49 @@ export default {
       fetchCategoryItems: 'category/fetchCategories',
       fetchCourseRegisteredUserItems:
         'courseRegisteredUser/fetchCourseRegisteredUsers',
-      postTicket: 'ticket/postTicket'
+      postTicket: 'ticket/postTicket',
+      findTicket: 'ticket/findTicket',
+      fetchTicketDetails: 'ticket/fetchTicketDetails',
+      postDetailTicket: 'detailTicket/postDetailTicket'
     }),
+    /** category: null,
+      categoryMassiveTicket: null,
+      priority: null,
+      type: null,
+      motive: null,
+      status: null,
+      source: null,
+      operator: null,
+      statusDetail: null, */
+
+    setSource(value) {
+      this.editedTicketItem.sourceTicket = value
+      this.$v.source.$touch()
+    },
+    setPriority(value) {
+      this.editedTicketItem.prioriryTicket = value
+      this.$v.priority.$touch()
+    },
+    setType(value) {
+      this.editedTicketItem.typeTicket = value
+      this.$v.type.$touch()
+    },
+    setMotive(value) {
+      this.editedTicketItem.motiveTicket = value
+      this.$v.motive.$touch()
+    },
+    setStatus(value) {
+      this.editedTicketItem.statusTicket = value
+      this.$v.status.$touch()
+    },
+    setOperator(value) {
+      this.editedTicketItem.operatorTicket = value
+      this.$v.operator.$touch()
+    },
+    // setStatusDetail(value) {
+    //   this.editedDetailTicketItem.statusDeailTicket = value
+    //   this.$v.statusDetail.$touch()
+    // },
 
     async saveTicket() {
       this.rulesValueStepThree = true
@@ -1020,17 +1068,41 @@ export default {
           user_assigned_id: this.operator.properties.id
         }
 
-        const { success, message } = await this.postTicket(dataStoreTicket)
+        const { success } = await this.postTicket(dataStoreTicket)
         if (success) {
-          this.snackbar = true
-          this.message = this.successMessage
-        } else {
-          this.snackbar = true
-          this.message = message
+          const dataDetailTicket = {
+            comment: this.observation,
+            ticket_id: this.savedTicket.id,
+            status_detail_ticket_id: this.statusDetail.id,
+            user_created_id: this.userLog.id
+          }
+          const { success, message } = await this.postDetailTicket(
+            dataDetailTicket
+          )
+
+          if (success) {
+            this.snackbar = true
+            this.message = this.successMessage
+          } else {
+            this.snackbar = true
+            this.message = message
+          }
         }
 
         this.clearTicket()
       }
+    },
+
+    async editItem(item) {
+      this.editedIndex = this.items.indexOf(item)
+
+      this.editedItem = Object.assign({}, item)
+
+      console.log(this.editedItem)
+
+      await this.fetchTicketDetails(this.editedItem)
+
+      this.dialog = true
     },
 
     async filterUsersByCategories() {
@@ -1247,38 +1319,42 @@ export default {
       this.$v.$reset()
     },
     checkStepTwo() {
-      this.rulesValueStepTwo = true
+      this.$v.$reset()
 
-      if (!this.$v.source.required) {
-        this.$v.source.$touch()
-        this.rulesValueStepTwo = this.$v.source.required
-      }
+      setTimeout(() => {
+        this.rulesValueStepTwo = true
 
-      if (!this.$v.priority.required) {
-        this.$v.priority.$touch()
-        this.rulesValueStepTwo = this.$v.priority.required
-      }
+        if (!this.$v.source.required) {
+          this.$v.source.$touch()
+          this.rulesValueStepTwo = this.$v.source.required
+        }
 
-      if (!this.$v.type.required) {
-        this.$v.type.$touch()
-        this.rulesValueStepTwo = this.$v.type.required
-      }
+        if (!this.$v.priority.required) {
+          this.$v.priority.$touch()
+          this.rulesValueStepTwo = this.$v.priority.required
+        }
 
-      if (!this.$v.motive.required) {
-        this.$v.motive.$touch()
-        this.rulesValueStepTwo = this.$v.motive.required
-      }
+        if (!this.$v.type.required) {
+          this.$v.type.$touch()
+          this.rulesValueStepTwo = this.$v.type.required
+        }
 
-      if (!this.$v.operator.required) {
-        this.$v.operator.$touch()
-        this.rulesValueStepTwo = this.$v.operator.required
-      }
+        if (!this.$v.motive.required) {
+          this.$v.motive.$touch()
+          this.rulesValueStepTwo = this.$v.motive.required
+        }
 
-      if (this.rulesValueStepTwo) {
-        this.completeStepTwo = true
-        this.em1 = 3
-        this.e1 = 3
-      }
+        if (!this.$v.operator.required) {
+          this.$v.operator.$touch()
+          this.rulesValueStepTwo = this.$v.operator.required
+        }
+
+        if (this.rulesValueStepTwo) {
+          this.completeStepTwo = true
+          this.em1 = 3
+          this.e1 = 3
+        }
+      }, 500)
     }
   },
   created() {
@@ -1309,7 +1385,8 @@ export default {
       statusTicketItems: 'statusTicket/statusTickets',
       classroomItems: 'classroom/classrooms',
       userLog: 'auth/user',
-      statusDetailTicketItems: 'statusDetailTicket/statusDetailTickets'
+      statusDetailTicketItems: 'statusDetailTicket/statusDetailTickets',
+      savedTicket: 'ticket/getLastTicket'
     }),
     categoryErrors() {
       const errors = []
