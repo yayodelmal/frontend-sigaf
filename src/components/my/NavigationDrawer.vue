@@ -135,6 +135,10 @@ export default {
               to: { name: 'SourceTicket' }
             },
             {
+              name: 'Estado Detalle Ticket',
+              to: { name: 'StatusDetailTicket' }
+            },
+            {
               name: 'Rol Usuario',
               to: { name: 'Role' }
             },
