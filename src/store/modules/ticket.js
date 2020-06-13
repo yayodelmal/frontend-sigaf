@@ -21,6 +21,12 @@ export default {
     },
     POST_TICKET: (state, ticket) => {
       state.tickets.push(ticket)
+    },
+    PUT_TICKET: (state, ticket) => {
+      const editedIndex = state.tickets.findIndex(
+        find => find.properties.id === ticket.properties.id
+      )
+      Object.assign(state.tickets[editedIndex], ticket)
     }
   },
   getters: {
@@ -31,7 +37,9 @@ export default {
       return state.ticket
     },
     ticketDetailsByTicket: state => {
-      return state.ticketDetails
+      return state.ticketDetails.map(({ properties }) => {
+        return properties
+      })
     },
     getLastTicket: state => {
       return state.tickets[state.tickets.length - 1]
@@ -42,9 +50,6 @@ export default {
       const response = await axios.get(
         `${BASE_URL}/${ticket.id}/ticket-details`
       )
-
-      console.log(response)
-
       const { _data, success, error, message } = response.data
 
       if (success) {
@@ -86,6 +91,36 @@ export default {
       } else {
         console.log(error)
         return { success, error, message }
+      }
+    },
+    putTicket: async ({ commit }, ticket) => {
+      try {
+        const { data, status } = await axios.put(
+          `${BASE_URL}/${ticket.id}`,
+          ticket
+        )
+        if (status === 200) {
+          const { _data, success, error, message } = data
+
+          if (success) {
+            commit('PUT_TICKET', _data)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
       }
     },
     postTicket: async ({ commit }, ticket) => {

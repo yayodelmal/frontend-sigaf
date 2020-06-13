@@ -299,8 +299,8 @@
                                     :items="userItems"
                                     label="Operador"
                                     v-model="operator"
-                                    item-value="properties.id"
-                                    item-text="properties.name"
+                                    item-value="id"
+                                    item-text="name"
                                     return-object
                                     @change="setOperator($event)"
                                     @blur="$v.operator.$touch()"
@@ -350,14 +350,6 @@
                                 </v-col>
                               </v-row>
                               <v-row>
-                                <v-col>
-                                  <v-label>Estado detalle</v-label>
-                                  <v-label>Comentarios</v-label>
-                                </v-col>
-                                <v-card> </v-card>
-                              </v-row>
-
-                              <v-row>
                                 <v-spacer />
                                 <v-col cols="12" md="4">
                                   <base-autocomplete
@@ -371,6 +363,44 @@
                                     @blur="$v.status.$touch()"
                                     :error-messages="statusErrors"
                                   ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col>
+                                  <v-simple-table fixed-header height="300px">
+                                    <template v-slot:default>
+                                      <thead>
+                                        <tr>
+                                          <th class="text-left">#</th>
+                                          <th class="text-left">Intento</th>
+                                          <th class="text-left">Observación</th>
+                                          <th class="text-left">Fecha</th>
+                                          <th class="text-left">Operador</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr
+                                          v-for="(item, index) in ticketDetails"
+                                          :key="item.name"
+                                        >
+                                          <td>{{ index + 1 }}</td>
+                                          <td>
+                                            {{
+                                              item.statusDetailTicket
+                                                .description
+                                            }}
+                                          </td>
+                                          <td>{{ item.comment }}</td>
+                                          <td>
+                                            {{ item.createdAt }}
+                                          </td>
+                                          <td>
+                                            {{ item.userCreated.name }}
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </template>
+                                  </v-simple-table>
                                 </v-col>
                               </v-row>
                               <v-btn text color="grayS" @click="e1 = 2">
@@ -649,8 +679,8 @@
                                     :items="userItems"
                                     label="Operador"
                                     v-model="operator"
-                                    item-value="properties.id"
-                                    item-text="properties.name"
+                                    item-value="id"
+                                    item-text="name"
                                     return-object
                                     @change="$v.operator.$touch()"
                                     @blur="$v.operator.$touch()"
@@ -1003,6 +1033,7 @@ export default {
       fetchCourseRegisteredUserItems:
         'courseRegisteredUser/fetchCourseRegisteredUsers',
       postTicket: 'ticket/postTicket',
+      putTicket: 'ticket/putTicket',
       findTicket: 'ticket/findTicket',
       fetchTicketDetails: 'ticket/fetchTicketDetails',
       postDetailTicket: 'detailTicket/postDetailTicket'
@@ -1065,27 +1096,53 @@ export default {
           priority_ticket_id: this.priority.id,
           motive_ticket_id: this.motive.id,
           user_create_id: this.userLog.id,
-          user_assigned_id: this.operator.properties.id
+          user_assigned_id: this.operator.id
         }
 
-        const { success } = await this.postTicket(dataStoreTicket)
-        if (success) {
-          const dataDetailTicket = {
-            comment: this.observation,
-            ticket_id: this.savedTicket.id,
-            status_detail_ticket_id: this.statusDetail.id,
-            user_created_id: this.userLog.id
-          }
-          const { success, message } = await this.postDetailTicket(
-            dataDetailTicket
-          )
+        this.editedTicketItem.userCreate = { ...this.userLog }
+
+        if (this.editedTicketIndex > -1) {
+          const { success } = await this.putTicket(dataStoreTicket)
 
           if (success) {
-            this.snackbar = true
-            this.message = this.successMessage
-          } else {
-            this.snackbar = true
-            this.message = message
+            const dataDetailTicket = {
+              comment: this.observation,
+              ticket_id: this.savedTicket.id,
+              status_detail_ticket_id: this.statusDetail.id,
+              user_created_id: this.userLog.id
+            }
+            const { success, message } = await this.postDetailTicket(
+              dataDetailTicket
+            )
+            if (success) {
+              this.snackbar = true
+              this.message = this.successMessage
+            } else {
+              this.snackbar = true
+              this.message = message
+            }
+          }
+        } else {
+          console.log('object ticket', this.editedTicketItem)
+          const { success } = await this.postTicket(dataStoreTicket)
+          if (success) {
+            const dataDetailTicket = {
+              comment: this.observation,
+              ticket_id: this.savedTicket.id,
+              status_detail_ticket_id: this.statusDetail.id,
+              user_created_id: this.userLog.id
+            }
+            const { success, message } = await this.postDetailTicket(
+              dataDetailTicket
+            )
+
+            if (success) {
+              this.snackbar = true
+              this.message = this.successMessage
+            } else {
+              this.snackbar = true
+              this.message = message
+            }
           }
         }
 
@@ -1094,11 +1151,20 @@ export default {
     },
 
     async editItem(item) {
-      this.editedIndex = this.items.indexOf(item)
+      console.log('item', item)
 
+      this.priority = item.priorityTicket
+      this.type = item.typeTicket
+      this.motive = item.motiveTicket
+      this.status = item.statusTicket
+      this.source = item.sourceTicket
+      this.operator = item.userAssigned
+      this.rut = item.courseRegisteredUser.registered_user.rut_registered_moodle
+
+      this.fetchUserByRut(this.rut)
+
+      this.editedTicketIndex = this.items.indexOf(item)
       this.editedItem = Object.assign({}, item)
-
-      console.log(this.editedItem)
 
       await this.fetchTicketDetails(this.editedItem)
 
@@ -1247,7 +1313,7 @@ export default {
           priority_ticket_id: this.priority.id,
           motive_ticket_id: this.motive.id,
           user_create_id: this.userLog.id,
-          user_assigned_id: this.operator.properties.id
+          user_assigned_id: this.operator.id
         }
 
         this.selected.forEach(async userCourse => {
@@ -1386,7 +1452,8 @@ export default {
       classroomItems: 'classroom/classrooms',
       userLog: 'auth/user',
       statusDetailTicketItems: 'statusDetailTicket/statusDetailTickets',
-      savedTicket: 'ticket/getLastTicket'
+      savedTicket: 'ticket/getLastTicket',
+      ticketDetails: 'ticket/ticketDetailsByTicket'
     }),
     categoryErrors() {
       const errors = []
