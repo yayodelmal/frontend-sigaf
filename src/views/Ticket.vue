@@ -344,6 +344,7 @@
                                       item-value="id"
                                       item-text="description"
                                       return-object
+                                      v-if="showStatusDetailTicket"
                                       @change="setStatusDetail($event)"
                                       @blur="$v.statusDetail.$touch()"
                                       :error-messages="statusDetailErrors"
@@ -353,6 +354,7 @@
                                     <v-textarea
                                       color="blueS"
                                       v-model="observation"
+                                      v-if="showObservation"
                                       dense
                                       outlined
                                       auto-grow
@@ -754,19 +756,21 @@
                                       prepend-icon="mdi-comment"
                                       :items="statusDetailTicketItems"
                                       label="Intento de contacto"
-                                      v-model="statusDetail"
+                                      v-model="statusDetailMasive"
                                       item-value="id"
                                       item-text="description"
                                       return-object
+                                      v-if="showStatusDetailTicket"
                                     ></base-autocomplete>
                                   </v-col>
                                   <v-col cols="12" sm="8" md="8">
                                     <v-textarea
-                                      v-model="observation"
+                                      v-model="observationMassive"
                                       color="blueS"
                                       dense
                                       auto-grow
                                       counter
+                                      v-if="showObservation"
                                       clearable
                                       clear-icon="mdi-cancel"
                                       label="Observaciones"
@@ -775,14 +779,6 @@
                                     ></v-textarea>
                                   </v-col>
                                 </v-row>
-                                <v-row>
-                                  <v-col>
-                                    <v-label>Estado detalle</v-label>
-                                    <v-label>Comentarios</v-label>
-                                  </v-col>
-                                  <v-card> </v-card>
-                                </v-row>
-
                                 <v-row>
                                   <v-spacer />
                                   <v-col cols="12" md="4">
@@ -986,69 +982,38 @@ import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 export default {
   mixins: [validationMixin],
-  validations() {
-    if (this.editedTicketIndex > -1) {
-      return {
-        category: {
-          required
-        },
-        categoryMassiveTicket: {
-          required
-        },
-        priority: {
-          required
-        },
-        source: {
-          required
-        },
-        type: {
-          required
-        },
-        motive: {
-          required
-        },
-        status: {
-          required
-        },
-        operator: {
-          required
-        },
-        statusDetail: {
-          required
-        },
-        observation: {
-          minLength: minLength(0),
-          maxLength: maxLength(150),
-          required
-        }
-      }
-    } else {
-      return {
-        category: {
-          required
-        },
-        categoryMassiveTicket: {
-          required
-        },
-        priority: {
-          required
-        },
-        source: {
-          required
-        },
-        type: {
-          required
-        },
-        motive: {
-          required
-        },
-        status: {
-          required
-        },
-        operator: {
-          required
-        }
-      }
+  validations: {
+    category: {
+      required
+    },
+    categoryMassiveTicket: {
+      required
+    },
+    priority: {
+      required
+    },
+    source: {
+      required
+    },
+    type: {
+      required
+    },
+    motive: {
+      required
+    },
+    status: {
+      required
+    },
+    operator: {
+      required
+    },
+    statusDetail: {
+      required
+    },
+    observation: {
+      minLength: minLength(0),
+      maxLength: maxLength(150),
+      required
     }
   },
   data() {
@@ -1094,22 +1059,22 @@ export default {
       headersTicket: [
         {
           text: 'RUT',
-          value: 'properties.registered_user.rut_registered_moodle',
+          value: 'registered_user.rut_registered_moodle',
           class: 'redS--text'
         },
         {
           text: 'Nombre participante',
-          value: 'properties.registered_user.name_registered_moodle',
+          value: 'registered_user.name_registered_moodle',
           class: 'redS--text'
         },
         {
           text: 'Aula',
-          value: 'properties.classroom.description',
+          value: 'classroom.description',
           class: 'redS--text'
         },
         {
           text: 'Última conexión',
-          value: 'properties.last_access_registered_moodle',
+          value: 'last_access_registered_moodle',
           class: 'redS--text'
         }
       ],
@@ -1126,6 +1091,7 @@ export default {
       source: null,
       operator: null,
       statusDetail: null,
+      statusDetailMasive: null,
       observation: '',
       classrooms: [],
       userRegisteredFiltered: [],
@@ -1163,7 +1129,10 @@ export default {
       editItem_: new Ticket(),
       dialogConfirm: false,
       openTicket: true,
-      closeTicket: false
+      closeTicket: false,
+      showStatusDetailTicket: true,
+      showObservation: true,
+      observationMassive: ''
     }
   },
   methods: {
@@ -1372,6 +1341,7 @@ export default {
           if (this.classrooms.length === 0) {
             this.userRegisteredFiltered = this.courseRegisteredUserItems.filter(
               userCourse => {
+                console.log('userCourse', userCourse)
                 return userCourse.course.id === course.properties.id
               }
             )
@@ -1537,14 +1507,48 @@ export default {
           user_assigned_id: this.operator.id
         }
 
+        if (this.status.description === 'Cerrado') {
+          let arrayDate = new Date()
+            .toLocaleString()
+            .slice(0, 10)
+            .replace('T', ' ')
+            .split('-')
+
+          dataStoreTicket = Object.assign(dataStoreTicket, {
+            closing_date: `${arrayDate[2]}-${arrayDate[1]}-${arrayDate[0]}`
+          })
+        }
+
         this.selected.forEach(async userCourse => {
           dataStoreTicket = {
             ...dataStoreTicket,
             ...{ course_registered_user_id: userCourse.id }
           }
 
-          const { success, message } = await this.postTicket(dataStoreTicket)
+          const { success, message, _data } = await this.postTicket(
+            dataStoreTicket
+          )
+
+          console.log('_data', _data)
+          console.log('statusDetailMasive', this.statusDetailMasive)
           if (success) {
+            if (this.statusDetailMasive) {
+              const dataDetailTicket = {
+                comment: this.observationMassive,
+                ticket_id: _data.properties.id,
+                status_detail_ticket_id: this.statusDetailMasive.id,
+                user_created_id: this.userLog.id
+              }
+              console.log('dataDetailTicket', dataDetailTicket)
+
+              const { success } = await this.postDetailTicket(dataDetailTicket)
+
+              if (success) {
+                this.snackbar = true
+                this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
+              }
+            }
+
             this.snackbar = true
             this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
           } else {
@@ -1552,8 +1556,10 @@ export default {
             this.message = message
           }
         })
-
         this.clearTicket()
+        setTimeout(() => {
+          this.fetchItems()
+        }, 2000)
       }
     },
     showComment(comment) {
@@ -1612,6 +1618,8 @@ export default {
       this.$v.$reset()
       this.editedTicketIndex = -1
       this.editedTicketItem = Object.assign({}, this.defaultTicketItem)
+      this.showStatusDetailTicket = true
+      this.showObservation = true
     },
     checkStepTwo() {
       this.$v.$reset()
@@ -1642,6 +1650,14 @@ export default {
         if (!this.$v.operator.required) {
           this.$v.operator.$touch()
           this.rulesValueStepTwo = this.$v.operator.required
+        }
+
+        if (this.type.description !== 'Correo electrónico') {
+          this.showStatusDetailTicket = false
+          this.showObservation = false
+        } else {
+          this.showStatusDetailTicket = true
+          this.showObservation = true
         }
 
         if (this.rulesValueStepTwo) {
@@ -1813,15 +1829,39 @@ export default {
         })
     },
     tickets() {
-      return this.items.filter(item => {
-        if (this.openTicket === true && this.closeTicket === false) {
-          return item.properties.statusTicket.description === 'Abierto'
-        } else if (this.openTicket === false && this.closeTicket === true) {
-          return item.properties.statusTicket.description === 'Cerrado'
-        } else {
-          return item
-        }
-      })
+      if (this.category !== null) {
+        return this.items.filter(item => {
+          if (this.openTicket === true && this.closeTicket === false) {
+            return (
+              item.properties.statusTicket.description === 'Abierto' &&
+              item.properties.courseRegisteredUser.course.category
+                .description === this.category.description
+            )
+          } else if (this.openTicket === false && this.closeTicket === true) {
+            return (
+              item.properties.statusTicket.description === 'Cerrado' &&
+              item.properties.courseRegisteredUser.course.category
+                .description === this.category.description
+            )
+          } else {
+            return (
+              item &&
+              item.properties.courseRegisteredUser.course.category
+                .description === this.category.description
+            )
+          }
+        })
+      } else {
+        return this.items.filter(item => {
+          if (this.openTicket === true && this.closeTicket === false) {
+            return item.properties.statusTicket.description === 'Abierto'
+          } else if (this.openTicket === false && this.closeTicket === true) {
+            return item.properties.statusTicket.description === 'Cerrado'
+          } else {
+            return item
+          }
+        })
+      }
     },
     courseId() {
       return this.course.id

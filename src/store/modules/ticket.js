@@ -150,15 +150,15 @@ export default {
 
         const { _data, success, error, message } = data
 
-        console.log()
-
         if (success) {
           commit('POST_TICKET', _data)
         } else {
           console.log(error)
         }
 
-        return { success, message }
+        console.log('_dataStore', _data)
+
+        return { success, message, _data }
       } catch (error) {
         const { data } = error.response
         return {
