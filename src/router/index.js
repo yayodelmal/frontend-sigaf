@@ -107,6 +107,15 @@ const routes = [
             meta: { requiresAuth: true }
           },
           {
+            path: 'estado-detalle-ticket',
+            name: 'StatusDetailTicket',
+            component: () =>
+              import(
+                /* webpackChunkName: "IntentoContacto" */ '../views/maintenance/StatusDetailTicket.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
             name: 'Section',
             path: 'seccion',
             component: () =>

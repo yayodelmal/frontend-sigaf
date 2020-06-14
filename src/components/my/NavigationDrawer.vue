@@ -135,11 +135,15 @@ export default {
               to: { name: 'SourceTicket' }
             },
             {
+              name: 'Intento Contacto',
+              to: { name: 'StatusDetailTicket' }
+            },
+            {
               name: 'Rol Usuario',
               to: { name: 'Role' }
             },
             {
-              name: 'Perfil plataforma',
+              name: 'Perfil Plataforma',
               to: { name: 'Profile' }
             }
           ]
