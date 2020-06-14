@@ -27,11 +27,28 @@ export default {
         find => find.properties.id === ticket.properties.id
       )
       Object.assign(state.tickets[editedIndex], ticket)
+    },
+    DELETE_TICKET: (state, ticket) => {
+      console.log(ticket)
+      const editedIndex = state.tickets.findIndex(find => {
+        console.log(ticket.id)
+        console.log(find.properties.id)
+        return find.properties.id === ticket.id
+      })
+
+      console.log(editedIndex)
+      state.tickets.splice(editedIndex, 1)
     }
   },
   getters: {
     tickets: state => {
-      return state.tickets
+      return state.tickets.map(ticket => {
+        if (ticket.relationships.numberOfElements === 0) {
+          return Object.assign(ticket, { showDeleteButton: true })
+        } else {
+          return Object.assign(ticket, { showDeleteButton: false })
+        }
+      })
     },
     ticket: state => {
       return state.ticket
@@ -50,6 +67,8 @@ export default {
       const response = await axios.get(
         `${BASE_URL}/${ticket.id}/ticket-details`
       )
+
+      console.log(response)
       const { _data, success, error, message } = response.data
 
       if (success) {
@@ -144,6 +163,34 @@ export default {
         const { data } = error.response
         return {
           success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    deleteTicket: async ({ commit }, ticket) => {
+      try {
+        const { status, data } = await axios.delete(`${BASE_URL}/${ticket.id}`)
+
+        if (status === 200) {
+          const { success, error, message } = data
+
+          if (success) {
+            commit('DELETE_TICKET', ticket)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
           error: 'Error grave. Contacte al Administrador.'
         }
       }

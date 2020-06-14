@@ -1,6 +1,6 @@
 import axios from '../../services/axios'
 
-const BASE_URL = '/api/v2/status-detail-ticket'
+const BASE_URL = '/api/v2/status-detail-tickets'
 
 export default {
   namespaced: true,

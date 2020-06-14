@@ -50,7 +50,7 @@
                   </template>
                   <v-card>
                     <v-card-title>
-                      <span class="headline">Ticket</span>
+                      <span class="headline">{{ titleTicket }}</span>
                     </v-card-title>
                     <v-card-text>
                       <v-container>
@@ -325,7 +325,6 @@
                               <v-row>
                                 <v-col cols="12" sm="4" md="4">
                                   <base-autocomplete
-                                    prepend-icon="mdi-comment"
                                     :items="statusDetailTicketItems"
                                     label="Intento de contacto"
                                     v-model="statusDetail"
@@ -339,13 +338,13 @@
                                     color="blueS"
                                     v-model="observation"
                                     dense
+                                    outlined
                                     auto-grow
                                     counter
                                     clearable
                                     clear-icon="mdi-cancel"
                                     label="Observaciones"
                                     rows="1"
-                                    prepend-icon="mdi-comment"
                                   ></v-textarea>
                                 </v-col>
                               </v-row>
@@ -367,40 +366,67 @@
                               </v-row>
                               <v-row>
                                 <v-col>
-                                  <v-simple-table fixed-header height="300px">
-                                    <template v-slot:default>
-                                      <thead>
-                                        <tr>
-                                          <th class="text-left">#</th>
-                                          <th class="text-left">Intento</th>
-                                          <th class="text-left">Observación</th>
-                                          <th class="text-left">Fecha</th>
-                                          <th class="text-left">Operador</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <tr
-                                          v-for="(item, index) in ticketDetails"
-                                          :key="item.name"
-                                        >
-                                          <td>{{ index + 1 }}</td>
-                                          <td>
-                                            {{
-                                              item.statusDetailTicket
-                                                .description
-                                            }}
-                                          </td>
-                                          <td>{{ item.comment }}</td>
-                                          <td>
-                                            {{ item.createdAt }}
-                                          </td>
-                                          <td>
-                                            {{ item.userCreated.name }}
-                                          </td>
-                                        </tr>
-                                      </tbody>
-                                    </template>
-                                  </v-simple-table>
+                                  <v-card hover>
+                                    <v-card-title :class="'blueS--text'">
+                                      Intentos de contacto
+                                    </v-card-title>
+                                    <v-card-text>
+                                      <v-simple-table
+                                        fixed-header
+                                        height="200px"
+                                      >
+                                        <template v-slot:default>
+                                          <thead>
+                                            <tr>
+                                              <th class="text-left">#</th>
+                                              <th class="text-left">Intento</th>
+                                              <th
+                                                style="width: 400px;"
+                                                class="text-left"
+                                              >
+                                                Observación
+                                              </th>
+                                              <th class="text-left">Fecha</th>
+                                              <th class="text-left">
+                                                Operador
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            <tr
+                                              v-for="(item,
+                                              index) in ticketDetails"
+                                              :key="item.name"
+                                            >
+                                              <td>{{ index + 1 }}</td>
+                                              <td
+                                                :class="
+                                                  item.statusDetailTicket
+                                                    .description === 'Fallido'
+                                                    ? 'redS--text'
+                                                    : 'success--text'
+                                                "
+                                              >
+                                                {{
+                                                  item.statusDetailTicket
+                                                    .description
+                                                }}
+                                              </td>
+                                              <td>
+                                                {{ item.comment }}
+                                              </td>
+                                              <td>
+                                                {{ item.createdAt }}
+                                              </td>
+                                              <td>
+                                                {{ item.userCreated.name }}
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </template>
+                                      </v-simple-table>
+                                    </v-card-text>
+                                  </v-card>
                                 </v-col>
                               </v-row>
                               <v-btn text color="grayS" @click="e1 = 2">
@@ -412,7 +438,7 @@
                               <base-button
                                 @click="saveTicket()"
                                 icon="mdi-arrow-right-bold-circle"
-                                label="Generar Ticket"
+                                :label="titleButtonTicket"
                               ></base-button>
                             </v-stepper-content>
                           </v-stepper-items>
@@ -795,16 +821,23 @@
           loading-text="Cargando... por favor espere"
         >
           <template
-            v-slot:item.courseRegisteredUser.registered_user.rut_registered_moodle="{
+            v-slot:item.properties.id="{
+              item
+            }"
+          >
+            {{ showPosition(item) }}
+          </template>
+          <template
+            v-slot:item.properties.courseRegisteredUser.registered_user.rut_registered_moodle="{
               item
             }"
           >
             {{
-              item.courseRegisteredUser.registered_user.rut_registered_moodle.toUpperCase()
+              item.properties.courseRegisteredUser.registered_user.rut_registered_moodle.toUpperCase()
             }}
           </template>
           <template
-            v-slot:item.courseRegisteredUser.registered_user.name_registered_moodle="{
+            v-slot:item.properties.courseRegisteredUser.registered_user.name_registered_moodle="{
               item
             }"
           >
@@ -812,49 +845,70 @@
               <template v-slot:activator="{ on }">
                 <v-label v-on="on">
                   {{
-                    item.courseRegisteredUser.registered_user.name_registered_moodle.toUpperCase()
+                    item.properties.courseRegisteredUser.registered_user.name_registered_moodle.toUpperCase()
                   }}</v-label
                 >
               </template>
-              <span>{{ item.courseRegisteredUser.course.description }}</span>
+              <span>{{
+                item.properties.courseRegisteredUser.course.description
+              }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item.typeTicket.description="{ item }">
+          <template v-slot:item.properties.typeTicket.description="{ item }">
             <v-tooltip color="blueS" bottom>
               <template v-slot:activator="{ on }">
                 <v-icon v-on="on">{{
-                  getTypeTicket(item.typeTicket.description)
+                  getTypeTicket(item.properties.typeTicket.description)
                 }}</v-icon>
               </template>
-              <span>{{ item.typeTicket.description }}</span>
+              <span>{{ item.properties.typeTicket.description }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item.statusTicket.description="{ item }">
+          <template v-slot:item.properties.statusTicket.description="{ item }">
             <v-tooltip color="blueS" bottom>
               <template v-slot:activator="{ on }">
                 <v-icon v-on="on">{{
-                  getStatusTicket(item.statusTicket.description)
+                  getStatusTicket(item.properties.statusTicket.description)
                 }}</v-icon>
               </template>
-              <span>{{ item.statusTicket.description }}</span>
+              <span>{{ item.properties.statusTicket.description }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item.priorityTicket.description="{ item }">
+          <template
+            v-slot:item.properties.priorityTicket.description="{ item }"
+          >
             <v-chip
               small
-              :color="getColor(item.priorityTicket.description)"
+              :color="getColor(item.properties.priorityTicket.description)"
               dark
               label
-              >{{ item.priorityTicket.description.toUpperCase() }}</v-chip
+              >{{
+                item.properties.priorityTicket.description.toUpperCase()
+              }}</v-chip
             >
           </template>
           <template v-slot:item.actions="{ item }">
-            <v-icon class="mr-2" @click.prevent="editItem(item)">
-              mdi-pencil
-            </v-icon>
-            <v-icon @click.prevent="deleteItem(item)">
-              mdi-delete
-            </v-icon>
+            <v-tooltip color="blueS" bottom>
+              <template v-slot:activator="{ on }">
+                <v-icon v-on="on" class="mr-2" @click.prevent="editItem(item)">
+                  mdi-chat-plus
+                </v-icon>
+              </template>
+              <span>Agregar contacto</span>
+            </v-tooltip>
+
+            <v-tooltip color="blueS" bottom>
+              <template v-slot:activator="{ on }">
+                <v-icon
+                  v-show="item.showDeleteButton"
+                  v-on="on"
+                  @click.prevent="deleteItem(item)"
+                >
+                  mdi-delete
+                </v-icon>
+              </template>
+              <span>Eliminar ticket</span>
+            </v-tooltip>
           </template>
         </v-data-table>
         <template v-slot:actions>
@@ -874,6 +928,29 @@
         Cerrar
       </v-btn>
     </v-snackbar>
+    <v-dialog v-model="dialogConfirm" persistent max-width="350">
+      <base-card
+        class="pt-12"
+        color="redS"
+        icon="mdi-hand-left"
+        title="¡Atención!"
+      >
+        <v-divider></v-divider>
+        <v-card-text>Eliminará un registro de forma permanente</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <base-button
+            icon="mdi-check-circle"
+            label="Aceptar"
+            @click.prevent="confirmDelete"
+          ></base-button>
+          <v-btn text color="grayS" @click="close">
+            <v-icon size="30" left>mdi-close-circle</v-icon>
+            Cancelar</v-btn
+          >
+        </v-card-actions>
+      </base-card>
+    </v-dialog>
   </v-row>
 </template>
 
@@ -939,39 +1016,45 @@ export default {
           text: '#',
           align: 'start',
           sortable: false,
-          value: 'id'
+          value: 'properties.id'
         },
         {
           text: 'RUT',
-          value: 'courseRegisteredUser.registered_user.rut_registered_moodle'
+          value:
+            'properties.courseRegisteredUser.registered_user.rut_registered_moodle'
         },
         {
           text: 'Nombre participante',
-          value: 'courseRegisteredUser.registered_user.name_registered_moodle'
+          value:
+            'properties.courseRegisteredUser.registered_user.name_registered_moodle'
         },
-        { text: 'Tipo', value: 'typeTicket.description' },
-        { text: 'Estado', value: 'statusTicket.description' },
+        { text: 'Tipo', value: 'properties.typeTicket.description' },
+        { text: 'Estado', value: 'properties.statusTicket.description' },
         {
           text: 'Prioridad',
-          value: 'priorityTicket.description'
+          value: 'properties.priorityTicket.description'
         },
         { text: 'Opciones', value: 'actions', sortable: false }
       ],
       headersTicket: [
         {
           text: 'RUT',
-          value: 'registered_user.rut_registered_moodle',
+          value: 'properties.registered_user.rut_registered_moodle',
           class: 'redS--text'
         },
         {
           text: 'Nombre participante',
-          value: 'registered_user.name_registered_moodle',
+          value: 'properties.registered_user.name_registered_moodle',
           class: 'redS--text'
         },
-        { text: 'Aula', value: 'classroom.description', class: 'redS--text' },
+        {
+          text: 'Aula',
+          value: 'properties.classroom.description',
+          class: 'redS--text'
+        },
         {
           text: 'Última conexión',
-          value: 'last_access_registered_moodle',
+          value: 'properties.last_access_registered_moodle',
           class: 'redS--text'
         }
       ],
@@ -1021,7 +1104,9 @@ export default {
       editedTicketItem: new Ticket(),
       defaultTicketItem: new Ticket(),
       editedDetailTicketItem: new DetailTicket(),
-      defaultDetailTicketItem: new DetailTicket()
+      defaultDetailTicketItem: new DetailTicket(),
+      editItem_: new Ticket(),
+      dialogConfirm: false
     }
   },
   methods: {
@@ -1034,6 +1119,7 @@ export default {
         'courseRegisteredUser/fetchCourseRegisteredUsers',
       postTicket: 'ticket/postTicket',
       putTicket: 'ticket/putTicket',
+      removeItem: 'ticket/deleteTicket',
       findTicket: 'ticket/findTicket',
       fetchTicketDetails: 'ticket/fetchTicketDetails',
       postDetailTicket: 'detailTicket/postDetailTicket'
@@ -1088,7 +1174,7 @@ export default {
       if (this.rulesValueStepThree) {
         this.completeStepThree = true
 
-        const dataStoreTicket = {
+        let dataStoreTicket = {
           course_registered_user_id: this.user.id,
           type_ticket_id: this.type.id,
           source_ticket_id: this.source.id,
@@ -1099,15 +1185,22 @@ export default {
           user_assigned_id: this.operator.id
         }
 
-        this.editedTicketItem.userCreate = { ...this.userLog }
-
         if (this.editedTicketIndex > -1) {
+          dataStoreTicket = Object.assign(dataStoreTicket, {
+            id: this.editedTicketItem.id
+          })
+
+          if (this.statusDetail) {
+            dataStoreTicket = Object.assign(dataStoreTicket, {
+              showDeleteButton: false
+            })
+          }
           const { success } = await this.putTicket(dataStoreTicket)
 
           if (success) {
             const dataDetailTicket = {
               comment: this.observation,
-              ticket_id: this.savedTicket.id,
+              ticket_id: this.editedTicketItem.id,
               status_detail_ticket_id: this.statusDetail.id,
               user_created_id: this.userLog.id
             }
@@ -1123,35 +1216,37 @@ export default {
             }
           }
         } else {
-          console.log('object ticket', this.editedTicketItem)
           const { success } = await this.postTicket(dataStoreTicket)
           if (success) {
-            const dataDetailTicket = {
-              comment: this.observation,
-              ticket_id: this.savedTicket.id,
-              status_detail_ticket_id: this.statusDetail.id,
-              user_created_id: this.userLog.id
-            }
-            const { success, message } = await this.postDetailTicket(
-              dataDetailTicket
-            )
+            if (this.statusDetail) {
+              const dataDetailTicket = {
+                comment: this.observation,
+                ticket_id: this.savedTicket.properties.id,
+                status_detail_ticket_id: this.statusDetail.id,
+                user_created_id: this.userLog.id
+              }
 
-            if (success) {
-              this.snackbar = true
-              this.message = this.successMessage
-            } else {
-              this.snackbar = true
-              this.message = message
+              const { success, message } = await this.postDetailTicket(
+                dataDetailTicket
+              )
+
+              if (success) {
+                this.snackbar = true
+                this.message = this.successMessage
+              } else {
+                this.snackbar = true
+                this.message = message
+              }
             }
           }
         }
-
+        this.fetchItems()
         this.clearTicket()
       }
     },
 
-    async editItem(item) {
-      console.log('item', item)
+    async editItem(ticket) {
+      const item = ticket.properties
 
       this.priority = item.priorityTicket
       this.type = item.typeTicket
@@ -1163,12 +1258,16 @@ export default {
 
       this.fetchUserByRut(this.rut)
 
-      this.editedTicketIndex = this.items.indexOf(item)
-      this.editedItem = Object.assign({}, item)
+      this.editedTicketIndex = this.tickets.findIndex(
+        find => find.properties.id === item.id
+      )
+      this.editItem_ = Object.assign({}, item)
+      this.editedTicketItem.id = item.id
 
-      await this.fetchTicketDetails(this.editedItem)
+      await this.fetchTicketDetails(this.editItem_)
 
       this.dialog = true
+      this.e1 = 3
     },
 
     async filterUsersByCategories() {
@@ -1209,6 +1308,7 @@ export default {
         })
       }
     },
+
     async fetchDataCourses() {
       this.loading = true
       const { success, message } = await this.fetchCourseItems()
@@ -1267,6 +1367,11 @@ export default {
 
           this.user = { ...this.user, ...userInter }
 
+          this.editedTicketItem.courseRegisteredUser = Object.assign(
+            {},
+            this.user
+          )
+
           this.findActivities(this.user.id)
         } else {
           vm.snackbar = true
@@ -1294,7 +1399,41 @@ export default {
         }
       })
     },
+    async deleteItem(ticket) {
+      console.log(ticket)
+      this.editedTicketIndex = this.tickets.findIndex(
+        find => find.properties.id === ticket.id
+      )
+      this.editItem_ = Object.assign({}, ticket)
 
+      this.dialogConfirm = true
+    },
+    async confirmDelete() {
+      const { success, message } = await this.removeItem(
+        this.editItem_.properties
+      )
+
+      if (success) {
+        this.snackbar = true
+        this.message = this.successMessage
+      } else {
+        this.snackbar = true
+        this.message = message
+      }
+      this.closeConfirmDelete()
+    },
+    closeConfirmDelete() {
+      this.dialogConfirm = false
+      setTimeout(() => {
+        this.clearTicket()
+      }, 300)
+    },
+    close() {
+      this.dialogConfirm = false
+      setTimeout(() => {
+        this.clearTicket()
+      }, 300)
+    },
     async saveMassiveTicket() {
       this.rulesValueStepThree = true
 
@@ -1335,7 +1474,13 @@ export default {
         this.clearTicket()
       }
     },
-
+    showComment(comment) {
+      if (comment.length > 50) {
+        return `${comment.slice(0, 50)}...`
+      } else {
+        return comment
+      }
+    },
     checkStepOne() {
       this.rulesValueStepOne = true
 
@@ -1383,6 +1528,8 @@ export default {
         isActive: null
       }
       this.$v.$reset()
+      this.editedTicketIndex = -1
+      this.editedTicketItem = Object.assign({}, this.defaultTicketItem)
     },
     checkStepTwo() {
       this.$v.$reset()
@@ -1421,6 +1568,13 @@ export default {
           this.e1 = 3
         }
       }, 500)
+    },
+    showPosition(ticket) {
+      const index = this.tickets.findIndex(find => {
+        return find.properties.id === ticket.properties.id
+      })
+
+      return index + 1
     }
   },
   created() {
@@ -1455,6 +1609,12 @@ export default {
       savedTicket: 'ticket/getLastTicket',
       ticketDetails: 'ticket/ticketDetailsByTicket'
     }),
+    titleTicket() {
+      return this.editedTicketIndex > -1 ? 'Agregar contacto' : 'Generar ticket'
+    },
+    titleButtonTicket() {
+      return this.editedTicketIndex > -1 ? 'Agregar contacto' : 'Generar ticket'
+    },
     categoryErrors() {
       const errors = []
 
