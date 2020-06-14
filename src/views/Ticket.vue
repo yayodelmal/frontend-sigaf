@@ -344,7 +344,6 @@
                                       item-value="id"
                                       item-text="description"
                                       return-object
-                                      v-if="showStatusDetailTicket"
                                       @change="setStatusDetail($event)"
                                       @blur="$v.statusDetail.$touch()"
                                       :error-messages="statusDetailErrors"
@@ -354,7 +353,6 @@
                                     <v-textarea
                                       color="blueS"
                                       v-model="observation"
-                                      v-if="showObservation"
                                       dense
                                       outlined
                                       auto-grow
