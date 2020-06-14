@@ -21,17 +21,42 @@ export default {
     },
     POST_TICKET: (state, ticket) => {
       state.tickets.push(ticket)
+    },
+    PUT_TICKET: (state, ticket) => {
+      const editedIndex = state.tickets.findIndex(
+        find => find.properties.id === ticket.properties.id
+      )
+      Object.assign(state.tickets[editedIndex], ticket)
+    },
+    DELETE_TICKET: (state, ticket) => {
+      console.log(ticket)
+      const editedIndex = state.tickets.findIndex(find => {
+        console.log(ticket.id)
+        console.log(find.properties.id)
+        return find.properties.id === ticket.id
+      })
+
+      console.log(editedIndex)
+      state.tickets.splice(editedIndex, 1)
     }
   },
   getters: {
     tickets: state => {
-      return state.tickets
+      return state.tickets.map(ticket => {
+        if (ticket.relationships.numberOfElements === 0) {
+          return Object.assign(ticket, { showDeleteButton: true })
+        } else {
+          return Object.assign(ticket, { showDeleteButton: false })
+        }
+      })
     },
     ticket: state => {
       return state.ticket
     },
     ticketDetailsByTicket: state => {
-      return state.ticketDetails
+      return state.ticketDetails.map(({ properties }) => {
+        return properties
+      })
     },
     getLastTicket: state => {
       return state.tickets[state.tickets.length - 1]
@@ -44,7 +69,6 @@ export default {
       )
 
       console.log(response)
-
       const { _data, success, error, message } = response.data
 
       if (success) {
@@ -88,6 +112,36 @@ export default {
         return { success, error, message }
       }
     },
+    putTicket: async ({ commit }, ticket) => {
+      try {
+        const { data, status } = await axios.put(
+          `${BASE_URL}/${ticket.id}`,
+          ticket
+        )
+        if (status === 200) {
+          const { _data, success, error, message } = data
+
+          if (success) {
+            commit('PUT_TICKET', _data)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
     postTicket: async ({ commit }, ticket) => {
       try {
         const { data } = await axios.post(BASE_URL, ticket)
@@ -96,19 +150,47 @@ export default {
 
         const { _data, success, error, message } = data
 
-        console.log()
-
         if (success) {
           commit('POST_TICKET', _data)
         } else {
           console.log(error)
         }
 
-        return { success, message }
+        console.log('_dataStore', _data)
+
+        return { success, message, _data }
       } catch (error) {
         const { data } = error.response
         return {
           success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    deleteTicket: async ({ commit }, ticket) => {
+      try {
+        const { status, data } = await axios.delete(`${BASE_URL}/${ticket.id}`)
+
+        if (status === 200) {
+          const { success, error, message } = data
+
+          if (success) {
+            commit('DELETE_TICKET', ticket)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
           error: 'Error grave. Contacte al Administrador.'
         }
       }

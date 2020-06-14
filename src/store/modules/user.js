@@ -14,7 +14,13 @@ export default {
   },
   getters: {
     users: state => {
-      return state.users
+      return state.users.map(({ properties }) => {
+        return {
+          id: properties.id,
+          name: properties.name,
+          email: properties.email
+        }
+      })
     }
   },
   actions: {

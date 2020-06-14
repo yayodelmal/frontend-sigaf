@@ -3,6 +3,12 @@
     <v-container class="fill-height" fluid>
       <v-app-bar app clipped-right flat color="white">
         <v-app-bar-nav-icon @click.stop="setDrawer()"></v-app-bar-nav-icon>
+        <v-spacer></v-spacer>
+        <v-toolbar-title class="blueS--text">
+          SISTEMA DE INFORMACIÓN PARA LA GESTIÓN DE ACCIONES
+          FORMATIVAS</v-toolbar-title
+        >
+        <v-spacer></v-spacer>
       </v-app-bar>
       <navigation-drawer-app :drawer.sync="drawer"></navigation-drawer-app>
       <router-view></router-view>
