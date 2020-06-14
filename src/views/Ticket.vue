@@ -1232,14 +1232,10 @@ export default {
           })
 
           if (this.status.description === 'Cerrado') {
-            let arrayDate = new Date()
-              .toLocaleString()
-              .slice(0, 10)
-              .replace('T', ' ')
-              .split('-')
+            let arrayDate = new Date().toISOString().substr(0, 10)
 
             dataStoreTicket = Object.assign(dataStoreTicket, {
-              closing_date: `${arrayDate[2]}-${arrayDate[1]}-${arrayDate[0]}`
+              closing_date: arrayDate
             })
           }
 
@@ -1506,14 +1502,10 @@ export default {
         }
 
         if (this.status.description === 'Cerrado') {
-          let arrayDate = new Date()
-            .toLocaleString()
-            .slice(0, 10)
-            .replace('T', ' ')
-            .split('-')
+          let arrayDate = new Date().toISOString().substr(0, 10)
 
           dataStoreTicket = Object.assign(dataStoreTicket, {
-            closing_date: `${arrayDate[2]}-${arrayDate[1]}-${arrayDate[0]}`
+            closing_date: arrayDate
           })
         }
 
