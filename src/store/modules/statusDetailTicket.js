@@ -1,6 +1,6 @@
 import axios from '../../services/axios'
 
-const BASE_URL = '/api/v2/status-detail-ticket'
+const BASE_URL = '/api/v2/status-detail-tickets'
 
 export default {
   namespaced: true,
@@ -22,9 +22,9 @@ export default {
       Object.assign(state.statusDetailTickets[editedIndex], statusDetailTicket)
     },
     DELETE_STATUS_DETAIL_TICKET: (state, statusDetailTicket) => {
-      const editedIndex = state.statusDetailTickets.findIndex(
-        find => find.properties.id === statusDetailTicket.properties.id
-      )
+      const editedIndex = state.statusDetailTickets.findIndex(find => {
+        find.properties.id === statusDetailTicket.id
+      })
       state.statusDetailTickets.splice(editedIndex, 1)
     }
   },
@@ -46,7 +46,6 @@ export default {
         const { _data, success, error, message } = data
 
         if (success) {
-          console.log(_data.collections)
           commit('SET_STATUS_DETAIL_TICKET', _data.collections)
         } else {
           console.log(error)

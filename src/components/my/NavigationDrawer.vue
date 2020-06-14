@@ -135,7 +135,7 @@ export default {
               to: { name: 'SourceTicket' }
             },
             {
-              name: 'Estado Detalle Ticket',
+              name: 'Intento Contacto',
               to: { name: 'StatusDetailTicket' }
             },
             {
@@ -143,7 +143,7 @@ export default {
               to: { name: 'Role' }
             },
             {
-              name: 'Perfil plataforma',
+              name: 'Perfil Plataforma',
               to: { name: 'Profile' }
             }
           ]

@@ -111,7 +111,7 @@ const routes = [
             name: 'StatusDetailTicket',
             component: () =>
               import(
-                /* webpackChunkName: "EstadoDetalleTicket" */ '../views/maintenance/StatusDetailTicket.vue'
+                /* webpackChunkName: "IntentoContacto" */ '../views/maintenance/StatusDetailTicket.vue'
               ),
             meta: { requiresAuth: true }
           },
