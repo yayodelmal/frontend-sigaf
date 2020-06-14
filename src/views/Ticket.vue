@@ -1146,7 +1146,8 @@ export default {
       removeItem: 'ticket/deleteTicket',
       findTicket: 'ticket/findTicket',
       fetchTicketDetails: 'ticket/fetchTicketDetails',
-      postDetailTicket: 'detailTicket/postDetailTicket'
+      postDetailTicket: 'detailTicket/postDetailTicket',
+      clearTicketDetail: 'ticket/clearDetailTicket'
     }),
     /** category: null,
       categoryMassiveTicket: null,
@@ -1610,6 +1611,7 @@ export default {
       this.editedTicketItem = Object.assign({}, this.defaultTicketItem)
       this.showStatusDetailTicket = true
       this.showObservation = true
+      this.clearDetailTicket()
     },
     checkStepTwo() {
       this.$v.$reset()

@@ -194,6 +194,9 @@ export default {
           error: 'Error grave. Contacte al Administrador.'
         }
       }
+    },
+    clearDetailTicket: ({ commit }) => {
+      commit('SET_TICKET_DETAILS', [])
     }
   }
 }
