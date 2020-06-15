@@ -836,6 +836,7 @@
           @page-count="pageCount = $event"
           :loading="loading"
           loading-text="Cargando... por favor espere"
+          calculate-widths
         >
           <template
             v-slot:item.properties.id="{
@@ -1032,17 +1033,20 @@ export default {
       headers: [
         {
           text: '#',
-          align: 'start',
+          align: 'center',
           sortable: false,
+          width: 50,
           value: 'properties.id'
         },
         {
           text: 'RUT',
+          width: 120,
           value:
             'properties.courseRegisteredUser.registered_user.rut_registered_moodle'
         },
         {
           text: 'Nombre participante',
+          width: 250,
           value:
             'properties.courseRegisteredUser.registered_user.name_registered_moodle'
         },
@@ -1052,7 +1056,23 @@ export default {
           text: 'Prioridad',
           value: 'properties.priorityTicket.description'
         },
-        { text: 'Opciones', value: 'actions', sortable: false }
+        {
+          text: 'Intentos',
+          align: 'center',
+          value: 'relationships.numberOfElements'
+        },
+        {
+          text: 'Antigüedad (días)',
+          align: 'center',
+          value: 'properties.ageTicket'
+        },
+        {
+          text: 'Operador',
+          align: 'center',
+          width: 150,
+          value: 'properties.userAssigned.name'
+        },
+        { text: 'Opciones', value: 'actions', sortable: false, width: 90 }
       ],
       headersTicket: [
         {
