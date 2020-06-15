@@ -1575,6 +1575,7 @@ export default {
       this.source = null
       this.status = null
       this.priority = null
+      this.categoryMassiveTicket = null
       this.motive = null
       this.operator = null
       this.statusDetail = null
