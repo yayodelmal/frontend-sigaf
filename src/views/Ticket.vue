@@ -1147,18 +1147,8 @@ export default {
       findTicket: 'ticket/findTicket',
       fetchTicketDetails: 'ticket/fetchTicketDetails',
       postDetailTicket: 'detailTicket/postDetailTicket',
-      clearTicketDetail: 'ticket/clearDetailTicket'
+      clearTicketDetail: 'ticket/clearDetailTickets'
     }),
-    /** category: null,
-      categoryMassiveTicket: null,
-      priority: null,
-      type: null,
-      motive: null,
-      status: null,
-      source: null,
-      operator: null,
-      statusDetail: null, */
-
     setSource(value) {
       this.editedTicketItem.sourceTicket = value
       this.$v.source.$touch()
@@ -1398,6 +1388,7 @@ export default {
     },
     async fetchUserByRut() {
       this.searchRutLoading = true
+      this.clearTicketDetail()
 
       const vm = this
       setTimeout(async () => {
@@ -1611,7 +1602,7 @@ export default {
       this.editedTicketItem = Object.assign({}, this.defaultTicketItem)
       this.showStatusDetailTicket = true
       this.showObservation = true
-      this.clearDetailTicket()
+      this.clearTicketDetail()
     },
     checkStepTwo() {
       this.$v.$reset()

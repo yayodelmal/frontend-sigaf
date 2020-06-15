@@ -195,7 +195,7 @@ export default {
         }
       }
     },
-    clearDetailTicket: ({ commit }) => {
+    clearDetailTickets: ({ commit }) => {
       commit('SET_TICKET_DETAILS', [])
     }
   }
