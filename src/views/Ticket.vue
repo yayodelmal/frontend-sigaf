@@ -1580,6 +1580,7 @@ export default {
       this.statusDetail = null
       this.observation = ''
       this.selected = []
+      this.userRegisteredFiltered = []
       this.completeStepOne = false
       this.completeStepTwo = false
       this.completeStepThree = false
