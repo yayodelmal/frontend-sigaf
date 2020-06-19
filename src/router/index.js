@@ -125,15 +125,6 @@ const routes = [
             meta: { requiresAuth: true }
           },
           {
-            name: 'Activity',
-            path: 'actividad',
-            component: () =>
-              import(
-                /* webpackChunkName: "Actividad" */ '../views/maintenance/Activity.vue'
-              ),
-            meta: { requiresAuth: true }
-          },
-          {
             name: 'Role',
             path: 'rol',
             component: () =>
@@ -148,6 +139,15 @@ const routes = [
             component: () =>
               import(
                 /* webpackChunkName: "Perfil" */ '../views/maintenance/Profile.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'Category',
+            path: 'categoria',
+            component: () =>
+              import(
+                /*webpackChunkName: "Categoria" */ '../views/maintenance/Category.vue'
               ),
             meta: { requiresAuth: true }
           }
@@ -168,6 +168,15 @@ const routes = [
             component: () =>
               import(
                 /* webpackChunkName: "Perfil" */ '../views/configuration/LoadStudent.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'Activity',
+            path: 'actividad',
+            component: () =>
+              import(
+                /* webpackChunkName: "Actividad" */ '../views/maintenance/Activity.vue'
               ),
             meta: { requiresAuth: true }
           }
