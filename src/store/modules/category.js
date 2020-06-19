@@ -5,11 +5,15 @@ const BASE_URL = '/api/v2/categories'
 export default {
   namespaced: true,
   state: {
-    categories: []
+    categories: [],
+    categoriesByPlatform: []
   },
   mutations: {
     SET_CATEGORIES: (state, categories) => {
       state.categories = categories
+    },
+    SET_CATEGORIES_BY_PLATFORM: (state, categories) => {
+      state.categoriesByPlatform = categories
     }
   },
   getters: {
@@ -18,10 +22,16 @@ export default {
         return {
           id: properties.id,
           description: properties.description,
-          numberOfCourses: relationships.numberOfElements,
-          getLinkCourses: relationships.links.href
+          courses: {
+            numberOfElements: relationships.numberOfElements,
+            href: relationships.links.href
+          },
+          platorm: properties.platorm
         }
       })
+    },
+    categoriesByPlatform: state => {
+      return state.categoriesByPlatform
     }
   },
   actions: {
@@ -46,6 +56,38 @@ export default {
           message: data.message
         }
       }
+      // },
+      // getCategoriesByPlatform: async ({ commit }, link) => {
+      //   try {
+      //     const { status, data } = await axios.get(link)
+
+      //     if (status === 200) {
+      //       const { success, error, message } = data
+
+      //       if (success) {
+      //         console.log(data._data)
+      //         commit(
+      //           'SET_CATEGORIES_BY_PLATFORM',
+      //           data._data.relationships.collections.description
+      //         )
+      //       } else {
+      //         console.log(error)
+      //       }
+
+      //       return { success, message }
+      //     } else {
+      //       return {
+      //         success: data.success,
+      //         error: 'No se ha podido realizar la operación'
+      //       }
+      //     }
+      //   } catch (error) {
+      //     console.log(error)
+      //     return {
+      //       success: false,
+      //       error: 'Error grave. Contacte al Administrador.'
+      //     }
+      //   }
     }
   }
 }
