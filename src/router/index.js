@@ -147,7 +147,16 @@ const routes = [
             path: 'categoria',
             component: () =>
               import(
-                /*webpackChunkName: "Categoria" */ '../views/maintenance/Category.vue'
+                /*webpackChunkName: "Categoría" */ '../views/maintenance/Category.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'Course',
+            path: 'Curso',
+            component: () =>
+              import(
+                /*webpackChunkName: "Curso" */ '../views/maintenance/Course.vue'
               ),
             meta: { requiresAuth: true }
           }

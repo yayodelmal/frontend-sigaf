@@ -1,9 +1,9 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Categoría de curso">
+    <base-card color="blueS" class="px-5 py-3" title="Curso">
       <v-data-table
         :headers="headers"
-        :items="categoriesItems"
+        :items="items"
         class="elevation-1 grayS--text"
         :loading="loading"
         loading-text="Cargando... por favor espere"
@@ -23,7 +23,7 @@
                 <base-button
                   icon="mdi-plus-circle"
                   v-on="on"
-                  label="Crear categoria"
+                  label="Crear curso"
                 ></base-button>
               </template>
               <v-form>
@@ -49,15 +49,15 @@
                       <v-row>
                         <v-col cols="8">
                           <base-autocomplete
-                            v-model="platformModel"
-                            :items="platformItems"
-                            label="Plataforma"
+                            v-model="categoryModel"
+                            :items="categoryItems"
+                            label="Categoría"
                             item-value="id"
                             item-text="description"
                             return-object
-                            @change="$v.platformModel.$touch()"
-                            @blur="$v.platformModel.$touch()"
-                            :error-messages="platformErrors"
+                            @change="$v.sectionModel.$touch()"
+                            @blur="$v.sectionModel.$touch()"
+                            :error-messages="sectionErrors"
                           >
                           </base-autocomplete>
                         </v-col>
@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import Category from '../../models/Category'
+import Course from '../../models/Course'
 import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
@@ -151,7 +151,7 @@ export default {
       minLength: minLength(5),
       maxLength: maxLength(25)
     },
-    platformModel: {
+    categoryModel: {
       required
     }
   },
@@ -162,8 +162,8 @@ export default {
       { text: '#', value: 'id', class: 'redS--text' },
       { text: 'Nombre', value: 'description', class: 'redS--text' },
       {
-        text: 'Plataforma',
-        value: 'platform.description',
+        text: 'Categoría',
+        value: 'category.description',
         class: 'redS--text'
       },
       {
@@ -174,20 +174,20 @@ export default {
       }
     ],
     editedIndex: -1,
-    editedItem: new Category(),
-    defaultItem: new Category(),
+    editedItem: new Course(),
+    defaultItem: new Course(),
     message: '',
     successMessage: 'Operación realizada con éxito.',
     errorMEssage: 'Ha ocurrido un error.',
     snackbar: false,
     timeout: 3000,
     loading: false,
-    platformModel: null
+    platform: null
   }),
   computed: {
     ...mapGetters({
-      categoriesItems: 'category/categories',
-      platformsItems: 'platform/platforms'
+      coursesItems: 'course, courses',
+      categoriesItems: 'category/categories'
     }),
     descriptionErrors() {
       const errors = []
@@ -200,52 +200,52 @@ export default {
         errors.push('El nombre debe contener máximo 25 carácteres')
       return errors
     },
-    platformErrors() {
+    categoryErrors() {
       const errors = []
 
-      if (!this.$v.platformModel.$dirty) return errors
-      !this.$v.platformModel.required && errors.push('Es obligatorio.')
+      if (!this.$v.categoryModel.$dirty) return errors
+      !this.$v.categoryModel.required && errors.push('Es obligatorio.')
 
       return errors
     },
     formTitle() {
-      return this.editedIndex === -1 ? 'Crear categoría' : 'Editar categoría'
+      return this.editedIndex === -1 ? 'Crear curso' : 'Editar curso'
     },
     description() {
       return this.editedItem.description
     }
   },
   created() {
-    this.fetchDataCategories(), this.fetchDataPlatforms()
+    this.fetchDataCourses(), this.fetchDataCategories()
   },
   methods: {
     ...mapActions({
-      fetchCategoryItems: 'category/fetchCategories',
-      postItem: 'category/postCategory',
-      putItem: 'category/putCategory',
-      removeItem: 'category/deleteCategory',
-      fetchPlatformItems: 'platform/fetchPlatforms'
+      fetchCourseItems: 'course/fetchCourses',
+      postItem: 'course/postCourse',
+      putItem: 'course/putCourse',
+      removeItem: 'course/deleteCourse',
+      fetchCategoryItems: 'category/fetchCategories'
     }),
     editItem(item) {
-      this.editedIndex = this.categoriesItems.indexOf(item)
+      this.editedIndex = this.coursesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
       this.dialog = true
 
-      this.fetchPlatformItems(1)
+      this.fetchCategoryItems(1)
     },
-    async fetchDataCategories() {
+    async fetchDataCourses() {
       this.loading = true
-      const { success, message } = await this.fetchCategoryItems()
+      const { success, message } = await this.fetchCourseItems()
       if (!success) {
         this.snackbar = true
         this.message = message
       }
       this.loading = false
     },
-    async fetchDataPlatforms() {
+    async fetchDataCategories() {
       this.loading = true
-      const { success, message } = await this.fetchPlatformItems()
+      const { success, message } = await this.fetchCategoryItems()
       console.log()
       if (!success) {
         this.snackbar = true
@@ -254,7 +254,7 @@ export default {
       this.loading = false
     },
     deleteItem(item) {
-      this.editedIndex = this.categoriesItems.indexOf(item)
+      this.editedIndex = this.coursesItems.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogConfirm = true
     },

@@ -56,38 +56,38 @@ export default {
           message: data.message
         }
       }
-      // },
-      // getCategoriesByPlatform: async ({ commit }, link) => {
-      //   try {
-      //     const { status, data } = await axios.get(link)
+    },
+    getCategoriesByPlatform: async ({ commit }, link) => {
+      try {
+        const { status, data } = await axios.get(link)
 
-      //     if (status === 200) {
-      //       const { success, error, message } = data
+        if (status === 200) {
+          const { success, error, message } = data
 
-      //       if (success) {
-      //         console.log(data._data)
-      //         commit(
-      //           'SET_CATEGORIES_BY_PLATFORM',
-      //           data._data.relationships.collections.description
-      //         )
-      //       } else {
-      //         console.log(error)
-      //       }
+          if (success) {
+            console.log(data._data)
+            commit(
+              'SET_CATEGORIES_BY_PLATFORM',
+              data._data.relationships.collections.description
+            )
+          } else {
+            console.log(error)
+          }
 
-      //       return { success, message }
-      //     } else {
-      //       return {
-      //         success: data.success,
-      //         error: 'No se ha podido realizar la operación'
-      //       }
-      //     }
-      //   } catch (error) {
-      //     console.log(error)
-      //     return {
-      //       success: false,
-      //       error: 'Error grave. Contacte al Administrador.'
-      //     }
-      //   }
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
     }
   }
 }

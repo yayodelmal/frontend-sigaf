@@ -145,6 +145,10 @@ export default {
             {
               name: 'Categoría',
               to: { name: 'Category' }
+            },
+            {
+              name: 'Curso',
+              to: { name: 'Course' }
             }
           ]
         },
