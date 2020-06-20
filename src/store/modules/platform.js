@@ -18,7 +18,7 @@ export default {
   },
   getters: {
     platforms: state => {
-      return state.plaftorms.map(({ properties, relationships }) => {
+      return state.platforms.map(({ properties, relationships }) => {
         return {
           id: properties.id,
           description: properties.description,

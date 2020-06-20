@@ -182,7 +182,7 @@ export default {
     snackbar: false,
     timeout: 3000,
     loading: false,
-    platform: null
+    categoryModel: null
   }),
   computed: {
     ...mapGetters({

@@ -50,7 +50,7 @@
                         <v-col cols="8">
                           <base-autocomplete
                             v-model="platformModel"
-                            :items="platformItems"
+                            :items="platformsItems"
                             label="Plataforma"
                             item-value="id"
                             item-text="description"
@@ -216,7 +216,8 @@ export default {
     }
   },
   created() {
-    this.fetchDataCategories(), this.fetchDataPlatforms()
+    this.fetchDataCategories()
+    this.fetchDataPlatforms()
   },
   methods: {
     ...mapActions({
@@ -231,8 +232,6 @@ export default {
 
       this.editedItem = Object.assign({}, item)
       this.dialog = true
-
-      this.fetchPlatformItems(1)
     },
     async fetchDataCategories() {
       this.loading = true
