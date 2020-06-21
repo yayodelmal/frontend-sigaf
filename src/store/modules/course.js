@@ -18,6 +18,9 @@ export default {
     },
     SET_COURSES_BY_CATEGORY: (state, courses) => {
       state.coursesByCategory = courses
+    },
+    POST_COURSE: (state, course) => {
+      state.course.push(course)
     }
   },
   getters: {
@@ -121,6 +124,29 @@ export default {
         console.log(error)
         return {
           success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    postCourse: async ({ commit }, course) => {
+      try {
+        const { data } = await axios.post('/api/v2/courses/post', course)
+
+        console.log(course)
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('POST_COURSE', _data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
           error: 'Error grave. Contacte al Administrador.'
         }
       }

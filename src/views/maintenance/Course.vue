@@ -3,7 +3,7 @@
     <base-card color="blueS" class="px-5 py-3" title="Curso">
       <v-data-table
         :headers="headers"
-        :items="items"
+        :items="coursesItems"
         class="elevation-1 grayS--text"
         :loading="loading"
         loading-text="Cargando... por favor espere"
@@ -50,16 +50,26 @@
                         <v-col cols="8">
                           <base-autocomplete
                             v-model="categoryModel"
-                            :items="categoryItems"
+                            :items="categoriesItems"
                             label="Categoría"
                             item-value="id"
                             item-text="description"
                             return-object
-                            @change="$v.sectionModel.$touch()"
-                            @blur="$v.sectionModel.$touch()"
-                            :error-messages="sectionErrors"
-                          >
-                          </base-autocomplete>
+                            @change="setCategory($event)"
+                            @blur="$v.categoryModel.$touch()"
+                            :error-messages="categoryErrors"
+                          ></base-autocomplete>
+                        </v-col>
+                        <v-col cols="4">
+                          <base-textfield
+                            v-model="editedItem.idMoodle"
+                            label="Id Moodle"
+                            required
+                            clearable
+                            @input="$v.idMoodle.$touch()"
+                            @blur="$v.idMoodle.$touch()"
+                            :error-messages="idMoodleErrors"
+                          ></base-textfield>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -140,7 +150,14 @@
 <script>
 import Course from '../../models/Course'
 import { validationMixin } from 'vuelidate'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+import {
+  required,
+  minLength,
+  maxLength,
+  numeric,
+  minValue,
+  maxValue
+} from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
@@ -148,11 +165,16 @@ export default {
   validations: {
     description: {
       required,
-      minLength: minLength(5),
-      maxLength: maxLength(25)
+      minLength: minLength(10),
+      maxLength: maxLength(150)
     },
     categoryModel: {
       required
+    },
+    idMoodle: {
+      numeric,
+      minValue: minValue(100),
+      maxValue: maxValue(999999)
     }
   },
   data: () => ({
@@ -186,7 +208,7 @@ export default {
   }),
   computed: {
     ...mapGetters({
-      coursesItems: 'course, courses',
+      coursesItems: 'course/courses',
       categoriesItems: 'category/categories'
     }),
     descriptionErrors() {
@@ -195,9 +217,9 @@ export default {
       if (!this.$v.description.$dirty) return errors
       !this.$v.description.required && errors.push('El nombre es obligatorio.')
       !this.$v.description.minLength &&
-        errors.push('El nombre debe contener al menos 5 carácteres')
+        errors.push('El nombre debe contener al menos 10 carácteres')
       !this.$v.description.maxLength &&
-        errors.push('El nombre debe contener máximo 25 carácteres')
+        errors.push('El nombre debe contener máximo 100 carácteres')
       return errors
     },
     categoryErrors() {
@@ -208,11 +230,25 @@ export default {
 
       return errors
     },
+    idMoodleErrors() {
+      const errors = []
+
+      if (!this.$v.idMoodle.$dirty) return errors
+      !this.$v.idMoodle.numeric && errors.push('Debe ser un número válido.')
+      !this.$v.idMoodle.minValue &&
+        errors.push('Debe contener al menos 3 cifras.')
+      !this.$v.idMoodle.maxValue &&
+        errors.push('Debe contener máximo 6 cifras.')
+      return errors
+    },
     formTitle() {
       return this.editedIndex === -1 ? 'Crear curso' : 'Editar curso'
     },
     description() {
       return this.editedItem.description
+    },
+    idMoodle() {
+      return this.editedItem.idMoodle
     }
   },
   created() {
@@ -226,6 +262,11 @@ export default {
       removeItem: 'course/deleteCourse',
       fetchCategoryItems: 'category/fetchCategories'
     }),
+    setCategory(value) {
+      console.log(value)
+      this.editedItem.category = value
+      this.$v.categoryModel.$touch()
+    },
     editItem(item) {
       this.editedIndex = this.coursesItems.indexOf(item)
 
@@ -289,7 +330,12 @@ export default {
             this.message = message
           }
         } else {
-          const { success, message } = await this.postItem(this.editedItem)
+          let dataStore = Object.assign(this.editedItem, {
+            category_id: this.editedItem.category.id,
+            status: 1
+          })
+
+          const { success, message } = await this.postItem(dataStore)
           if (success) {
             this.snackbar = true
             this.message = this.successMessage
@@ -311,6 +357,7 @@ export default {
     clear() {
       this.$v.$reset()
       this.editedItem = Object.assign({}, this.defaultItem)
+      this.categoryModel = null
       this.editedIndex = -1
     }
   }
