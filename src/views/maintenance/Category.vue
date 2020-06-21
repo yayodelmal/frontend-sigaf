@@ -23,7 +23,7 @@
                 <base-button
                   icon="mdi-plus-circle"
                   v-on="on"
-                  label="Crear categoria"
+                  label="Crear categoría"
                 ></base-button>
               </template>
               <v-form>
@@ -55,11 +55,22 @@
                             item-value="id"
                             item-text="description"
                             return-object
-                            @change="$v.platformModel.$touch()"
+                            @change="setPlatform($event)"
                             @blur="$v.platformModel.$touch()"
                             :error-messages="platformErrors"
                           >
                           </base-autocomplete>
+                        </v-col>
+                        <v-col cols="4">
+                          <base-textfield
+                            v-model="editedItem.idMoodle"
+                            label="Id Moodle"
+                            required
+                            clearable
+                            @input="$v.idMoodle.$touch()"
+                            @blur="$v.idMoodle.$touch()"
+                            :error-messages="idMoodleErrors"
+                          ></base-textfield>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -140,7 +151,14 @@
 <script>
 import Category from '../../models/Category'
 import { validationMixin } from 'vuelidate'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+import {
+  required,
+  minLength,
+  maxLength,
+  numeric,
+  minValue,
+  maxValue
+} from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
@@ -149,10 +167,15 @@ export default {
     description: {
       required,
       minLength: minLength(5),
-      maxLength: maxLength(25)
+      maxLength: maxLength(150)
     },
     platformModel: {
       required
+    },
+    idMoodle: {
+      numeric,
+      minValue: minValue(100),
+      maxValue: maxValue(999999)
     }
   },
   data: () => ({
@@ -208,16 +231,29 @@ export default {
 
       return errors
     },
+    idMoodleErrors() {
+      const errors = []
+
+      if (!this.$v.idMoodle.$dirty) return errors
+      !this.$v.idMoodle.numeric && errors.push('Debe ser un número válido.')
+      !this.$v.idMoodle.minValue &&
+        errors.push('Debe contener al menos 3 cifras.')
+      !this.$v.idMoodle.maxValue &&
+        errors.push('Debe contener máximo 6 cifras.')
+      return errors
+    },
     formTitle() {
       return this.editedIndex === -1 ? 'Crear categoría' : 'Editar categoría'
     },
     description() {
       return this.editedItem.description
+    },
+    idMoodle() {
+      return this.editedItem.idMoodle
     }
   },
   created() {
-    this.fetchDataCategories()
-    this.fetchDataPlatforms()
+    this.fetchDataCategories(), this.fetchDataPlatforms()
   },
   methods: {
     ...mapActions({
@@ -227,7 +263,14 @@ export default {
       removeItem: 'category/deleteCategory',
       fetchPlatformItems: 'platform/fetchPlatforms'
     }),
+    setPlatform(value) {
+      console.log(value)
+      this.editedItem.platform = value
+      this.$v.platformModel.$touch()
+    },
     editItem(item) {
+      //this.platform = item.platform
+
       this.editedIndex = this.categoriesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
@@ -278,8 +321,12 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
+        let dataStore = Object.assign(this.editedItem, {
+          platform_id: this.editedItem.platform.id,
+          status: 1
+        })
         if (this.editedIndex > -1) {
-          const { success, message } = await this.putItem(this.editedItem)
+          const { success, message } = await this.putItem(dataStore)
           if (success) {
             this.snackbar = true
             this.message = this.successMessage
@@ -288,7 +335,7 @@ export default {
             this.message = message
           }
         } else {
-          const { success, message } = await this.postItem(this.editedItem)
+          const { success, message } = await this.postItem(dataStore)
           if (success) {
             this.snackbar = true
             this.message = this.successMessage
@@ -310,6 +357,7 @@ export default {
     clear() {
       this.$v.$reset()
       this.editedItem = Object.assign({}, this.defaultItem)
+      this.platformModel = null
       this.editedIndex = -1
     }
   }

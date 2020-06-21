@@ -268,12 +268,14 @@ export default {
       this.$v.categoryModel.$touch()
     },
     editItem(item) {
+      this.category = item.category
+
       this.editedIndex = this.coursesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
       this.dialog = true
 
-      this.fetchCategoryItems(1)
+      this.fetchCategoryItems(this.category)
     },
     async fetchDataCourses() {
       this.loading = true
@@ -320,8 +322,12 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
+        let dataStore = Object.assign(this.editedItem, {
+          category_id: this.editedItem.category.id,
+          status: 1
+        })
         if (this.editedIndex > -1) {
-          const { success, message } = await this.putItem(this.editedItem)
+          const { success, message } = await this.putItem(dataStore)
           if (success) {
             this.snackbar = true
             this.message = this.successMessage
@@ -330,11 +336,6 @@ export default {
             this.message = message
           }
         } else {
-          let dataStore = Object.assign(this.editedItem, {
-            category_id: this.editedItem.category.id,
-            status: 1
-          })
-
           const { success, message } = await this.postItem(dataStore)
           if (success) {
             this.snackbar = true

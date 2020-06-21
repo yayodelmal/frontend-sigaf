@@ -20,7 +20,19 @@ export default {
       state.coursesByCategory = courses
     },
     POST_COURSE: (state, course) => {
-      state.course.push(course)
+      state.courses.push(course)
+    },
+    PUT_COURSE: (state, course) => {
+      const editedIndex = state.courses.findIndex(
+        find => find.properties.id === course.properties.id
+      )
+      Object.assign(state.courses[editedIndex], course)
+    },
+    DELETE_COURSE: (state, course) => {
+      const editedIndex = state.courses.findIndex(
+        find => find.properties.id === course.id
+      )
+      state.courses.splice(editedIndex, 1)
     }
   },
   getters: {
@@ -30,8 +42,9 @@ export default {
           return {
             id: properties.id,
             description: properties.description,
-            status: properties.status,
-            category: properties.category
+            idCourseMoodle: properties.idCourseMoodle,
+            category: properties.category,
+            status: properties.status
           }
         })
         .filter(course => {
@@ -147,6 +160,64 @@ export default {
         const { data } = error.response
         return {
           success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    putCourse: async ({ commit }, course) => {
+      try {
+        const { data, status } = await axios.put(
+          `${BASE_URL}/${course.id}`,
+          course
+        )
+        if (status === 200) {
+          const { _data, success, error, message } = data
+
+          if (success) {
+            commit('PUT_COURSE', _data)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    deleteCourse: async ({ commit }, course) => {
+      try {
+        const { status, data } = await axios.delete(`${BASE_URL}/${course.id}`)
+
+        if (status === 200) {
+          const { success, error, message } = data
+
+          if (success) {
+            commit('DELETE_COURSE', course)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
           error: 'Error grave. Contacte al Administrador.'
         }
       }
