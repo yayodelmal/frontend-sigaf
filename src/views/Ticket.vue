@@ -1397,7 +1397,7 @@ export default {
       else return 'error'
     },
     getStatusTicket(status) {
-      if (status === 'Abierto') return 'mdi-lock-open'
+      if (status === 'Abierto') return 'mdi-lock-open-outline'
       else if (status === 'Cerrado') return 'mdi-lock'
       else return 'error'
     },

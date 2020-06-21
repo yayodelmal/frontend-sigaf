@@ -170,6 +170,15 @@ const routes = [
                 /* webpackChunkName: "Perfil" */ '../views/configuration/LoadStudent.vue'
               ),
             meta: { requiresAuth: true }
+          },
+          {
+            name: 'BuildClassrooms',
+            path: 'conformar-aulas',
+            component: () =>
+              import(
+                /* webpackChunkName: "Perfil" */ '../views/configuration/BuildClassroom.vue'
+              ),
+            meta: { requiresAuth: true }
           }
         ]
       }

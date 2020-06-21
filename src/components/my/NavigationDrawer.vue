@@ -151,7 +151,10 @@ export default {
         {
           name: 'Configuración',
           icon: 'mdi-cog-outline',
-          links: [{ name: 'Cargar estudiantes', to: { name: 'LoadStudents' } }]
+          links: [
+            { name: 'Matrícula', to: { name: 'LoadStudents' } },
+            { name: 'Conformar aulas', to: { name: 'BuildClassrooms' } }
+          ]
         }
       ]
     }

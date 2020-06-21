@@ -10,6 +10,16 @@ export default {
   mutations: {
     SET_COURSE_REGISTERED_USERS: (state, courseRegisteredUsers) => {
       state.courseRegisteredUsers = courseRegisteredUsers
+    },
+    PUT_COURSE_REGISTERED_USER: (state, courseRegisteredUser) => {
+      const editedIndex = state.courseRegisteredUsers.findIndex(
+        find => find.id === courseRegisteredUser.id
+      )
+
+      Object.assign(
+        state.courseRegisteredUsers[editedIndex],
+        courseRegisteredUser
+      )
     }
   },
   getters: {
@@ -38,6 +48,37 @@ export default {
         return {
           success: data.success,
           message: data.message
+        }
+      }
+    },
+    putCourseRegisteredUser: async ({ commit }, courseRegisteredUser) => {
+      try {
+        const { data, status } = await axios.put(
+          `/api/v2/course-registered-user/classroom/${courseRegisteredUser.id}`,
+          courseRegisteredUser
+        )
+
+        if (status === 200) {
+          const { _data, success, error, message } = data
+
+          if (success) {
+            commit('PUT_COURSE_REGISTERED_USER', _data)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
         }
       }
     }

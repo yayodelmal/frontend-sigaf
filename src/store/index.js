@@ -12,6 +12,7 @@ import activity from './modules/activity'
 import course from './modules/course'
 import ticket from './modules/ticket'
 import category from './modules/category'
+import registeredUser from './modules/registeredUser'
 import auth from './modules/auth'
 import role from './modules/role'
 import profile from './modules/profile'
@@ -39,6 +40,7 @@ export default new Vuex.Store({
     auth,
     role,
     profile,
+    registeredUser,
     user,
     detailTicket,
     statusDetailTicket,
