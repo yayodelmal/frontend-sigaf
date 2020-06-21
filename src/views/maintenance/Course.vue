@@ -268,7 +268,7 @@ export default {
       this.$v.categoryModel.$touch()
     },
     editItem(item) {
-      this.category = item.category
+      //this.category = item.category
 
       this.editedIndex = this.coursesItems.indexOf(item)
 
