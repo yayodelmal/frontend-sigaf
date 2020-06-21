@@ -127,10 +127,6 @@ export default {
               to: { name: 'Section' }
             },
             {
-              name: 'Actividades',
-              to: { name: 'Activity' }
-            },
-            {
               name: 'Origen Ticket',
               to: { name: 'SourceTicket' }
             },
@@ -145,6 +141,14 @@ export default {
             {
               name: 'Perfil Plataforma',
               to: { name: 'Profile' }
+            },
+            {
+              name: 'Categoría',
+              to: { name: 'Category' }
+            },
+            {
+              name: 'Curso',
+              to: { name: 'Course' }
             }
           ]
         },
@@ -153,7 +157,11 @@ export default {
           icon: 'mdi-cog-outline',
           links: [
             { name: 'Matrícula', to: { name: 'LoadStudents' } },
-            { name: 'Conformar aulas', to: { name: 'BuildClassrooms' } }
+            { name: 'Conformar aulas', to: { name: 'BuildClassrooms' } },
+            {
+              name: 'Actividades',
+              to: { name: 'Activity' }
+            }
           ]
         }
       ]

@@ -18,6 +18,21 @@ export default {
     },
     SET_COURSES_BY_CATEGORY: (state, courses) => {
       state.coursesByCategory = courses
+    },
+    POST_COURSE: (state, course) => {
+      state.courses.push(course)
+    },
+    PUT_COURSE: (state, course) => {
+      const editedIndex = state.courses.findIndex(
+        find => find.properties.id === course.properties.id
+      )
+      Object.assign(state.courses[editedIndex], course)
+    },
+    DELETE_COURSE: (state, course) => {
+      const editedIndex = state.courses.findIndex(
+        find => find.properties.id === course.id
+      )
+      state.courses.splice(editedIndex, 1)
     }
   },
   getters: {
@@ -27,8 +42,9 @@ export default {
           return {
             id: properties.id,
             description: properties.description,
-            status: properties.status,
-            category: properties.category
+            idCourseMoodle: properties.idCourseMoodle,
+            category: properties.category,
+            status: properties.status
           }
         })
         .filter(course => {
@@ -106,6 +122,87 @@ export default {
               'SET_COURSES_BY_CATEGORY',
               data._data.relationships.collections.data
             )
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    postCourse: async ({ commit }, course) => {
+      try {
+        const { data } = await axios.post('/api/v2/courses/post', course)
+
+        console.log(course)
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('POST_COURSE', _data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    putCourse: async ({ commit }, course) => {
+      try {
+        const { data, status } = await axios.put(
+          `${BASE_URL}/${course.id}`,
+          course
+        )
+        if (status === 200) {
+          const { _data, success, error, message } = data
+
+          if (success) {
+            commit('PUT_COURSE', _data)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    deleteCourse: async ({ commit }, course) => {
+      try {
+        const { status, data } = await axios.delete(`${BASE_URL}/${course.id}`)
+
+        if (status === 200) {
+          const { success, error, message } = data
+
+          if (success) {
+            commit('DELETE_COURSE', course)
           } else {
             console.log(error)
           }

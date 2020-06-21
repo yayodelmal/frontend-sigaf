@@ -20,6 +20,7 @@ import user from './modules/user'
 import statusDetailTicket from './modules/statusDetailTicket'
 import detailTicket from './modules/detailTicket'
 import courseRegisteredUser from './modules/courseRegisteredUser'
+import platform from './modules/platform'
 
 Vue.use(Vuex)
 
@@ -44,6 +45,7 @@ export default new Vuex.Store({
     user,
     detailTicket,
     statusDetailTicket,
-    courseRegisteredUser
+    courseRegisteredUser,
+    platform
   }
 })

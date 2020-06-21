@@ -1,9 +1,9 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Actividades">
+    <base-card color="blueS" class="px-5 py-3" title="Curso">
       <v-data-table
         :headers="headers"
-        :items="activitiesFiltered"
+        :items="coursesItems"
         class="elevation-1 grayS--text"
         :loading="loading"
         loading-text="Cargando... por favor espere"
@@ -18,23 +18,14 @@
         <template v-slot:top>
           <v-toolbar flat color="white">
             <v-spacer></v-spacer>
-            <base-autocomplete
-              v-model="category"
-              :items="categoryItems"
-              label="Categoría"
-              item-value="id"
-              item-text="description"
-              return-object
-            >
-            </base-autocomplete>
             <v-dialog v-model="dialog" max-width="500px" persistent>
-              <!-- <template v-slot:activator="{ on }">
+              <template v-slot:activator="{ on }">
                 <base-button
                   icon="mdi-plus-circle"
                   v-on="on"
-                  label="Crear actividades"
+                  label="Crear curso"
                 ></base-button>
-              </template> -->
+              </template>
               <v-form>
                 <v-card>
                   <v-card-title>
@@ -48,7 +39,7 @@
                             v-model="editedItem.description"
                             label="Nombre"
                             required
-                            readonly
+                            clearable
                             @input="$v.description.$touch()"
                             @blur="$v.description.$touch()"
                             :error-messages="descriptionErrors"
@@ -56,30 +47,29 @@
                         </v-col>
                       </v-row>
                       <v-row>
-                        <v-col cols="4">
-                          <base-textfield
-                            v-model="editedItem.weighing"
-                            label="Ponderación (%)"
-                            required
-                            clearable
-                            @input="$v.weighing.$touch()"
-                            @blur="$v.weighing.$touch()"
-                            :error-messages="weighingErrors"
-                          ></base-textfield>
-                        </v-col>
                         <v-col cols="8">
                           <base-autocomplete
-                            v-model="sectionModel"
-                            :items="sectionItems"
-                            label="Sección"
+                            v-model="categoryModel"
+                            :items="categoriesItems"
+                            label="Categoría"
                             item-value="id"
                             item-text="description"
                             return-object
-                            @change="$v.sectionModel.$touch()"
-                            @blur="$v.sectionModel.$touch()"
-                            :error-messages="sectionErrors"
-                          >
-                          </base-autocomplete>
+                            @change="setCategory($event)"
+                            @blur="$v.categoryModel.$touch()"
+                            :error-messages="categoryErrors"
+                          ></base-autocomplete>
+                        </v-col>
+                        <v-col cols="4">
+                          <base-textfield
+                            v-model="editedItem.idMoodle"
+                            label="Id Moodle"
+                            required
+                            clearable
+                            @input="$v.idMoodle.$touch()"
+                            @blur="$v.idMoodle.$touch()"
+                            :error-messages="idMoodleErrors"
+                          ></base-textfield>
                         </v-col>
                       </v-row>
                     </v-container>
@@ -112,7 +102,7 @@
             </template>
             <span>Editar</span>
           </v-tooltip>
-          <!-- <v-tooltip color="blueS" bottom>
+          <v-tooltip color="blueS" bottom>
             <template v-slot:activator="{ on }">
               <v-btn icon text v-on="on">
                 <v-icon @click.prevent="deleteItem(item)">
@@ -121,7 +111,7 @@
               </v-btn>
             </template>
             <span>Eliminar</span>
-          </v-tooltip> -->
+          </v-tooltip>
         </template>
       </v-data-table>
     </base-card>
@@ -158,25 +148,33 @@
 </template>
 
 <script>
-import Activity from '../../models/Activity'
+import Course from '../../models/Course'
 import { validationMixin } from 'vuelidate'
-import { required, numeric, minValue, maxValue } from 'vuelidate/lib/validators'
+import {
+  required,
+  minLength,
+  maxLength,
+  numeric,
+  minValue,
+  maxValue
+} from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
   mixins: [validationMixin],
   validations: {
     description: {
-      required
-    },
-    weighing: {
       required,
-      numeric,
-      minValue: minValue(0),
-      maxValue: maxValue(100)
+      minLength: minLength(10),
+      maxLength: maxLength(150)
     },
-    sectionModel: {
+    categoryModel: {
       required
+    },
+    idMoodle: {
+      numeric,
+      minValue: minValue(100),
+      maxValue: maxValue(999999)
     }
   },
   data: () => ({
@@ -185,8 +183,11 @@ export default {
     headers: [
       { text: '#', value: 'id', class: 'redS--text' },
       { text: 'Nombre', value: 'description', class: 'redS--text' },
-      { text: 'Ponderación', value: 'weighing', class: 'redS--text' },
-      { text: 'Sección', value: 'section.description', class: 'redS--text' },
+      {
+        text: 'Categoría',
+        value: 'category.description',
+        class: 'redS--text'
+      },
       {
         text: 'Acciones',
         value: 'actions',
@@ -195,115 +196,87 @@ export default {
       }
     ],
     editedIndex: -1,
-    editedItem: new Activity(),
-    defaultItem: new Activity(),
+    editedItem: new Course(),
+    defaultItem: new Course(),
     message: '',
     successMessage: 'Operación realizada con éxito.',
     errorMEssage: 'Ha ocurrido un error.',
     snackbar: false,
     timeout: 3000,
     loading: false,
-    activitiesFiltered: [],
-    category: null,
-    sectionModel: null
+    categoryModel: null
   }),
-  watch: {
-    category() {
-      if (this.category !== null) {
-        this.filterActivitiesByCategories()
-      }
-    }
-  },
   computed: {
     ...mapGetters({
-      activitiesItems: 'activity/activities',
       coursesItems: 'course/courses',
-      coursesByCategory: 'course/coursesByCategory',
-      sectionItems: 'section/sections',
-      categoryItems: 'category/categories'
+      categoriesItems: 'category/categories'
     }),
-    activitiesByCategory() {
-      if (this.category === null) return []
-
-      return this.activitiesItems.filter(activity => {
-        activity.course.id === this.courses[0].id
-      })
-    },
     descriptionErrors() {
       const errors = []
 
       if (!this.$v.description.$dirty) return errors
       !this.$v.description.required && errors.push('El nombre es obligatorio.')
+      !this.$v.description.minLength &&
+        errors.push('El nombre debe contener al menos 10 carácteres')
+      !this.$v.description.maxLength &&
+        errors.push('El nombre debe contener máximo 100 carácteres')
       return errors
     },
-    weighingErrors() {
+    categoryErrors() {
       const errors = []
 
-      if (!this.$v.weighing.$dirty) return errors
-      !this.$v.weighing.required && errors.push('Es obligatorio.')
-      !this.$v.weighing.numeric && errors.push('Debe ser un número válido.')
-      !this.$v.weighing.minValue && errors.push('Debe ser mayor que 0%.')
-      !this.$v.weighing.maxValue && errors.push('Debe ser menor que 100%.')
+      if (!this.$v.categoryModel.$dirty) return errors
+      !this.$v.categoryModel.required && errors.push('Es obligatorio.')
+
       return errors
     },
-    sectionErrors() {
+    idMoodleErrors() {
       const errors = []
 
-      if (!this.$v.sectionModel.$dirty) return errors
-      !this.$v.sectionModel.required && errors.push('Es obligatorio.')
-
+      if (!this.$v.idMoodle.$dirty) return errors
+      !this.$v.idMoodle.numeric && errors.push('Debe ser un número válido.')
+      !this.$v.idMoodle.minValue &&
+        errors.push('Debe contener al menos 3 cifras.')
+      !this.$v.idMoodle.maxValue &&
+        errors.push('Debe contener máximo 6 cifras.')
       return errors
     },
     formTitle() {
-      return this.editedIndex === -1 ? 'Crear actividad' : 'Editar actividad'
+      return this.editedIndex === -1 ? 'Crear curso' : 'Editar curso'
     },
     description() {
       return this.editedItem.description
     },
-    weighing() {
-      return this.editedItem.weighing
+    idMoodle() {
+      return this.editedItem.idMoodle
     }
   },
   created() {
-    this.fetchDataActivities()
     this.fetchDataCourses()
-    this.fetchDataSections()
     this.fetchDataCategories()
   },
   methods: {
     ...mapActions({
-      fetchActivityItems: 'activity/fetchActivities',
       fetchCourseItems: 'course/fetchCourses',
-      fetchCourseByCategory: 'course/getCoursesByCategory',
-      fetchSectionItems: 'section/fetchSections',
-      fetchCategoryItems: 'category/fetchCategories',
-      putItem: 'activity/putActivity'
+      postItem: 'course/postCourse',
+      putItem: 'course/putCourse',
+      removeItem: 'course/deleteCourse',
+      fetchCategoryItems: 'category/fetchCategories'
     }),
+    setCategory(value) {
+      console.log(value)
+      this.editedItem.category = value
+      this.$v.categoryModel.$touch()
+    },
     editItem(item) {
-      this.editedIndex = this.activitiesFiltered.indexOf(item)
+      console.log('ITEM', item)
+      this.editedIndex = this.coursesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
-      this.dialog = true
-    },
-    async filterActivitiesByCategories() {
-      if (this.category !== null) {
-        await this.fetchCourseByCategory(this.category.getLinkCourses)
 
-        this.coursesByCategory.forEach(course => {
-          this.activitiesFiltered = this.activitiesItems.filter(activity => {
-            return activity.course.id === course.properties.id
-          })
-        })
-      }
-    },
-    async fetchDataActivities() {
-      this.loading = true
-      const { success, message } = await this.fetchActivityItems()
-      if (!success) {
-        this.snackbar = true
-        this.message = message
-      }
-      this.loading = false
+      this.categoryModel = item.category.properties
+
+      this.dialog = true
     },
     async fetchDataCourses() {
       this.loading = true
@@ -324,32 +297,54 @@ export default {
       }
       this.loading = false
     },
-    async fetchDataSections() {
-      this.loading = true
-      const { success, message } = await this.fetchSectionItems()
-      if (!success) {
+    deleteItem(item) {
+      this.editedIndex = this.coursesItems.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.dialogConfirm = true
+    },
+    async confirmDelete() {
+      const { success, message } = await this.removeItem(this.editedItem)
+
+      if (success) {
+        this.snackbar = true
+        this.message = this.successMessage
+      } else {
         this.snackbar = true
         this.message = message
       }
-      this.loading = false
+      this.closeConfirmDelete()
     },
-    deleteItem(item) {
-      this.editedIndex = this.items.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialogConfirm = true
+    closeConfirmDelete() {
+      this.dialogConfirm = false
+      setTimeout(() => {
+        this.clear()
+      }, 300)
     },
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
-        this.editedItem.section = { ...this.sectionModel }
-        const { success, message } = await this.putItem(this.editedItem)
-        if (success) {
-          this.snackbar = true
-          this.message = this.successMessage
-          this.filterActivitiesByCategories()
+        let dataStore = Object.assign(this.editedItem, {
+          category_id: this.editedItem.category.id,
+          status: 1
+        })
+        if (this.editedIndex > -1) {
+          const { success, message } = await this.putItem(dataStore)
+          if (success) {
+            this.snackbar = true
+            this.message = this.successMessage
+          } else {
+            this.snackbar = true
+            this.message = message
+          }
         } else {
-          this.snackbar = true
-          this.message = message
+          const { success, message } = await this.postItem(dataStore)
+          if (success) {
+            this.snackbar = true
+            this.message = this.successMessage
+          } else {
+            this.snackbar = true
+            this.message = message
+          }
         }
         this.close()
       }
@@ -362,11 +357,10 @@ export default {
       }, 300)
     },
     clear() {
-      console.log(this.defaultItem)
       this.$v.$reset()
       this.editedItem = Object.assign({}, this.defaultItem)
+      this.categoryModel = null
       this.editedIndex = -1
-      this.sectionModel = null
     }
   }
 }
