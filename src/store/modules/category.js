@@ -42,7 +42,7 @@ export default {
             href: relationships.links.href
           },
           idCategoryMoodle: properties.idCategoryMoodle,
-          platorm: properties.platorm,
+          platform: properties.platform,
           status: properties.status
         }
       })

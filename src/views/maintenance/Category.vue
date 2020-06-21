@@ -253,7 +253,8 @@ export default {
     }
   },
   created() {
-    this.fetchDataCategories(), this.fetchDataPlatforms()
+    this.fetchDataCategories()
+    this.fetchDataPlatforms()
   },
   methods: {
     ...mapActions({
@@ -269,11 +270,14 @@ export default {
       this.$v.platformModel.$touch()
     },
     editItem(item) {
-      //this.platform = item.platform
-
       this.editedIndex = this.categoriesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
+
+      console.log('EDITEDITEM', this.editedItem)
+
+      this.platformModel = item.platform.properties
+
       this.dialog = true
     },
     async fetchDataCategories() {
@@ -322,9 +326,10 @@ export default {
       this.$v.$touch()
       if (!this.$v.$error) {
         let dataStore = Object.assign(this.editedItem, {
-          platform_id: this.editedItem.platform.id,
+          platform_id: this.editedItem.platform.properties.id,
           status: 1
         })
+        console.log('DATASTORE', dataStore)
         if (this.editedIndex > -1) {
           const { success, message } = await this.putItem(dataStore)
           if (success) {

@@ -252,7 +252,8 @@ export default {
     }
   },
   created() {
-    this.fetchDataCourses(), this.fetchDataCategories()
+    this.fetchDataCourses()
+    this.fetchDataCategories()
   },
   methods: {
     ...mapActions({
@@ -268,14 +269,14 @@ export default {
       this.$v.categoryModel.$touch()
     },
     editItem(item) {
-      //this.category = item.category
-
+      console.log('ITEM', item)
       this.editedIndex = this.coursesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
-      this.dialog = true
 
-      this.fetchCategoryItems(this.category)
+      this.categoryModel = item.category.properties
+
+      this.dialog = true
     },
     async fetchDataCourses() {
       this.loading = true
