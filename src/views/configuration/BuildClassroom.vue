@@ -384,8 +384,9 @@ export default {
       const config = {
         responseType: 'blob' // o blob o arraybuffer
       }
+
       const response = await axios.get(
-        `/api/v2/download-file/excel/${this.courseModel.description}`,
+        `/api/v2/download-file/excel/${this.courseModel.id}/${this.courseModel.description}`,
         config
       )
 
