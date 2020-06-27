@@ -1,11 +1,15 @@
 <template>
   <base-card color="blueS" class="px-5 py-3 mt-5" title="Conformación de aulas">
-    <base-button
-      class="mb-5"
-      icon="mdi-file-excel"
-      label="Descargar"
-      @click="downloadExcel"
-    ></base-button>
+    <v-row>
+      <v-spacer />
+      <base-button
+        class="mb-5"
+        icon="mdi-file-excel"
+        label="Descargar"
+        @click="downloadExcel"
+      ></base-button>
+    </v-row>
+
     <template>
       <v-stepper alt-labels non-linear v-model="e1">
         <v-stepper-header>
@@ -58,14 +62,17 @@
                 >
                 </base-autocomplete>
               </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <base-button
+                  :disabled="courseModel === null"
+                  icon="mdi-package-down"
+                  label="Obtener alumnos"
+                  @click="getStudents"
+                  :loading="loadingButton"
+                ></base-button>
+              </v-card-actions>
             </v-card>
-            <base-button
-              :disabled="courseModel === null"
-              icon="mdi-package-down"
-              label="Obtener alumnos"
-              @click="getStudents"
-              :loading="loadingButton"
-            ></base-button>
           </v-stepper-content>
           <v-stepper-content step="2">
             <v-card flat outlined>
@@ -179,16 +186,19 @@
                   </template>
                 </v-data-table>
               </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text color="grayS" @click="e1 = 1">
+                  <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
+                  Atrás</v-btn
+                >
+                <base-button
+                  @click="checkStepTwo"
+                  icon="mdi-arrow-right-bold-circle"
+                  label="Continuar"
+                ></base-button>
+              </v-card-actions>
             </v-card>
-            <v-btn text color="grayS" @click="e1 = 1">
-              <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
-              Atrás</v-btn
-            >
-            <base-button
-              @click="checkStepTwo"
-              icon="mdi-arrow-right-bold-circle"
-              label="Continuar"
-            ></base-button>
           </v-stepper-content>
 
           <v-stepper-content step="3">
@@ -216,11 +226,14 @@
                   ></base-button>
                 </v-row>
               </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text color="grayS" @click="e1 = 2">
+                  <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
+                  Atrás</v-btn
+                >
+              </v-card-actions>
             </v-card>
-            <v-btn text color="grayS" @click="e1 = 2">
-              <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
-              Atrás</v-btn
-            >
           </v-stepper-content>
         </v-stepper-items>
       </v-stepper>
