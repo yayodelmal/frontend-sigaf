@@ -61,18 +61,15 @@ export default {
         if (status === 200) {
           const { _data, success, error, message } = data
 
+          console.log('_data', _data)
+
           if (success) {
-            commit('PUT_COURSE_REGISTERED_USER', _data)
+            commit('course/PUT_USER_BY_COURSE', _data, { root: true })
           } else {
             console.log(error)
           }
 
           return { success, message }
-        } else {
-          return {
-            success: data.success,
-            error: 'No se ha podido realizar la operación'
-          }
         }
       } catch (error) {
         const { data } = error.response

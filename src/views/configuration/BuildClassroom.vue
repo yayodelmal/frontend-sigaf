@@ -1,141 +1,243 @@
 <template>
-  <base-card color="blueS" class="px-5 py-3" title="Conformación de aulas">
-    <v-card>
-      <v-card-title>
-        Seleccione un curso:
-      </v-card-title>
-      <v-card-text>
-        <base-autocomplete
-          v-model="courseModel"
-          :items="courseItems"
-          label="Curso"
-          item-value="id"
-          item-text="description"
-          return-object
-          @change="$v.courseModel.$touch()"
-          @blur="$v.courseModel.$touch()"
-          :error-messages="courseErrors"
-        >
-        </base-autocomplete>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <base-button
-          :disabled="courseModel === null"
-          icon="mdi-package-down"
-          label="Obtener alumnos"
-          @click="getStudents"
-        ></base-button>
-      </v-card-actions>
-    </v-card>
-    <v-card class="mt-5" v-if="isData">
-      <v-card-title>
-        <v-row>
-          <v-col>
-            <v-card>
+  <base-card color="blueS" class="px-5 py-3 mt-5" title="Conformación de aulas">
+    <v-row>
+      <v-spacer />
+      <base-button
+        class="mb-5"
+        icon="mdi-file-excel"
+        label="Descargar"
+        @click="downloadExcel"
+      ></base-button>
+    </v-row>
+
+    <template>
+      <v-stepper alt-labels non-linear v-model="e1">
+        <v-stepper-header>
+          <v-stepper-step
+            :color="!completeStepOne ? 'redS' : 'green'"
+            dark
+            :complete="completeStepOne"
+            :rules="[() => rulesValueStepOne]"
+            step="1"
+          >
+            Curso</v-stepper-step
+          >
+          <v-divider></v-divider>
+          <v-stepper-step
+            :color="!completeStepTwo ? 'redS' : 'green'"
+            dark
+            :complete="completeStepTwo"
+            :rules="[() => rulesValueStepTwo]"
+            step="2"
+          >
+            Usuario</v-stepper-step
+          >
+          <v-divider></v-divider>
+          <v-stepper-step
+            :color="!completeStepThree ? 'redS' : 'green'"
+            dark
+            :complete="completeStepThree"
+            :rules="[() => rulesValueStepThree]"
+            step="3"
+            >Aula</v-stepper-step
+          >
+        </v-stepper-header>
+        <v-stepper-items>
+          <v-stepper-content step="1">
+            <v-card flat outlined>
               <v-card-title>
-                Filtrar estudiantes:
+                Seleccione un curso:
               </v-card-title>
               <v-card-text>
                 <base-autocomplete
-                  v-if="regions"
-                  v-model="regionModel"
-                  :items="regions"
-                  label="Región"
+                  v-model="courseModel"
+                  :items="courseItems"
+                  label="Curso"
                   item-value="id"
                   item-text="description"
                   return-object
+                  @change="$v.courseModel.$touch()"
+                  @blur="$v.courseModel.$touch()"
+                  :error-messages="courseErrors"
                 >
                 </base-autocomplete>
-                <base-autocomplete
-                  v-if="regions"
-                  v-model="classroomModel"
-                  :items="classrooms"
-                  label="Aula"
-                  item-value="id"
-                  item-text="description"
-                  return-object
-                >
-                </base-autocomplete>
-
-                <base-button
-                  icon="mdi-check-circle"
-                  label="Conformar aula"
-                  @click="makeClassroom"
-                ></base-button
-              ></v-card-text>
-            </v-card>
-          </v-col>
-          <v-col cols="3" sm="12" md="12" lg="3">
-            <v-card>
-              <v-card-text>
-                <base-button
-                  icon="mdi-file-excel"
-                  label="Descargar Excel"
-                  @click="downloadExcel"
-                ></base-button>
               </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <base-button
+                  :disabled="courseModel === null"
+                  icon="mdi-package-down"
+                  label="Obtener alumnos"
+                  @click="getStudents"
+                  :loading="loadingButton"
+                ></base-button>
+              </v-card-actions>
             </v-card>
-            <v-spacer></v-spacer>
-            <v-card class="mt-5">
+          </v-stepper-content>
+          <v-stepper-content step="2">
+            <v-card flat outlined>
               <v-card-title>
-                Crear alumno:
+                Filtros:
               </v-card-title>
               <v-card-text>
-                <base-button
-                  icon="mdi-file-excel"
-                  label="CREAR"
-                  @click="downloadExcel"
-                ></base-button>
+                <v-row>
+                  <v-col cols="11" md="6" sm="11" lg="6" class="mx-3">
+                    <v-row>
+                      <v-col cols="8" md="8" sm="12">
+                        <base-autocomplete
+                          v-if="regions"
+                          v-model="regionModel"
+                          :items="regions"
+                          label="Región"
+                          item-value="id"
+                          item-text="description"
+                          return-object
+                          @change="$vuetify.goTo(target, options)"
+                        >
+                        </base-autocomplete>
+                      </v-col>
+                      <v-col cols="4" md="4" sm="12">
+                        <base-textfield
+                          label="Buscar"
+                          required
+                          clearable
+                          v-model="searchStudent"
+                        ></base-textfield>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col cols="12" md="5" sm="12" lg="5">
+                    <v-row justify="space-around">
+                      <v-row>
+                        <v-checkbox
+                          v-for="profile in profiles"
+                          :key="profile.id"
+                          :label="profile.description"
+                          v-model="selectedFilter"
+                          color="redS"
+                          :value="profile"
+                          multiple
+                          class="ml-10"
+                          :input-value="profile.id === 1"
+                        >
+                        </v-checkbox>
+                      </v-row>
+                      <v-row>
+                        <v-btn
+                          dark
+                          color="blueS"
+                          class="mt-3"
+                          @click="clearFilter"
+                          ><v-icon class="mr-3">mdi-close</v-icon> Limpiar
+                        </v-btn>
+                      </v-row>
+                    </v-row>
+                  </v-col>
+                </v-row>
               </v-card-text>
             </v-card>
-          </v-col>
-        </v-row>
-      </v-card-title>
-      <v-card-text>
-        <v-data-table
-          :headers="headers"
-          :items="filteredUserByCourse"
-          class="elevation-1 grayS--text"
-          v-model="selected"
-          :loading="loading"
-          loading-text="Cargando... por favor espere"
-          show-select
-          hide-default-footer
-          calculate-widths
-        >
-          <template v-slot:progress>
-            <v-progress-linear
-              color="blueS"
-              :height="3"
-              indeterminate
-            ></v-progress-linear>
-          </template>
-          <template v-slot:top="{ pagination, options, updateOptions }">
-            <v-data-footer
-              :items-per-page-options="[15, 20, 25, 30, -1]"
-              :pagination="pagination"
-              :options="options"
-              @update:options="updateOptions"
-              items-per-page-text="$vuetify.dataTable.itemsPerPageText"
-            />
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-tooltip color="blueS" bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn icon text v-on="on">
-                  <v-icon @click.prevent="editItem(item)">
-                    mdi-pencil
-                  </v-icon>
-                </v-btn>
-              </template>
-              <span>Editar</span>
-            </v-tooltip>
-          </template>
-        </v-data-table>
-      </v-card-text>
-    </v-card>
+            <v-card flat outlined class="my-3">
+              <v-card-title>
+                Seleccione usuarios:
+                <v-spacer />
+                <span class="ml-10 blueS--text"
+                  >{{ selected.length }} seleccionados</span
+                >
+              </v-card-title>
+              <v-card-text>
+                <v-data-table
+                  :headers="headers"
+                  :items="filteredUserByCourse"
+                  v-model="selected"
+                  :loading="loading"
+                  loading-text="Cargando... por favor espere"
+                  show-select
+                  hide-default-footer
+                  calculate-widths
+                  :search="searchStudent"
+                >
+                  <template v-slot:progress>
+                    <v-progress-linear
+                      color="blueS"
+                      :height="3"
+                      indeterminate
+                    ></v-progress-linear>
+                  </template>
+                  <template v-slot:top="{ pagination, options, updateOptions }">
+                    <v-data-footer
+                      :items-per-page-options="[10, 15, 20, 25, 30, -1]"
+                      :pagination="pagination"
+                      :options="options"
+                      @update:options="updateOptions"
+                      items-per-page-text="$vuetify.dataTable.itemsPerPageText"
+                    />
+                  </template>
+                  <template v-slot:item.actions="{ item }">
+                    <v-tooltip color="blueS" bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn icon text v-on="on">
+                          <v-icon @click.prevent="editItem(item)">
+                            mdi-pencil
+                          </v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Editar</span>
+                    </v-tooltip>
+                  </template>
+                </v-data-table>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text color="grayS" @click="e1 = 1">
+                  <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
+                  Atrás</v-btn
+                >
+                <base-button
+                  @click="checkStepTwo"
+                  icon="mdi-arrow-right-bold-circle"
+                  label="Continuar"
+                ></base-button>
+              </v-card-actions>
+            </v-card>
+          </v-stepper-content>
 
+          <v-stepper-content step="3">
+            <v-card flat outlined>
+              <v-card-title>
+                Seleccionar aula:
+              </v-card-title>
+              <v-card-text>
+                <v-row class="mx-3">
+                  <base-autocomplete
+                    v-if="regions"
+                    v-model="classroomModel"
+                    :items="classrooms"
+                    label="Aula"
+                    item-value="id"
+                    item-text="description"
+                    return-object
+                  >
+                  </base-autocomplete>
+                  <v-spacer />
+                  <base-button
+                    icon="mdi-check-circle"
+                    label="Conformar aula"
+                    @click="makeClassroom"
+                  ></base-button>
+                </v-row>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer />
+                <v-btn text color="grayS" @click="e1 = 2">
+                  <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
+                  Atrás</v-btn
+                >
+              </v-card-actions>
+            </v-card>
+          </v-stepper-content>
+        </v-stepper-items>
+      </v-stepper>
+    </template>
     <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
       {{ message }}
       <v-btn dark text @click="snackbar = false">
@@ -146,28 +248,33 @@
       <v-form>
         <v-card>
           <v-card-title>
-            <span class="headline">Modificar Aula</span>
+            <span class="headline">Modificar</span>
           </v-card-title>
           <v-card-text>
-            <v-container>
-              <v-row>
-                <v-col cols="12">
-                  <base-autocomplete
-                    v-if="regions"
-                    v-model="editClassroomModel"
-                    :items="classrooms"
-                    label="Aula"
-                    item-value="id"
-                    item-text="description"
-                    return-object
-                    @change="setEditClassroom"
-                    @blur="$v.editClassroom.$touch()"
-                    :error-messages="editClassroomErrors"
-                  >
-                  </base-autocomplete>
-                </v-col>
-              </v-row>
-            </v-container>
+            <base-autocomplete
+              v-if="regions"
+              v-model="editClassroomModel"
+              :items="classrooms"
+              label="Aula"
+              item-value="id"
+              item-text="description"
+              return-object
+              @change="setEditClassroom"
+              @blur="$v.editClassroom.$touch()"
+              :error-messages="editClassroomErrors"
+            >
+            </base-autocomplete>
+
+            <base-autocomplete
+              v-if="regions"
+              v-model="profileModel"
+              :items="profiles"
+              label="Tipo usuario moodle"
+              item-value="id"
+              item-text="description"
+              return-object
+            >
+            </base-autocomplete>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -193,6 +300,9 @@ import CourseRegisteredUser from '../../models/CourseRegisteredUser'
 import { validationMixin } from 'vuelidate'
 import { required } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+
+import * as easings from 'vuetify/es5/services/goto/easing-patterns'
+
 export default {
   mixins: [validationMixin],
   validations: {
@@ -213,31 +323,31 @@ export default {
         value: 'classroom.description',
         class: 'redS--text'
       },
-      { text: 'RUT', value: 'registered_user.rut', class: 'redS--text' },
+      { text: 'RUT', value: 'registeredUser.rut', class: 'redS--text' },
       {
         text: 'Nombre',
-        value: 'registered_user.name',
+        value: 'registeredUser.name',
         class: 'redS--text',
         width: 150
       },
       {
         text: 'Apellido Paterno',
-        value: 'registered_user.last_name',
+        value: 'registeredUser.last_name',
         class: 'redS--text'
       },
       {
         text: 'Apellido materno',
-        value: 'registered_user.mother_last_name',
+        value: 'registeredUser.mother_last_name',
         class: 'redS--text'
       },
       {
         text: 'Región',
-        value: 'registered_user.region',
+        value: 'registeredUser.region',
         class: 'redS--text'
       },
       {
         text: 'Ciudad',
-        value: 'registered_user.city_school',
+        value: 'registeredUser.city_school',
         class: 'redS--text'
       },
       {
@@ -247,6 +357,11 @@ export default {
         sortable: false
       }
     ],
+    target: 'table',
+    duration: 1000,
+    offset: 0,
+    easing: 'easeInOutCubic',
+    easings: Object.keys(easings),
     file: null,
     data: [],
     dataMoodle: [],
@@ -267,7 +382,19 @@ export default {
     snackbar: false,
     timeout: 3000,
     dialog: false,
-    editClassroomModel: null
+    editClassroomModel: null,
+    profileModel: null,
+    searchStudent: '',
+    defaultValueSelect: { id: 1, description: 'Alumno' },
+    selectedFilter: [],
+    completeStepOne: false,
+    completeStepTwo: false,
+    completeStepThree: false,
+    rulesValueStepOne: true,
+    rulesValueStepTwo: true,
+    rulesValueStepThree: true,
+    e1: 1,
+    loadingButton: false
   }),
   created() {
     this.fetchCourseItems()
@@ -277,19 +404,50 @@ export default {
       courseItems: 'course/courses',
       registeredUsers: 'registeredUser/registeredUsers',
       courseRegisteredUser: 'courseRegisteredUser/courseRegisteredUsers',
-      classrooms: 'classroom/classrooms'
+      classrooms: 'classroom/classrooms',
+      profiles: 'profile/profiles',
+      usersByCourse: 'course/usersByCourse'
     }),
+    options() {
+      return {
+        duration: this.duration,
+        offset: this.offset,
+        easing: this.easing
+      }
+    },
     filteredUserByCourse() {
-      return this.courseRegisteredUser.filter(courseUser => {
-        this.region.push(courseUser.registered_user.region)
-        if (this.regionModel !== null) {
-          return (
-            courseUser.course.id === this.courseModel.id &&
-            courseUser.registered_user.region === this.regionModel
-          )
+      let userCourses = []
+
+      this.usersByCourse.forEach(courseRegistered => {
+        this.region.push(courseRegistered.registeredUser.region)
+
+        if (this.selectedFilter.length !== 0) {
+          this.selectedFilter.forEach(selected => {
+            if (
+              this.regionModel === null &&
+              courseRegistered.profile.id === selected.id
+            ) {
+              userCourses.push(courseRegistered)
+            } else {
+              if (
+                this.regionModel === courseRegistered.registeredUser.region &&
+                courseRegistered.profile.id === selected.id
+              ) {
+                userCourses.push(courseRegistered)
+              }
+            }
+          })
+        } else {
+          if (this.regionModel === null) {
+            userCourses.push(courseRegistered)
+          } else {
+            if (this.regionModel === courseRegistered.registeredUser.region) {
+              userCourses.push(courseRegistered)
+            }
+          }
         }
-        return courseUser.course.id === this.courseModel.id
       })
+      return userCourses
     },
     regions() {
       return [...new Set([...this.region])]
@@ -321,7 +479,9 @@ export default {
       fetchCourseRegisteredUser:
         'courseRegisteredUser/fetchCourseRegisteredUsers',
       fetchClassrooms: 'classroom/fetchClassrooms',
-      editCourseRegisteredUser: 'courseRegisteredUser/putCourseRegisteredUser'
+      editCourseRegisteredUser: 'courseRegisteredUser/putCourseRegisteredUser',
+      fetchProfiles: 'profile/fetchProfiles',
+      fetchUsersByCourse: 'course/getUsersByCourse'
     }),
     setEditClassroom() {
       this.editedItem.classroom = this.editClassroomModel
@@ -334,12 +494,19 @@ export default {
       this.editedItem = Object.assign({}, item)
 
       this.editClassroomModel = this.editedItem.classroom
+      this.profileModel = this.editedItem.profile
 
       this.dialog = true
     },
     async save() {
       this.$v.editClassroom.$touch()
       if (!this.$v.$error) {
+        if (this.profileModel !== null) {
+          this.editedItem.profile = Object.assign({}, this.profileModel)
+          this.editedItem.profile_id = this.profileModel.id
+
+          console.log('profileitem', this.editedItem)
+        }
         const { success } = await this.editCourseRegisteredUser(this.editedItem)
 
         if (success) {
@@ -351,10 +518,17 @@ export default {
       }
     },
     async getStudents() {
+      this.loadingButton = true
       setTimeout(() => {
-        this.fetchCourseRegisteredUser()
+        this.fetchProfiles()
+        this.fetchUsersByCourse(this.courseModel.id)
         this.fetchClassrooms()
-        this.isData = true
+        this.e1 = 2
+        this.completeStepOne = true
+        this.rulesValueStepOne = true
+        this.loadingButton = false
+        // this.isData = true
+        // this.$vuetify.goTo(300, this.options)
       }, 2000)
     },
     async makeClassroom() {
@@ -366,6 +540,7 @@ export default {
               classroom: this.classroomModel
             }
           })
+
           const { success } = await this.editCourseRegisteredUser(dataSend)
 
           if (success && index === this.selected.length - 1) {
@@ -376,7 +551,13 @@ export default {
               this.classroomModel = null
               this.regionModel = null
               this.selected = []
+              this.rulesValueStepThree = true
+              this.completeStepThree = false
+              this.completeStepTwo = false
+
+              this.e1 = 2
             }, 1000)
+            this.completeStepThree = true
           }
         })
     },
@@ -384,8 +565,9 @@ export default {
       const config = {
         responseType: 'blob' // o blob o arraybuffer
       }
+
       const response = await axios.get(
-        `/api/v2/download-file/excel/${this.courseModel.description}`,
+        `/api/v2/download-file/excel/${this.courseModel.id}/${this.courseModel.description}`,
         config
       )
 
@@ -410,6 +592,24 @@ export default {
       this.editedItem = Object.assign({}, this.defaultItem)
       this.editedIndex = -1
       this.editClassroomModel = null
+    },
+    clearFilter() {
+      this.regionModel = null
+      this.searchStudent = ''
+    },
+    checkStepTwo() {
+      this.rulesValueStepTwo = true
+
+      if (this.selected.length === 0) {
+        this.rulesValueStepTwo = false
+        this.snackbar = true
+        this.message = `Debe seleccionar al menos un usuario`
+      }
+
+      if (this.rulesValueStepTwo) {
+        this.completeStepTwo = true
+        this.e1 = 3
+      }
     }
   }
 }

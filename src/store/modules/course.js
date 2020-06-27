@@ -7,7 +7,8 @@ export default {
   state: {
     courses: [],
     course: null,
-    coursesByCategory: []
+    coursesByCategory: [],
+    usersByCourse: []
   },
   mutations: {
     SET_COURSES: (state, courses) => {
@@ -19,6 +20,9 @@ export default {
     SET_COURSES_BY_CATEGORY: (state, courses) => {
       state.coursesByCategory = courses
     },
+    SET_USER_BY_COURSE: (state, usersByCourse) => {
+      state.usersByCourse = usersByCourse
+    },
     POST_COURSE: (state, course) => {
       state.courses.push(course)
     },
@@ -28,6 +32,16 @@ export default {
       )
       Object.assign(state.courses[editedIndex], course)
     },
+    PUT_USER_BY_COURSE: (state, user) => {
+      const editedIndex = state.usersByCourse.findIndex(find => {
+        return find.properties.id === user.properties.id
+      })
+
+      console.log('editedIndex', editedIndex)
+
+      Object.assign(state.usersByCourse[editedIndex], user)
+    },
+
     DELETE_COURSE: (state, course) => {
       const editedIndex = state.courses.findIndex(
         find => find.properties.id === course.id
@@ -56,6 +70,11 @@ export default {
     },
     coursesByCategory: state => {
       return state.coursesByCategory
+    },
+    usersByCourse: state => {
+      return state.usersByCourse.map(({ properties }) => {
+        return properties
+      })
     }
   },
   actions: {
@@ -219,6 +238,31 @@ export default {
         return {
           success: false,
           error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    getUsersByCourse: async ({ commit }, courseId) => {
+      try {
+        const { data } = await axios.get(
+          `${BASE_URL}/${courseId}/registered-users`
+        )
+
+        console.log(data)
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('SET_USER_BY_COURSE', _data.relationships.collection.data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        const { data } = error.response
+        console.log(error)
+        return {
+          success: data.success,
+          message: data.message
         }
       }
     }
