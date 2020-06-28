@@ -161,6 +161,10 @@ export default {
             {
               name: 'Actividades',
               to: { name: 'Activity' }
+            },
+            {
+              name: 'Gestión estudiantes',
+              to: { name: 'ManagementStudent' }
             }
           ]
         }
