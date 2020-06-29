@@ -1414,6 +1414,8 @@ export default {
       setTimeout(async () => {
         const { data } = await axios.get(`/api/v2/registered-user/${this.rut}`)
 
+        console.log(data)
+
         if (data.registeredUser !== null) {
           this.userCourse = data.registeredUser
 
@@ -1430,6 +1432,7 @@ export default {
             this.user
           )
 
+          console.log('edit', this.editedTicketItem)
           this.findActivities(this.user.id)
         } else {
           vm.snackbar = true
