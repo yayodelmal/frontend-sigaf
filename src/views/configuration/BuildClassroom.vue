@@ -456,7 +456,8 @@ export default {
       return userCourses
     },
     regions() {
-      return [...new Set([...this.region])]
+      return Array.from(new Set(this.region))
+      //[...new Set([...this.region])]
     },
     courseErrors() {
       const errors = []

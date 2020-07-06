@@ -322,14 +322,12 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
-        let dataStore = Object.assign(this.editedItem, {
-          category_id: this.editedItem.category.properties.id,
-          id_course_moodle: this.editedItem.idCourseMoodle,
-          status: 1
-        })
-
-        console.log('dataStore', dataStore)
         if (this.editedIndex > -1) {
+          let dataStore = Object.assign(this.editedItem, {
+            category_id: this.editedItem.category.properties.id,
+            id_course_moodle: this.editedItem.idCourseMoodle,
+            status: 1
+          })
           const { success, message } = await this.putItem(dataStore)
           if (success) {
             this.snackbar = true
@@ -339,6 +337,12 @@ export default {
             this.message = message
           }
         } else {
+          let dataStore = Object.assign(this.editedItem, {
+            category_id: this.editedItem.category.id,
+            id_course_moodle: this.editedItem.idCourseMoodle,
+            status: 1
+          })
+
           const { success, message } = await this.postItem(dataStore)
           if (success) {
             this.snackbar = true

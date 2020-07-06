@@ -1328,8 +1328,9 @@ export default {
 
     async filterUsersByCategories() {
       if (this.category !== null) {
-        await this.fetchCourseByCategory(this.category.getLinkCourses)
+        await this.fetchCourseByCategory(this.category.courses.href)
         this.coursesByCategory.forEach(course => {
+          console.log('usersCourse => ', this.usersCourse)
           this.userRegisteredFiltered = this.usersCourse.filter(userCourse => {
             return userCourse.course.id === course.properties.id
           })

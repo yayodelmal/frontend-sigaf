@@ -73,7 +73,21 @@ export default {
     },
     usersByCourse: state => {
       return state.usersByCourse.map(({ properties }) => {
-        return properties
+        const rutUpper = properties.registeredUser.rut_registered_moodle
+
+        if (rutUpper) {
+          const status =
+            properties.registeredUser.rut ===
+            properties.registeredUser.rut_registered_moodle.toUpperCase()
+
+          return Object.assign(properties, { status: status })
+        } else {
+          const status =
+            properties.registeredUser.rut ===
+            properties.registeredUser.rut_registered_moodle
+
+          return Object.assign(properties, { status: status })
+        }
       })
     }
   },

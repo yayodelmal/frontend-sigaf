@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-main>
     <v-container class="fill-height" fluid>
       <v-app-bar app clipped-right flat color="white">
         <v-app-bar-nav-icon @click.stop="setDrawer()"></v-app-bar-nav-icon>
@@ -14,7 +14,7 @@
       <router-view></router-view>
       <footer-app></footer-app>
     </v-container>
-  </v-content>
+  </v-main>
 </template>
 
 <script>
@@ -32,12 +32,27 @@ export default {
       title: 'Ticket'
     }
   },
+  computed: {
+    breackPoint() {
+      return this.$vuetify.breakpoint.name
+    }
+  },
   methods: {
     setMini() {
       this.mini = !this.mini
     },
     setDrawer() {
       this.drawer = !this.drawer
+    }
+  },
+  watch: {
+    breackPoint(newValue) {
+      if (newValue === 'sm' || newValue === 'xs') {
+        console.log('branch true')
+        this.drawer = true
+      } else {
+        this.drawer = false
+      }
     }
   }
 }

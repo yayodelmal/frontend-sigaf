@@ -20,6 +20,9 @@ export default {
         state.courseRegisteredUsers[editedIndex],
         courseRegisteredUser
       )
+    },
+    POST_COURSE_REGISTERED_USER: (state, courseRegisteredUser) => {
+      state.courseRegisteredUsers.push(courseRegisteredUser)
     }
   },
   getters: {
@@ -72,10 +75,39 @@ export default {
           return { success, message }
         }
       } catch (error) {
-        const { data } = error.response
+        console.log(error)
         return {
-          success: data.success,
+          success: false,
           error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    postCourseRegisteredUser: async ({ commit }, courseRegisteredUser) => {
+      try {
+        const { data } = await axios.post(
+          `${BASE_URL}s/view-store`,
+          courseRegisteredUser
+        )
+
+        console.log(courseRegisteredUser)
+
+        const { _data, success, error, message } = data
+
+        console.log(data)
+
+        if (success) {
+          commit('POST_COURSE_REGISTERED_USER', _data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: error,
+          message: 'Error grave. Contacte al Administrador.'
         }
       }
     }

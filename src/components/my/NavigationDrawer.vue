@@ -1,12 +1,5 @@
 <template>
-  <v-navigation-drawer
-    app
-    overflow
-    left
-    :mini-variant.sync="drawerLocal"
-    dark
-    permanent
-  >
+  <v-navigation-drawer app left :mini-variant.sync="drawerLocal" dark permanent>
     <v-list>
       <v-list-item link>
         <v-list-item-content>
@@ -173,8 +166,7 @@ export default {
   }),
   props: {
     drawer: {
-      type: Boolean,
-      default: false
+      type: Boolean
     }
   },
   computed: {
