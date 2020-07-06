@@ -4,10 +4,21 @@ import router from './router'
 import store from './store'
 import './plugins/base'
 import vuetify from './plugins/vuetify'
+// import VueMask from 'v-mask'
 
 Vue.config.productionTip = false
 
 require('./store/modules/subscriber')
+
+// import { VueMaskFilter } from 'v-mask'
+// Vue.filter('VMask', VueMaskFilter)
+
+// Vue.use(VueMask, {
+//   placeholders: {
+//     R: /[\d/|k|K]/,
+//     S: /[.]/
+//   }
+// })
 
 store.dispatch('auth/attempt', localStorage.getItem('access_token'))
 

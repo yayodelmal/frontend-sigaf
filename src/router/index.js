@@ -176,7 +176,7 @@ const routes = [
             path: 'cargar-estudiantes',
             component: () =>
               import(
-                /* webpackChunkName: "Perfil" */ '../views/configuration/LoadStudent.vue'
+                /* webpackChunkName: "CargarEstudiantes" */ '../views/configuration/LoadStudent.vue'
               ),
             meta: { requiresAuth: true }
           },
@@ -185,7 +185,7 @@ const routes = [
             path: 'conformar-aulas',
             component: () =>
               import(
-                /* webpackChunkName: "Perfil" */ '../views/configuration/BuildClassroom.vue'
+                /* webpackChunkName: "ConformarAula" */ '../views/configuration/BuildClassroom.vue'
               )
           },
           {
@@ -194,6 +194,15 @@ const routes = [
             component: () =>
               import(
                 /* webpackChunkName: "Actividad" */ '../views/configuration/Activity.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'ManagementStudent',
+            path: 'gestion-estudiantes',
+            component: () =>
+              import(
+                /* webpackChunkName: "GestionEstudiante" */ '../views/configuration/ManagementStudent.vue'
               ),
             meta: { requiresAuth: true }
           }

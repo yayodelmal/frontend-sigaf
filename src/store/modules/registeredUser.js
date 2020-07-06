@@ -10,6 +10,16 @@ export default {
   mutations: {
     SET_REGISTERED_USERS: (state, registeredUsers) => {
       state.registeredUsers = registeredUsers
+    },
+    POST_REGISTERED_USER: (state, registeredUser) => {
+      state.registeredUsers.push(registeredUser)
+    },
+    PUT_REGISTERED_USER: (state, registeredUser) => {
+      const editedIndex = state.registeredUsers.findIndex(
+        find => find.properties.id === registeredUser.properties.id
+      )
+
+      Object.assign(state.registeredUsers[editedIndex], registeredUser)
     }
   },
   getters: {
@@ -39,6 +49,30 @@ export default {
         return {
           success: data.success,
           message: data.message
+        }
+      }
+    },
+    postRegisteredUser: async ({ commit }, registeredUser) => {
+      try {
+        const { data } = await axios.post(
+          `${BASE_URL}/view-store`,
+          registeredUser
+        )
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('POST_REGISTERED_USER', _data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message, _data }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
         }
       }
     }

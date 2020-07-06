@@ -1328,8 +1328,9 @@ export default {
 
     async filterUsersByCategories() {
       if (this.category !== null) {
-        await this.fetchCourseByCategory(this.category.getLinkCourses)
+        await this.fetchCourseByCategory(this.category.courses.href)
         this.coursesByCategory.forEach(course => {
+          console.log('usersCourse => ', this.usersCourse)
           this.userRegisteredFiltered = this.usersCourse.filter(userCourse => {
             return userCourse.course.id === course.properties.id
           })
@@ -1414,6 +1415,8 @@ export default {
       setTimeout(async () => {
         const { data } = await axios.get(`/api/v2/registered-user/${this.rut}`)
 
+        console.log(data)
+
         if (data.registeredUser !== null) {
           this.userCourse = data.registeredUser
 
@@ -1430,6 +1433,7 @@ export default {
             this.user
           )
 
+          console.log('edit', this.editedTicketItem)
           this.findActivities(this.user.id)
         } else {
           vm.snackbar = true

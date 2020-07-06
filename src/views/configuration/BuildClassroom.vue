@@ -30,7 +30,10 @@
             :rules="[() => rulesValueStepTwo]"
             step="2"
           >
-            Usuario</v-stepper-step
+            Selección
+            <small v-if="selectionHasError"
+              >Seleccione un usuario</small
+            ></v-stepper-step
           >
           <v-divider></v-divider>
           <v-stepper-step
@@ -67,7 +70,7 @@
                 <base-button
                   :disabled="courseModel === null"
                   icon="mdi-package-down"
-                  label="Obtener alumnos"
+                  label="Continuar con seleccion"
                   @click="getStudents"
                   :loading="loadingButton"
                 ></base-button>
@@ -118,7 +121,6 @@
                           :value="profile"
                           multiple
                           class="ml-10"
-                          :input-value="profile.id === 1"
                         >
                         </v-checkbox>
                       </v-row>
@@ -188,14 +190,14 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
-                <v-btn text color="grayS" @click="e1 = 1">
+                <v-btn text color="grayS" @click="backToCourse">
                   <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
-                  Atrás</v-btn
+                  VOLVER A CURSO</v-btn
                 >
                 <base-button
                   @click="checkStepTwo"
                   icon="mdi-arrow-right-bold-circle"
-                  label="Continuar"
+                  label="Continuar con aula"
                 ></base-button>
               </v-card-actions>
             </v-card>
@@ -230,7 +232,7 @@
                 <v-spacer />
                 <v-btn text color="grayS" @click="e1 = 2">
                   <v-icon size="30" left>mdi-arrow-left-bold-circle</v-icon>
-                  Atrás</v-btn
+                  VOLVER A SELECCION</v-btn
                 >
               </v-card-actions>
             </v-card>
@@ -238,7 +240,7 @@
         </v-stepper-items>
       </v-stepper>
     </template>
-    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
+    <v-snackbar :color="colorSnackbar" v-model="snackbar" :timeout="timeout">
       {{ message }}
       <v-btn dark text @click="snackbar = false">
         Cerrar
@@ -385,8 +387,7 @@ export default {
     editClassroomModel: null,
     profileModel: null,
     searchStudent: '',
-    defaultValueSelect: { id: 1, description: 'Alumno' },
-    selectedFilter: [],
+    selectedFilter: [{ id: 1, description: 'Alumno' }],
     completeStepOne: false,
     completeStepTwo: false,
     completeStepThree: false,
@@ -394,10 +395,15 @@ export default {
     rulesValueStepTwo: true,
     rulesValueStepThree: true,
     e1: 1,
-    loadingButton: false
+    loadingButton: false,
+    colorSnackbarError: 'redS',
+    colorSnackbarSuccess: 'blueS',
+    colorSnackbar: 'blueS',
+    selectionHasError: false
   }),
   created() {
     this.fetchCourseItems()
+    this.fetchProfiles()
   },
   computed: {
     ...mapGetters({
@@ -450,7 +456,8 @@ export default {
       return userCourses
     },
     regions() {
-      return [...new Set([...this.region])]
+      return Array.from(new Set(this.region))
+      //[...new Set([...this.region])]
     },
     courseErrors() {
       const errors = []
@@ -504,23 +511,27 @@ export default {
         if (this.profileModel !== null) {
           this.editedItem.profile = Object.assign({}, this.profileModel)
           this.editedItem.profile_id = this.profileModel.id
-
-          console.log('profileitem', this.editedItem)
+          this.editedItem.classroom_id = this.editClassroomModel.id
+          this.editedItem.classroom = Object.assign({}, this.editClassroomModel)
         }
         const { success } = await this.editCourseRegisteredUser(this.editedItem)
 
         if (success) {
           this.fetchCourseRegisteredUser()
           this.close()
+          this.colorSnackbar = this.colorSnackbarSuccess
           this.snackbar = true
           this.message = `Aula modificada exitosamente`
+        } else {
+          this.colorSnackbar = this.colorSnackbarError
+          this.snackbar = true
+          this.message = `Ha ocurrido un error`
         }
       }
     },
     async getStudents() {
       this.loadingButton = true
       setTimeout(() => {
-        this.fetchProfiles()
         this.fetchUsersByCourse(this.courseModel.id)
         this.fetchClassrooms()
         this.e1 = 2
@@ -545,6 +556,7 @@ export default {
 
           if (success && index === this.selected.length - 1) {
             setTimeout(() => {
+              this.colorSnackbar = this.colorSnackbarSuccess
               this.snackbar = true
               this.message = `Se ha conformado el ${this.classroomModel.description} con ${this.selected.length} alumnos`
 
@@ -601,15 +613,23 @@ export default {
       this.rulesValueStepTwo = true
 
       if (this.selected.length === 0) {
+        this.colorSnackbar = this.colorSnackbarError
+        this.selectionHasError = true
         this.rulesValueStepTwo = false
         this.snackbar = true
         this.message = `Debe seleccionar al menos un usuario`
       }
 
       if (this.rulesValueStepTwo) {
+        this.selectionHasError = false
         this.completeStepTwo = true
         this.e1 = 3
       }
+    },
+    backToCourse() {
+      this.selectionHasError = false
+      this.rulesValueStepTwo = true
+      this.e1 = 1
     }
   }
 }

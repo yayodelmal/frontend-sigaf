@@ -63,7 +63,7 @@
                         </v-col>
                         <v-col cols="4">
                           <base-textfield
-                            v-model="editedItem.idMoodle"
+                            v-model="editedItem.idCategoryMoodle"
                             label="Id Moodle"
                             required
                             clearable
@@ -184,9 +184,10 @@ export default {
     headers: [
       { text: '#', value: 'id', class: 'redS--text' },
       { text: 'Nombre', value: 'description', class: 'redS--text' },
+      { text: 'ID moodle', value: 'idCategoryMoodle', class: 'redS--text' },
       {
         text: 'Plataforma',
-        value: 'platform.description',
+        value: 'platform.properties.description',
         class: 'redS--text'
       },
       {
@@ -249,7 +250,7 @@ export default {
       return this.editedItem.description
     },
     idMoodle() {
-      return this.editedItem.idMoodle
+      return this.editedItem.idCategoryMoodle
     }
   },
   created() {
@@ -327,6 +328,7 @@ export default {
       if (!this.$v.$error) {
         let dataStore = Object.assign(this.editedItem, {
           platform_id: this.editedItem.platform.properties.id,
+          id_category_moodle: this.editedItem.idCategoryMoodle,
           status: 1
         })
         console.log('DATASTORE', dataStore)

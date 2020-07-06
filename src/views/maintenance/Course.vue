@@ -62,7 +62,7 @@
                         </v-col>
                         <v-col cols="4">
                           <base-textfield
-                            v-model="editedItem.idMoodle"
+                            v-model="editedItem.idCourseMoodle"
                             label="Id Moodle"
                             required
                             clearable
@@ -183,9 +183,10 @@ export default {
     headers: [
       { text: '#', value: 'id', class: 'redS--text' },
       { text: 'Nombre', value: 'description', class: 'redS--text' },
+      { text: 'ID moodle', value: 'idCourseMoodle', class: 'redS--text' },
       {
         text: 'Categoría',
-        value: 'category.description',
+        value: 'category.properties.description',
         class: 'redS--text'
       },
       {
@@ -248,7 +249,7 @@ export default {
       return this.editedItem.description
     },
     idMoodle() {
-      return this.editedItem.idMoodle
+      return this.editedItem.idCourseMoodle
     }
   },
   created() {
@@ -264,12 +265,10 @@ export default {
       fetchCategoryItems: 'category/fetchCategories'
     }),
     setCategory(value) {
-      console.log(value)
       this.editedItem.category = value
       this.$v.categoryModel.$touch()
     },
     editItem(item) {
-      console.log('ITEM', item)
       this.editedIndex = this.coursesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
@@ -323,11 +322,12 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
-        let dataStore = Object.assign(this.editedItem, {
-          category_id: this.editedItem.category.id,
-          status: 1
-        })
         if (this.editedIndex > -1) {
+          let dataStore = Object.assign(this.editedItem, {
+            category_id: this.editedItem.category.properties.id,
+            id_course_moodle: this.editedItem.idCourseMoodle,
+            status: 1
+          })
           const { success, message } = await this.putItem(dataStore)
           if (success) {
             this.snackbar = true
@@ -337,6 +337,12 @@ export default {
             this.message = message
           }
         } else {
+          let dataStore = Object.assign(this.editedItem, {
+            category_id: this.editedItem.category.id,
+            id_course_moodle: this.editedItem.idCourseMoodle,
+            status: 1
+          })
+
           const { success, message } = await this.postItem(dataStore)
           if (success) {
             this.snackbar = true
