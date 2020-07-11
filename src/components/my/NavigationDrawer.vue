@@ -83,9 +83,9 @@ export default {
           to: { name: 'Dashboard' }
         },
         {
-          name: 'Cursos',
+          name: 'Seguimiento',
           icon: 'mdi-google-classroom',
-          to: { name: 'Classroom' }
+          to: { name: 'FollowUp' }
         },
         {
           name: 'Ticket',
