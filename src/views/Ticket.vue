@@ -1,51 +1,61 @@
 <template>
-  <v-row justify="center" align="center">
-    <v-col cols="10">
-      <base-card
-        color="blueS"
-        class="px-5 py-3"
-        icon="mdi-ticket-account"
-        title="Ticket"
-      >
-        <template v-slot:searchInput>
-          <v-row justify="center">
-            <v-col cols="12">
-              <base-autocomplete
-                v-model="category"
-                :items="categoryItems"
-                label="Curso"
-                item-value="id"
-                item-text="description"
-                return-object
-              >
-              </base-autocomplete>
-            </v-col>
-          </v-row>
-          <v-row justify="center">
-            <v-col cols="12" md="3" class="pl-10 mt-4">
-              <v-label class="blueS--text">Filtrar ticket</v-label>
-              <v-checkbox
-                color="redS"
-                v-model="openTicket"
-                label="Abierto"
-              ></v-checkbox>
-              <v-checkbox
-                color="redS"
-                v-model="closeTicket"
-                label="Cerrado"
-              ></v-checkbox>
-            </v-col>
-            <v-spacer></v-spacer>
-            <v-divider vertical></v-divider>
-            <v-col cols="12" md="8">
-              <base-textfield
-                v-model="search"
-                append-icon="mdi-magnify"
-                label="Buscar"
-                single-line
-              ></base-textfield>
-              <template>
-                <v-col cols="6" md="4">
+  <v-container>
+    <base-card
+      color="blueS"
+      class="px-5 py-3 mt-10"
+      icon="mdi-ticket-account"
+      title="Ticket"
+    >
+      <template v-slot:searchInput>
+        <v-card flat outlined>
+          <v-card-title>
+            Filtrar ticket
+          </v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" sm="6" md="4">
+                <base-autocomplete
+                  v-model="category"
+                  :items="categoryItems"
+                  label="Curso"
+                  item-value="id"
+                  item-text="description"
+                  return-object
+                >
+                </base-autocomplete>
+              </v-col>
+              <v-col cols="12" sm="6" md="5">
+                <base-textfield
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  label="Buscar"
+                  single-line
+                ></base-textfield>
+              </v-col>
+              <v-col cols="12" sm="12" md="3">
+                <v-row justify="center">
+                  <v-checkbox
+                    color="redS"
+                    v-model="openTicket"
+                    label="Abierto"
+                  ></v-checkbox>
+
+                  <v-checkbox
+                    class="ml-10"
+                    color="redS"
+                    v-model="closeTicket"
+                    label="Cerrado"
+                  ></v-checkbox>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+        <v-card class="mt-3" flat outlined>
+          <v-card-text>
+            <v-row justify="center">
+              <v-col cols="12" sm="12" md="7" lg="6">
+                <template>
                   <v-dialog
                     v-model="dialog"
                     fullscreen
@@ -56,12 +66,16 @@
                       <base-button
                         icon="mdi-plus-circle"
                         v-on="on"
-                        label="Crear Ticket"
+                        label="Crear ticket individual"
                       ></base-button>
                     </template>
                     <v-card>
                       <v-card-title>
                         <span class="headline">{{ titleTicket }}</span>
+                        <v-spacer></v-spacer>
+                        <v-btn color="blueS" text @click="clearTicket"
+                          >Cancelar</v-btn
+                        >
                       </v-card-title>
                       <v-card-text>
                         <v-container>
@@ -102,6 +116,7 @@
                                     <v-col cols="10" sm="4" md="4">
                                       <base-textfield
                                         label="Rut"
+                                        :disabled="ticketClose"
                                         required
                                         color="blueS"
                                         v-model="rut"
@@ -112,6 +127,7 @@
                                     </v-col>
                                     <v-col cols="2" sm="1" md="1">
                                       <v-btn
+                                        :disabled="ticketClose"
                                         color="blueS"
                                         elevation="1"
                                         fab
@@ -168,6 +184,7 @@
                                     <v-col cols="12" sm="4" md="4">
                                       <base-textfield
                                         label="Nombre"
+                                        :disabled="ticketClose"
                                         required
                                         color="blueS"
                                         v-model="
@@ -178,6 +195,7 @@
                                     </v-col>
                                     <v-col cols="12" sm="4" md="4">
                                       <base-textfield
+                                        :disabled="ticketClose"
                                         label="Correo electrónico"
                                         required
                                         color="blueS"
@@ -189,6 +207,7 @@
                                     </v-col>
                                     <v-col cols="12" sm="4" md="4">
                                       <base-textfield
+                                        :disabled="ticketClose"
                                         label="Teléfono"
                                         required
                                         color="blueS"
@@ -199,6 +218,7 @@
                                   <v-row>
                                     <v-col cols="12">
                                       <base-textfield
+                                        :disabled="ticketClose"
                                         label="Curso"
                                         required
                                         dense
@@ -206,16 +226,26 @@
                                       ></base-textfield>
                                     </v-col>
                                   </v-row>
-                                  <base-button
-                                    @click="
-                                      () => {
-                                        e1 = 2
-                                        completeStepOne = true
-                                      }
-                                    "
-                                    icon="mdi-arrow-right-bold-circle"
-                                    label="Continuar"
-                                  ></base-button>
+                                  <v-row>
+                                    <v-spacer />
+                                    <v-btn
+                                      class="mt-3"
+                                      color="blueS"
+                                      depressed
+                                      dark
+                                      @click="
+                                        () => {
+                                          e1 = 2
+                                          completeStepOne = true
+                                        }
+                                      "
+                                    >
+                                      Continuar
+                                      <v-icon class="ml-3"
+                                        >mdi-arrow-right-bold-circle</v-icon
+                                      >
+                                    </v-btn>
+                                  </v-row>
                                 </template>
                               </v-stepper-content>
 
@@ -223,6 +253,7 @@
                                 <v-row>
                                   <v-col cols="12" sm="4">
                                     <base-autocomplete
+                                      :disabled="ticketClose"
                                       :items="sourceTicketItems"
                                       label="Origen"
                                       v-model="source"
@@ -237,6 +268,7 @@
 
                                   <v-col cols="12" sm="4">
                                     <base-autocomplete
+                                      :disabled="ticketClose"
                                       :items="typeTicketItems"
                                       label="Tipo"
                                       v-model="type"
@@ -259,6 +291,7 @@
                                     >
                                       <template v-slot:activator="{ on }">
                                         <base-textfield
+                                          disabled
                                           v-model="dateSingle"
                                           label="Fecha apertura"
                                           readonly
@@ -281,6 +314,7 @@
                                 <v-row>
                                   <v-col cols="12" sm="4">
                                     <base-autocomplete
+                                      :disabled="ticketClose"
                                       :items="motiveTicketItems"
                                       label="Motivo"
                                       v-model="motive"
@@ -295,6 +329,7 @@
 
                                   <v-col cols="12" sm="4">
                                     <base-autocomplete
+                                      :disabled="ticketClose"
                                       :items="priorityTicketItems"
                                       label="Prioridad"
                                       v-model="priority"
@@ -309,6 +344,7 @@
 
                                   <v-col cols="12" sm="4">
                                     <base-autocomplete
+                                      :disabled="ticketClose"
                                       :items="userItems"
                                       label="Operador"
                                       v-model="operator"
@@ -321,23 +357,38 @@
                                     ></base-autocomplete>
                                   </v-col>
                                 </v-row>
-                                <v-btn text color="grayS" @click="e1 = 1">
-                                  <v-icon size="30" left
-                                    >mdi-arrow-left-bold-circle</v-icon
+                                <v-row>
+                                  <v-spacer />
+                                  <v-btn
+                                    dark
+                                    depressed
+                                    color="grayS"
+                                    @click="e1 = 1"
                                   >
-                                  Atrás</v-btn
-                                >
-                                <base-button
-                                  @click="checkStepTwo"
-                                  icon="mdi-arrow-right-bold-circle"
-                                  label="Continuar"
-                                ></base-button>
+                                    <v-icon left
+                                      >mdi-arrow-left-bold-circle</v-icon
+                                    >
+                                    Atrás</v-btn
+                                  >
+                                  <v-btn
+                                    class="ml-3"
+                                    color="blueS"
+                                    depressed
+                                    dark
+                                    @click="checkStepTwo"
+                                  >
+                                    Continuar
+                                    <v-icon class="ml-3"
+                                      >mdi-arrow-right-bold-circle</v-icon
+                                    >
+                                  </v-btn>
+                                </v-row>
                               </v-stepper-content>
-
                               <v-stepper-content step="3">
                                 <v-row>
-                                  <v-col cols="12" sm="4" md="4">
+                                  <v-col cols="12" sm="4" md="3">
                                     <base-autocomplete
+                                      :disabled="ticketClose"
                                       :items="statusDetailTicketItems"
                                       label="Intento de contacto"
                                       v-model="statusDetail"
@@ -349,8 +400,10 @@
                                       :error-messages="statusDetailErrors"
                                     ></base-autocomplete>
                                   </v-col>
-                                  <v-col cols="12" sm="8" md="8">
+
+                                  <v-col cols="12" sm="8" md="9">
                                     <v-textarea
+                                      :disabled="ticketClose"
                                       color="blueS"
                                       v-model="observation"
                                       dense
@@ -365,22 +418,6 @@
                                       @blur="$v.observation.$touch()"
                                       :error-messages="observationErrors"
                                     ></v-textarea>
-                                  </v-col>
-                                </v-row>
-                                <v-row>
-                                  <v-spacer />
-                                  <v-col cols="12" md="4">
-                                    <base-autocomplete
-                                      :items="statusTicketItems"
-                                      label="Estado"
-                                      v-model="status"
-                                      item-value="id"
-                                      item-text="description"
-                                      return-object
-                                      @change="setStatus($event)"
-                                      @blur="$v.status.$touch()"
-                                      :error-messages="statusErrors"
-                                    ></base-autocomplete>
                                   </v-col>
                                 </v-row>
                                 <v-row>
@@ -407,7 +444,9 @@
                                                 >
                                                   Observación
                                                 </th>
-                                                <th class="text-left">Fecha</th>
+                                                <th class="text-left">
+                                                  Fecha
+                                                </th>
                                                 <th class="text-left">
                                                   Operador
                                                 </th>
@@ -450,35 +489,61 @@
                                     </v-card>
                                   </v-col>
                                 </v-row>
-                                <v-btn text color="grayS" @click="e1 = 2">
-                                  <v-icon size="30" left
-                                    >mdi-arrow-left-bold-circle</v-icon
+                                <v-row>
+                                  <v-spacer />
+                                  <v-col cols="12" sm="6" md="4" lg="3">
+                                    <base-autocomplete
+                                      :disabled="ticketClose"
+                                      :items="statusTicketItems"
+                                      label="Estado"
+                                      v-model="status"
+                                      item-value="id"
+                                      item-text="description"
+                                      return-object
+                                      @change="setStatus($event)"
+                                      @blur="$v.status.$touch()"
+                                      :error-messages="statusErrors"
+                                    ></base-autocomplete>
+                                  </v-col>
+                                </v-row>
+                                <v-row>
+                                  <v-spacer />
+                                  <v-btn
+                                    dark
+                                    depressed
+                                    color="grayS"
+                                    @click="e1 = 2"
                                   >
-                                  Atrás</v-btn
-                                >
-                                <base-button
-                                  @click="saveTicket()"
-                                  icon="mdi-arrow-right-bold-circle"
-                                  :label="titleButtonTicket"
-                                ></base-button>
+                                    <v-icon left
+                                      >mdi-arrow-left-bold-circle</v-icon
+                                    >
+                                    Atrás</v-btn
+                                  >
+                                  <v-btn
+                                    class="ml-3"
+                                    color="blueS"
+                                    depressed
+                                    :dark="!ticketClose"
+                                    :disabled="ticketClose"
+                                    @click="saveTicket()"
+                                  >
+                                    Guardar
+                                    <v-icon class="ml-3"
+                                      >mdi-arrow-right-bold-circle</v-icon
+                                    >
+                                  </v-btn>
+                                </v-row>
                               </v-stepper-content>
                             </v-stepper-items>
                           </v-stepper>
                         </v-container>
                       </v-card-text>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="blueS" text @click="clearTicket"
-                          >Cancelar</v-btn
-                        >
-                      </v-card-actions>
                     </v-card>
                   </v-dialog>
-                </v-col>
-              </template>
-
-              <template>
-                <v-col cols="12" md="2">
+                </template>
+              </v-col>
+              <v-col cols="12" sm="12" md="5" lg="6">
+                <template>
                   <v-dialog
                     v-model="dialogMassive"
                     fullscreen
@@ -487,6 +552,7 @@
                   >
                     <template v-slot:activator="{ on }">
                       <base-button
+                        v-if="isAdmin"
                         icon="mdi-plus-circle"
                         v-on="on"
                         label="Crear Ticket Masivo"
@@ -494,482 +560,543 @@
                     </template>
                     <v-card>
                       <v-card-title>
-                        <span class="headline">Ticket</span>
-                      </v-card-title>
-                      <v-card-text>
-                        <v-container>
-                          <v-stepper alt-labels non-linear v-model="em1">
-                            <v-stepper-header>
-                              <v-stepper-step
-                                :color="!completeStepOne ? 'redS' : 'green'"
-                                dark
-                                :complete="completeStepOne"
-                                :rules="[() => rulesValueStepOne]"
-                                step="1"
-                                >Destinatarios</v-stepper-step
-                              >
-                              <v-divider></v-divider>
-                              <v-stepper-step
-                                :color="!completeStepTwo ? 'redS' : 'green'"
-                                dark
-                                step="2"
-                                :complete="completeStepTwo"
-                                :rules="[() => rulesValueStepTwo]"
-                                >Ticket</v-stepper-step
-                              >
-                              <v-divider></v-divider>
-                              <v-stepper-step
-                                :color="!completeStepThree ? 'redS' : 'green'"
-                                dark
-                                step="3"
-                                :complete="completeStepThree"
-                                :rules="[() => rulesValueStepThree]"
-                                >Detalle</v-stepper-step
-                              >
-                            </v-stepper-header>
-                            <v-stepper-items>
-                              <v-stepper-content step="1">
-                                <v-row justify="center">
-                                  <v-col cols="12">
-                                    <base-autocomplete
-                                      v-model="categoryMassiveTicket"
-                                      :items="categoryItems"
-                                      label="Curso"
-                                      item-value="id"
-                                      item-text="description"
-                                      @change="
-                                        filterUsersByCategoriesTicket()
-                                        $v.categoryMassiveTicket.$touch()
-                                      "
-                                      return-object
-                                      outlined
-                                      @blur="$v.categoryMassiveTicket.$touch()"
-                                      :error-messages="
-                                        categoryMassiveTicketErrors
-                                      "
-                                    >
-                                    </base-autocomplete>
-                                  </v-col>
-                                </v-row>
-                                <v-row>
-                                  <v-col cols="12" sm="8" md="8">
-                                    <v-autocomplete
-                                      :items="classroomItems"
-                                      label="Filtrar aula"
-                                      chips
-                                      dense
-                                      item-text="description"
-                                      item-value="description"
-                                      return-object
-                                      v-model="classrooms"
-                                      @change="filterUsersByCategoriesTicket()"
-                                      multiple
-                                      color="blueS"
-                                      outlined
-                                    >
-                                      <template v-slot:selection="data">
-                                        <v-chip
-                                          :key="JSON.stringify(data.item)"
-                                          v-bind="data.attrs"
-                                          :input-value="data.selected"
-                                          :disabled="data.disabled"
-                                          close
-                                          small
-                                          @click:close="
-                                            data.parent.selectItem(data.item)
-                                          "
-                                        >
-                                          <v-avatar
-                                            class="redS whiteS--text"
-                                            left
-                                            v-text="
-                                              `${data.item.description
-                                                .split(' ')[0]
-                                                .slice(0, 1)
-                                                .toUpperCase()}${data.item.description
-                                                .split(' ')[1]
-                                                .slice(0, 2)
-                                                .toUpperCase()}`
-                                            "
-                                          ></v-avatar>
-                                          {{ data.item.description }}
-                                        </v-chip>
-                                      </template></v-autocomplete
-                                    >
-                                  </v-col>
-                                  <v-spacer />
-                                  <v-col cols="12" sm="4" md="4">
-                                    <v-text-field
-                                      v-model="searchMassiveTicket"
-                                      append-icon="mdi-magnify"
-                                      label="Buscar"
-                                      color="blueS"
-                                      dense
-                                      outlined
-                                    ></v-text-field>
-                                  </v-col>
-                                </v-row>
-                                <v-row>
-                                  <v-col cols="12">
-                                    <v-data-table
-                                      v-model="selected"
-                                      :headers="headersTicket"
-                                      :items="userRegisteredFiltered"
-                                      item-key="id"
-                                      show-select
-                                      class="elevation-1"
-                                      :search="searchMassiveTicket"
-                                      disable-pagination
-                                      hide-default-footer
-                                    >
-                                    </v-data-table>
-                                  </v-col>
-                                </v-row>
-                                <base-button
-                                  @click="checkStepOne"
-                                  icon="mdi-arrow-right-bold-circle"
-                                  label="Continuar"
-                                ></base-button>
-                              </v-stepper-content>
-
-                              <v-stepper-content step="2">
-                                <v-row>
-                                  <v-col cols="12" sm="4">
-                                    <base-autocomplete
-                                      :items="sourceTicketItems"
-                                      label="Origen"
-                                      v-model="source"
-                                      item-value="id"
-                                      item-text="description"
-                                      return-object
-                                      @change="$v.source.$touch()"
-                                      @blur="$v.source.$touch()"
-                                      :error-messages="sourceErrors"
-                                    ></base-autocomplete>
-                                  </v-col>
-
-                                  <v-col cols="12" sm="4">
-                                    <base-autocomplete
-                                      :items="typeTicketItems"
-                                      label="Tipo"
-                                      v-model="type"
-                                      item-value="id"
-                                      item-text="description"
-                                      return-object
-                                      @change="$v.type.$touch()"
-                                      @blur="$v.type.$touch()"
-                                      :error-messages="typeErrors"
-                                    ></base-autocomplete>
-                                  </v-col>
-                                  <v-col cols="12" sm="6" md="4">
-                                    <v-menu
-                                      v-model="menu"
-                                      :close-on-content-click="false"
-                                      :nudge-right="40"
-                                      transition="scale-transition"
-                                      offset-y
-                                      min-width="290px"
-                                    >
-                                      <template v-slot:activator="{ on }">
-                                        <base-textfield
-                                          v-model="dateMassive"
-                                          label="Fecha apertura"
-                                          readonly
-                                          v-on="on"
-                                        ></base-textfield>
-                                      </template>
-                                      <v-date-picker
-                                        :weekday-format="getDay"
-                                        show-week
-                                        landscape
-                                        locale="es"
-                                        v-model="dateMassive"
-                                        header-color="blueS"
-                                        color="redS"
-                                        @input="menu = false"
-                                      ></v-date-picker>
-                                    </v-menu>
-                                  </v-col>
-                                </v-row>
-                                <v-row>
-                                  <v-col cols="12" sm="4">
-                                    <base-autocomplete
-                                      :items="motiveTicketItems"
-                                      label="Motivo"
-                                      v-model="motive"
-                                      item-value="id"
-                                      item-text="description"
-                                      return-object
-                                      @change="$v.motive.$touch()"
-                                      @blur="$v.motive.$touch()"
-                                      :error-messages="motiveErrors"
-                                    ></base-autocomplete>
-                                  </v-col>
-
-                                  <v-col cols="12" sm="4">
-                                    <base-autocomplete
-                                      :items="priorityTicketItems"
-                                      label="Prioridad"
-                                      v-model="priority"
-                                      item-value="id"
-                                      item-text="description"
-                                      return-object
-                                      @change="$v.priority.$touch()"
-                                      @blur="$v.priority.$touch()"
-                                      :error-messages="priorityErrors"
-                                    ></base-autocomplete>
-                                  </v-col>
-
-                                  <v-col cols="12" sm="4">
-                                    <base-autocomplete
-                                      :items="userItems"
-                                      label="Operador"
-                                      v-model="operator"
-                                      item-value="id"
-                                      item-text="name"
-                                      return-object
-                                      @change="$v.operator.$touch()"
-                                      @blur="$v.operator.$touch()"
-                                      :error-messages="operatorErrors"
-                                    ></base-autocomplete>
-                                  </v-col>
-                                </v-row>
-                                <v-btn text color="grayS" @click="em1 = 1">
-                                  <v-icon size="30" left
-                                    >mdi-arrow-left-bold-circle</v-icon
-                                  >
-                                  Atrás</v-btn
-                                >
-                                <base-button
-                                  @click="checkStepTwo"
-                                  icon="mdi-arrow-right-bold-circle"
-                                  label="Continuar"
-                                ></base-button>
-                              </v-stepper-content>
-
-                              <v-stepper-content step="3">
-                                <v-row>
-                                  <v-col cols="12" sm="4" md="4">
-                                    <base-autocomplete
-                                      prepend-icon="mdi-comment"
-                                      :items="statusDetailTicketItems"
-                                      label="Intento de contacto"
-                                      v-model="statusDetailMasive"
-                                      item-value="id"
-                                      item-text="description"
-                                      return-object
-                                      v-if="showStatusDetailTicket"
-                                    ></base-autocomplete>
-                                  </v-col>
-                                  <v-col cols="12" sm="8" md="8">
-                                    <v-textarea
-                                      v-model="observationMassive"
-                                      color="blueS"
-                                      dense
-                                      auto-grow
-                                      counter
-                                      v-if="showObservation"
-                                      clearable
-                                      clear-icon="mdi-cancel"
-                                      label="Observaciones"
-                                      rows="1"
-                                      prepend-icon="mdi-comment"
-                                    ></v-textarea>
-                                  </v-col>
-                                </v-row>
-                                <v-row>
-                                  <v-spacer />
-                                  <v-col cols="12" md="4">
-                                    <base-autocomplete
-                                      :items="statusTicketItems"
-                                      label="Estado"
-                                      v-model="status"
-                                      item-value="id"
-                                      item-text="description"
-                                      return-object
-                                      @change="$v.status.$touch()"
-                                      @blur="$v.status.$touch()"
-                                      :error-messages="statusErrors"
-                                    ></base-autocomplete>
-                                  </v-col>
-                                </v-row>
-                                <v-btn text color="grayS" @click="em1 = 2">
-                                  <v-icon size="30" left
-                                    >mdi-arrow-left-bold-circle</v-icon
-                                  >
-                                  Atrás</v-btn
-                                >
-                                <base-button
-                                  @click="saveMassiveTicket()"
-                                  icon="mdi-arrow-right-bold-circle"
-                                  label="Generar tickets"
-                                ></base-button>
-                              </v-stepper-content>
-                            </v-stepper-items>
-                          </v-stepper>
-                        </v-container>
-                      </v-card-text>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
+                        <span class="headline">Ticket masivo</span>
+                        <v-spacer />
                         <v-btn color="blueS" text @click="clearTicket"
                           >Cancelar</v-btn
                         >
-                      </v-card-actions>
+                      </v-card-title>
+                      <v-card-text>
+                        <v-stepper alt-labels non-linear v-model="em1">
+                          <v-stepper-header>
+                            <v-stepper-step
+                              :color="!completeStepOne ? 'redS' : 'green'"
+                              dark
+                              :complete="completeStepOne"
+                              :rules="[() => rulesValueStepOne]"
+                              step="1"
+                              >Destinatarios</v-stepper-step
+                            >
+                            <v-divider></v-divider>
+                            <v-stepper-step
+                              :color="!completeStepTwo ? 'redS' : 'green'"
+                              dark
+                              step="2"
+                              :complete="completeStepTwo"
+                              :rules="[() => rulesValueStepTwo]"
+                              >Ticket</v-stepper-step
+                            >
+                            <v-divider></v-divider>
+                            <v-stepper-step
+                              :color="!completeStepThree ? 'redS' : 'green'"
+                              dark
+                              step="3"
+                              :complete="completeStepThree"
+                              :rules="[() => rulesValueStepThree]"
+                              >Detalle</v-stepper-step
+                            >
+                          </v-stepper-header>
+                          <v-stepper-items>
+                            <v-stepper-content step="1">
+                              <v-row justify="center">
+                                <v-col cols="12" sm="5" md="5" lg="4">
+                                  <base-autocomplete
+                                    v-model="categoryMassiveTicket"
+                                    :items="categoryItems"
+                                    label="Curso"
+                                    item-value="id"
+                                    item-text="description"
+                                    @change="
+                                      filterUsersByCategoriesTicket()
+                                      $v.categoryMassiveTicket.$touch()
+                                    "
+                                    return-object
+                                    outlined
+                                    @blur="$v.categoryMassiveTicket.$touch()"
+                                    :error-messages="
+                                      categoryMassiveTicketErrors
+                                    "
+                                  >
+                                  </base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4" md="4" lg="4">
+                                  <v-autocomplete
+                                    :items="classroomItems"
+                                    label="Filtrar aula"
+                                    chips
+                                    dense
+                                    item-text="description"
+                                    item-value="description"
+                                    return-object
+                                    v-model="classrooms"
+                                    @change="filterUsersByCategoriesTicket()"
+                                    multiple
+                                    color="blueS"
+                                    outlined
+                                  >
+                                    <template v-slot:selection="data">
+                                      <v-chip
+                                        :key="JSON.stringify(data.item)"
+                                        v-bind="data.attrs"
+                                        :input-value="data.selected"
+                                        :disabled="data.disabled"
+                                        close
+                                        small
+                                        @click:close="
+                                          data.parent.selectItem(data.item)
+                                        "
+                                      >
+                                        <v-avatar
+                                          class="redS whiteS--text"
+                                          left
+                                          v-text="
+                                            `${data.item.description
+                                              .split(' ')[0]
+                                              .slice(0, 1)
+                                              .toUpperCase()}${data.item.description
+                                              .split(' ')[1]
+                                              .slice(0, 2)
+                                              .toUpperCase()}`
+                                          "
+                                        ></v-avatar>
+                                        {{ data.item.description }}
+                                      </v-chip>
+                                    </template></v-autocomplete
+                                  >
+                                </v-col>
+                                <v-col cols="12" sm="3" md="3" lg="4">
+                                  <v-text-field
+                                    v-model="searchMassiveTicket"
+                                    append-icon="mdi-magnify"
+                                    label="Buscar"
+                                    color="blueS"
+                                    dense
+                                    outlined
+                                  ></v-text-field>
+                                </v-col>
+                              </v-row>
+
+                              <v-data-table
+                                v-model="selected"
+                                :headers="headersTicket"
+                                :items="userRegisteredFiltered"
+                                item-key="id"
+                                show-select
+                                class="elevation-1"
+                                :search="searchMassiveTicket"
+                                disable-pagination
+                                hide-default-footer
+                              >
+                              </v-data-table>
+                              <v-row>
+                                <v-spacer />
+                                <v-btn
+                                  class="mt-3"
+                                  color="blueS"
+                                  depressed
+                                  dark
+                                  @click="checkStepOne"
+                                >
+                                  Continuar
+                                  <v-icon class="ml-3"
+                                    >mdi-arrow-right-bold-circle</v-icon
+                                  >
+                                </v-btn>
+                              </v-row>
+                            </v-stepper-content>
+                            <v-stepper-content step="2">
+                              <v-row>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="sourceTicketItems"
+                                    label="Origen"
+                                    v-model="source"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                    @change="$v.source.$touch()"
+                                    @blur="$v.source.$touch()"
+                                    :error-messages="sourceErrors"
+                                  ></base-autocomplete>
+                                </v-col>
+
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="typeTicketItems"
+                                    label="Tipo"
+                                    v-model="type"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                    @change="$v.type.$touch()"
+                                    @blur="$v.type.$touch()"
+                                    :error-messages="typeErrors"
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="6" md="4">
+                                  <v-menu
+                                    v-model="menu"
+                                    :close-on-content-click="false"
+                                    :nudge-right="40"
+                                    transition="scale-transition"
+                                    offset-y
+                                    min-width="290px"
+                                  >
+                                    <template v-slot:activator="{ on }">
+                                      <base-textfield
+                                        disabled
+                                        v-model="dateMassive"
+                                        label="Fecha apertura"
+                                        readonly
+                                        v-on="on"
+                                      ></base-textfield>
+                                    </template>
+                                    <v-date-picker
+                                      :weekday-format="getDay"
+                                      show-week
+                                      landscape
+                                      locale="es"
+                                      v-model="dateMassive"
+                                      header-color="blueS"
+                                      color="redS"
+                                      @input="menu = false"
+                                    ></v-date-picker>
+                                  </v-menu>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="motiveTicketItems"
+                                    label="Motivo"
+                                    v-model="motive"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                    @change="$v.motive.$touch()"
+                                    @blur="$v.motive.$touch()"
+                                    :error-messages="motiveErrors"
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="priorityTicketItems"
+                                    label="Prioridad"
+                                    v-model="priority"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                    @change="$v.priority.$touch()"
+                                    @blur="$v.priority.$touch()"
+                                    :error-messages="priorityErrors"
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="4">
+                                  <base-autocomplete
+                                    :items="userItems"
+                                    label="Operador"
+                                    v-model="operator"
+                                    item-value="id"
+                                    item-text="name"
+                                    return-object
+                                    @change="$v.operator.$touch()"
+                                    @blur="$v.operator.$touch()"
+                                    :error-messages="operatorErrors"
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-spacer />
+                                <v-btn
+                                  dark
+                                  depressed
+                                  color="grayS"
+                                  @click="em1 = 1"
+                                >
+                                  <v-icon left
+                                    >mdi-arrow-left-bold-circle</v-icon
+                                  >
+                                  Atrás</v-btn
+                                >
+                                <v-btn
+                                  class="ml-3"
+                                  color="blueS"
+                                  depressed
+                                  dark
+                                  @click="checkStepTwo"
+                                >
+                                  Continuar
+                                  <v-icon class="ml-3"
+                                    >mdi-arrow-right-bold-circle</v-icon
+                                  >
+                                </v-btn>
+                              </v-row>
+                            </v-stepper-content>
+
+                            <v-stepper-content step="3">
+                              <v-row>
+                                <v-col cols="12" sm="4" md="4">
+                                  <base-autocomplete
+                                    prepend-icon="mdi-comment"
+                                    :items="statusDetailTicketItems"
+                                    label="Intento de contacto"
+                                    v-model="statusDetailMasive"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                    v-if="showStatusDetailTicket"
+                                  ></base-autocomplete>
+                                </v-col>
+                                <v-col cols="12" sm="8" md="8">
+                                  <v-textarea
+                                    v-model="observationMassive"
+                                    color="blueS"
+                                    dense
+                                    auto-grow
+                                    counter
+                                    v-if="showObservation"
+                                    clearable
+                                    clear-icon="mdi-cancel"
+                                    label="Observaciones"
+                                    rows="1"
+                                    prepend-icon="mdi-comment"
+                                  ></v-textarea>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-spacer />
+                                <v-col cols="12" md="4">
+                                  <base-autocomplete
+                                    :items="statusTicketItems"
+                                    label="Estado"
+                                    v-model="status"
+                                    item-value="id"
+                                    item-text="description"
+                                    return-object
+                                    @change="$v.status.$touch()"
+                                    @blur="$v.status.$touch()"
+                                    :error-messages="statusErrors"
+                                  ></base-autocomplete>
+                                </v-col>
+                              </v-row>
+                              <v-row>
+                                <v-spacer />
+                                <v-btn
+                                  dark
+                                  depressed
+                                  color="grayS"
+                                  @click="em1 = 2"
+                                >
+                                  <v-icon left
+                                    >mdi-arrow-left-bold-circle</v-icon
+                                  >
+                                  Atrás</v-btn
+                                >
+                                <v-btn
+                                  :disabled="ticketClose"
+                                  class="ml-3"
+                                  color="blueS"
+                                  depressed
+                                  :dark="ticketClose"
+                                  @click="saveMassiveTicket()"
+                                >
+                                  Generar tickets
+                                  <v-icon class="ml-3"
+                                    >mdi-arrow-right-bold-circle</v-icon
+                                  >
+                                </v-btn>
+                              </v-row>
+                            </v-stepper-content>
+                          </v-stepper-items>
+                        </v-stepper>
+                      </v-card-text>
                     </v-card>
                   </v-dialog>
-                </v-col>
-              </template>
-            </v-col>
-          </v-row>
-        </template>
-        <v-divider></v-divider>
-        <v-row justify="center"> </v-row>
-
-        <v-data-table
-          :headers="headers"
-          :search="search"
-          :items="tickets"
-          :page.sync="page"
-          :items-per-page="itemsPerPage"
-          hide-default-footer
-          class="elevation-1"
-          @page-count="pageCount = $event"
-          :loading="loading"
-          loading-text="Cargando... por favor espere"
-          calculate-widths
-        >
-          <template
-            v-slot:item.properties.id="{
-              item
-            }"
+                </template>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </template>
+      <v-card flat>
+        <v-card-text>
+          <v-data-table
+            :headers="headers"
+            :search="search"
+            :items="tickets"
+            :page.sync="page"
+            :items-per-page="itemsPerPage"
+            hide-default-footer
+            class="elevation-1"
+            @page-count="pageCount = $event"
+            :loading="loading"
+            loading-text="Cargando... por favor espere"
+            calculate-widths
           >
-            {{ showPosition(item) }}
-          </template>
-          <template
-            v-slot:item.properties.courseRegisteredUser.registered_user.rut_registered_moodle="{
-              item
-            }"
-          >
-            {{
-              item.properties.courseRegisteredUser.registered_user.rut_registered_moodle.toUpperCase()
-            }}
-          </template>
-          <template
-            v-slot:item.properties.courseRegisteredUser.registered_user.name_registered_moodle="{
-              item
-            }"
-          >
-            <v-tooltip color="blueS" bottom>
-              <template v-slot:activator="{ on }">
-                <v-label v-on="on">
-                  {{
-                    item.properties.courseRegisteredUser.registered_user.name_registered_moodle.toUpperCase()
-                  }}</v-label
-                >
-              </template>
-              <span>{{
-                item.properties.courseRegisteredUser.course.description
-              }}</span>
-            </v-tooltip>
-          </template>
-          <template v-slot:item.properties.typeTicket.description="{ item }">
-            <v-tooltip color="blueS" bottom>
-              <template v-slot:activator="{ on }">
-                <v-icon v-on="on">{{
-                  getTypeTicket(item.properties.typeTicket.description)
-                }}</v-icon>
-              </template>
-              <span>{{ item.properties.typeTicket.description }}</span>
-            </v-tooltip>
-          </template>
-          <template v-slot:item.properties.statusTicket.description="{ item }">
-            <v-tooltip color="blueS" bottom>
-              <template v-slot:activator="{ on }">
-                <v-icon v-on="on">{{
-                  getStatusTicket(item.properties.statusTicket.description)
-                }}</v-icon>
-              </template>
-              <span>{{ item.properties.statusTicket.description }}</span>
-            </v-tooltip>
-          </template>
-          <template
-            v-slot:item.properties.priorityTicket.description="{ item }"
-          >
-            <v-chip
-              small
-              :color="getColor(item.properties.priorityTicket.description)"
-              dark
-              label
-              >{{
-                item.properties.priorityTicket.description.toUpperCase()
-              }}</v-chip
+            <template
+              v-slot:item.properties.id="{
+                item
+              }"
             >
-          </template>
-          <template v-slot:item.actions="{ item }">
-            <v-tooltip color="blueS" bottom>
-              <template v-slot:activator="{ on }">
-                <v-icon v-on="on" class="mr-2" @click.prevent="editItem(item)">
-                  mdi-chat-plus
-                </v-icon>
-              </template>
-              <span>Agregar contacto</span>
-            </v-tooltip>
-
-            <v-tooltip color="blueS" bottom>
-              <template v-slot:activator="{ on }">
-                <v-icon
-                  v-show="item.showDeleteButton"
-                  v-on="on"
-                  @click.prevent="deleteItem(item)"
-                >
-                  mdi-delete
-                </v-icon>
-              </template>
-              <span>Eliminar ticket</span>
-            </v-tooltip>
-          </template>
-        </v-data-table>
-        <template v-slot:actions>
-          <div class="text-center pt-2">
-            <v-pagination
-              color="redS"
-              v-model="page"
-              :length="pageCount"
-            ></v-pagination>
-          </div>
-        </template>
-      </base-card>
-    </v-col>
-    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar>
-    <v-dialog v-model="dialogConfirm" persistent max-width="350">
-      <base-card
-        class="pt-12"
-        color="redS"
-        icon="mdi-hand-left"
-        title="¡Atención!"
-      >
-        <v-divider></v-divider>
-        <v-card-text>Eliminará un registro de forma permanente</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <base-button
-            icon="mdi-check-circle"
-            label="Aceptar"
-            @click.prevent="confirmDelete"
-          ></base-button>
-          <v-btn text color="grayS" @click="close">
-            <v-icon size="30" left>mdi-close-circle</v-icon>
-            Cancelar</v-btn
+              {{ showPosition(item) }}
+            </template>
+            <template
+              v-slot:item.properties.courseRegisteredUser.registered_user.rut_registered_moodle="{
+                item
+              }"
+            >
+              {{
+                item.properties.courseRegisteredUser.registered_user.rut_registered_moodle.toUpperCase()
+              }}
+            </template>
+            <template
+              v-slot:item.properties.courseRegisteredUser.registered_user.name_registered_moodle="{
+                item
+              }"
+            >
+              <v-tooltip color="blueS" bottom>
+                <template v-slot:activator="{ on }">
+                  <v-label v-on="on">
+                    {{
+                      item.properties.courseRegisteredUser.registered_user.name_registered_moodle.toUpperCase()
+                    }}</v-label
+                  >
+                </template>
+                <span>{{
+                  item.properties.courseRegisteredUser.course.description
+                }}</span>
+              </v-tooltip>
+            </template>
+            <template v-slot:item.properties.typeTicket.description="{ item }">
+              <v-tooltip color="blueS" bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">{{
+                    getTypeTicket(item.properties.typeTicket.description)
+                  }}</v-icon>
+                </template>
+                <span>{{ item.properties.typeTicket.description }}</span>
+              </v-tooltip>
+            </template>
+            <template
+              v-slot:item.properties.statusTicket.description="{ item }"
+            >
+              <v-tooltip color="blueS" bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">{{
+                    getStatusTicket(item.properties.statusTicket.description)
+                  }}</v-icon>
+                </template>
+                <span>{{ item.properties.statusTicket.description }}</span>
+              </v-tooltip>
+            </template>
+            <template
+              v-slot:item.properties.priorityTicket.description="{ item }"
+            >
+              <v-chip
+                small
+                :color="getColor(item.properties.priorityTicket.description)"
+                dark
+                label
+                >{{
+                  item.properties.priorityTicket.description.toUpperCase()
+                }}</v-chip
+              >
+            </template>
+            <template v-slot:item.actions="{ item }">
+              <v-tooltip color="blueS" bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon
+                    v-on="on"
+                    class="mr-2"
+                    @click.prevent="editItem(item)"
+                  >
+                    {{ showIconSearch(item) }}
+                  </v-icon>
+                </template>
+                <span>{{ showTooltipSearch(item) }}</span>
+              </v-tooltip>
+              <v-tooltip color="blueS" bottom>
+                <template v-slot:activator="{ on }">
+                  <v-icon
+                    v-if="item.showDeleteButton"
+                    v-on="on"
+                    @click.prevent="deleteItem(item)"
+                  >
+                    mdi-delete
+                  </v-icon>
+                </template>
+                <span>Eliminar ticket</span>
+              </v-tooltip>
+            </template>
+          </v-data-table>
+        </v-card-text>
+      </v-card>
+      <template v-slot:actions>
+        <div class="text-center pt-2">
+          <v-pagination
+            color="redS"
+            v-model="page"
+            :length="pageCount"
+          ></v-pagination>
+        </div>
+      </template>
+      <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
+        {{ message }}
+        <v-btn dark text @click="snackbar = false">
+          Cerrar
+        </v-btn>
+      </v-snackbar>
+      <v-dialog v-model="dialogConfirm" persistent max-width="350">
+        <base-card
+          class="pt-12"
+          color="redS"
+          icon="mdi-hand-left"
+          title="¡Atención!"
+        >
+          <v-divider></v-divider>
+          <v-card-text>Eliminará un registro de forma permanente</v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <base-button
+              icon="mdi-check-circle"
+              label="Aceptar"
+              @click.prevent="confirmDelete"
+            ></base-button>
+            <v-btn text color="grayS" @click="close">
+              <v-icon size="30" left>mdi-close-circle</v-icon>
+              Cancelar</v-btn
+            >
+          </v-card-actions>
+        </base-card>
+      </v-dialog>
+      <v-dialog v-model="dialogSelectCourse" max-width="400">
+        <v-card>
+          <v-card-title class="headline text-center"
+            >Seleccione un curso:</v-card-title
           >
-        </v-card-actions>
-      </base-card>
-    </v-dialog>
-  </v-row>
+          <v-card-text>
+            <v-hover
+              v-for="user in arrayCourseUserSelect"
+              :key="user.course.id"
+              v-slot:default="{ hover }"
+              close-delay="100"
+            >
+              <v-card
+                class="mt-3"
+                :elevation="hover ? 6 : 0"
+                flat
+                @click="selectCourse(user)"
+              >
+                <v-card-text class="font-weight-medium text-center subtitle-1">
+                  {{ user.course.description }}
+                </v-card-text>
+              </v-card>
+            </v-hover>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+    </base-card>
+  </v-container>
 </template>
 
 <script>
@@ -1036,43 +1163,90 @@ export default {
           align: 'center',
           sortable: false,
           width: 50,
-          value: 'properties.id'
+          value: 'properties.id',
+          class: 'redS--text'
         },
         {
           text: 'RUT',
           width: 120,
           value:
-            'properties.courseRegisteredUser.registered_user.rut_registered_moodle'
+            'properties.courseRegisteredUser.registered_user.rut_registered_moodle',
+          class: 'redS--text'
         },
         {
           text: 'Nombre participante',
           width: 250,
           value:
-            'properties.courseRegisteredUser.registered_user.name_registered_moodle'
+            'properties.courseRegisteredUser.registered_user.name_registered_moodle',
+          class: 'redS--text'
         },
-        { text: 'Tipo', value: 'properties.typeTicket.description' },
-        { text: 'Estado', value: 'properties.statusTicket.description' },
+        {
+          text: 'Tipo',
+          value: 'properties.typeTicket.description',
+          class: 'redS--text'
+        },
+        {
+          text: 'Estado',
+          value: 'properties.statusTicket.description',
+          class: 'redS--text'
+        },
         {
           text: 'Prioridad',
-          value: 'properties.priorityTicket.description'
+          value: 'properties.priorityTicket.description',
+          class: 'redS--text'
         },
         {
           text: 'Intentos',
           align: 'center',
-          value: 'relationships.numberOfElements'
+          value: 'relationships.numberOfElements',
+          class: 'redS--text'
         },
         {
           text: 'Antigüedad (días)',
           align: 'center',
-          value: 'properties.ageTicket'
+          value: 'properties.ageTicket',
+          class: 'redS--text'
+        },
+        {
+          text: 'Fecha creación',
+          align: 'center',
+          value: 'properties.createdAt',
+          width: 150,
+          class: 'redS--text'
+        },
+        {
+          text: 'Hora creación',
+          align: 'center',
+          value: 'properties.timeCreatedAt',
+          class: 'redS--text'
+        },
+        {
+          text: 'Fecha cierre',
+          align: 'center',
+          value: 'properties.closingDate',
+          width: 150,
+          class: 'redS--text'
+        },
+        {
+          text: 'Hora cierre',
+          align: 'center',
+          value: 'properties.timeClosingDate',
+          class: 'redS--text'
         },
         {
           text: 'Operador',
           align: 'center',
           width: 150,
-          value: 'properties.userAssigned.name'
+          value: 'properties.userAssigned.name',
+          class: 'redS--text'
         },
-        { text: 'Opciones', value: 'actions', sortable: false, width: 90 }
+        {
+          text: 'Opciones',
+          value: 'actions',
+          sortable: false,
+          width: 90,
+          class: 'redS--text'
+        }
       ],
       headersTicket: [
         {
@@ -1150,11 +1324,25 @@ export default {
       closeTicket: false,
       showStatusDetailTicket: true,
       showObservation: true,
-      observationMassive: ''
+      observationMassive: '',
+      dialogSelectCourse: false,
+      arrayCourseUserSelect: [],
+      currentCourseUser: {},
+      ticketClose: false,
+      checkCloseStatus: false
     }
   },
   methods: {
     ...mapActions({
+      fetchMotiveTicket: 'motiveTicket/fetchMotiveTickets',
+      fetchPriorityTicket: 'priorityTicket/fetchPriorityTickets',
+      fetchSourceTicket: 'sourceTicket/fetchSourceTickets',
+      fetchTypeTicket: 'typeTicket/fetchTypeTickets',
+      fetchUser: 'user/fetchUsers',
+      fetchStatusTicket: 'statusTicket/fetchStatusTickets',
+      fetchClassroom: 'classroom/fetchClassrooms',
+      fetchStatusDetailTicket: 'statusDetailTicket/fetchStatusDetailTickets',
+      fetchDetailTicket: 'detailTicket/fetchDetailTickets',
       fetchItems: 'ticket/fetchTickets',
       fetchCourseItems: 'course/fetchCourses',
       fetchCourseByCategory: 'course/getCoursesByCategory',
@@ -1169,6 +1357,12 @@ export default {
       postDetailTicket: 'detailTicket/postDetailTicket',
       clearTicketDetail: 'ticket/clearDetailTickets'
     }),
+    showIconSearch(item) {
+      return item.close ? 'mdi-email-search' : 'mdi-chat-plus'
+    },
+    showTooltipSearch(item) {
+      return item.close ? 'Ver ticket' : 'Agregar contacto'
+    },
     setSource(value) {
       this.editedTicketItem.sourceTicket = value
       this.$v.source.$touch()
@@ -1197,7 +1391,6 @@ export default {
       this.editedDetailTicketItem.statusDeailTicket = value
       this.$v.statusDetail.$touch()
     },
-
     async saveTicket() {
       this.rulesValueStepThree = true
 
@@ -1226,21 +1419,29 @@ export default {
       if (this.rulesValueStepThree) {
         this.completeStepThree = true
 
-        let dataStoreTicket = {
-          course_registered_user_id: this.user.id,
-          type_ticket_id: this.type.id,
-          source_ticket_id: this.source.id,
-          status_ticket_id: this.status.id,
-          priority_ticket_id: this.priority.id,
-          motive_ticket_id: this.motive.id,
-          user_create_id: this.userLog.id,
-          user_assigned_id: this.operator.id
-        }
-
-        if (this.editedTicketIndex > -1) {
-          dataStoreTicket = Object.assign(dataStoreTicket, {
-            id: this.editedTicketItem.id
-          })
+        if (
+          this.status.description === 'Cerrado' &&
+          this.observation === '' &&
+          this.statusDetail === null
+        ) {
+          this.snackbar = true
+          this.message =
+            'Debe seleccionar un intento de contacto y agregar una observación'
+          this.checkCloseStatus = false
+          this.$v.observation.$touch()
+          this.$v.statusDetail.$touch()
+        } else {
+          console.log('branch false')
+          let dataStoreTicket = {
+            course_registered_user_id: this.user.id,
+            type_ticket_id: this.type.id,
+            source_ticket_id: this.source.id,
+            status_ticket_id: this.status.id,
+            priority_ticket_id: this.priority.id,
+            motive_ticket_id: this.motive.id,
+            user_create_id: this.userLog.id,
+            user_assigned_id: this.operator.id
+          }
 
           if (this.status.description === 'Cerrado') {
             let arrayDate = new Date().toISOString().substr(0, 10)
@@ -1250,42 +1451,23 @@ export default {
             })
           }
 
-          console.log('putData', dataStoreTicket)
-          const { success } = await this.putTicket(dataStoreTicket)
+          if (this.editedTicketIndex > -1) {
+            dataStoreTicket = Object.assign(dataStoreTicket, {
+              id: this.editedTicketItem.id
+            })
 
-          if (success) {
-            const dataDetailTicket = {
-              comment: this.observation,
-              ticket_id: this.editedTicketItem.id,
-              status_detail_ticket_id: this.statusDetail.id,
-              user_created_id: this.userLog.id
-            }
-            const { success, message } = await this.postDetailTicket(
-              dataDetailTicket
-            )
+            const { success } = await this.putTicket(dataStoreTicket)
+
             if (success) {
-              this.snackbar = true
-              this.message = this.successMessage
-            } else {
-              this.snackbar = true
-              this.message = message
-            }
-          }
-        } else {
-          const { success } = await this.postTicket(dataStoreTicket)
-          if (success) {
-            if (this.statusDetail) {
               const dataDetailTicket = {
                 comment: this.observation,
-                ticket_id: this.savedTicket.properties.id,
+                ticket_id: this.editedTicketItem.id,
                 status_detail_ticket_id: this.statusDetail.id,
                 user_created_id: this.userLog.id
               }
-
               const { success, message } = await this.postDetailTicket(
                 dataDetailTicket
               )
-
               if (success) {
                 this.snackbar = true
                 this.message = this.successMessage
@@ -1294,13 +1476,36 @@ export default {
                 this.message = message
               }
             }
+          } else {
+            const { success } = await this.postTicket(dataStoreTicket)
+            if (success) {
+              if (this.statusDetail) {
+                const dataDetailTicket = {
+                  comment: this.observation,
+                  ticket_id: this.savedTicket.properties.id,
+                  status_detail_ticket_id: this.statusDetail.id,
+                  user_created_id: this.userLog.id
+                }
+
+                const { success, message } = await this.postDetailTicket(
+                  dataDetailTicket
+                )
+
+                if (success) {
+                  this.snackbar = true
+                  this.message = this.successMessage
+                } else {
+                  this.snackbar = true
+                  this.message = message
+                }
+              }
+            }
           }
+          this.fetchItems()
+          this.clearTicket()
         }
-        this.fetchItems()
-        this.clearTicket()
       }
     },
-
     async editItem(ticket) {
       const item = ticket.properties
 
@@ -1313,6 +1518,7 @@ export default {
       this.rut = item.courseRegisteredUser.registered_user.rut_registered_moodle
 
       this.fetchUserByRut(this.rut)
+      this.selectCourse(ticket.properties.courseRegisteredUser)
 
       this.editedTicketIndex = this.tickets.findIndex(
         find => find.properties.id === item.id
@@ -1320,20 +1526,25 @@ export default {
       this.editItem_ = Object.assign({}, item)
       this.editedTicketItem.id = item.id
 
+      console.log(ticket)
+
+      this.ticketClose = ticket.close
+      this.checkCloseStatus = true
+
       await this.fetchTicketDetails(this.editItem_)
 
       this.dialog = true
       this.e1 = 3
     },
-
     async filterUsersByCategories() {
       if (this.category !== null) {
         await this.fetchCourseByCategory(this.category.courses.href)
         this.coursesByCategory.forEach(course => {
-          console.log('usersCourse => ', this.usersCourse)
-          this.userRegisteredFiltered = this.usersCourse.filter(userCourse => {
-            return userCourse.course.id === course.properties.id
-          })
+          this.userRegisteredFiltered = this.courseRegisteredUserItems.filter(
+            userCourse => {
+              return userCourse.course.id === course.properties.id
+            }
+          )
         })
       }
     },
@@ -1341,16 +1552,17 @@ export default {
       this.userRegisteredFiltered = []
       if (this.categoryMassiveTicket !== null) {
         await this.fetchCourseByCategory(
-          this.categoryMassiveTicket.getLinkCourses
+          this.categoryMassiveTicket.courses.href
         )
+
+        const vm = this
         this.coursesByCategory.forEach(course => {
-          if (this.classrooms.length === 0) {
-            this.userRegisteredFiltered = this.courseRegisteredUserItems.filter(
-              userCourse => {
-                console.log('userCourse', userCourse)
-                return userCourse.course.id === course.properties.id
+          if (vm.classrooms.length === 0) {
+            vm.courseRegisteredUserItems.forEach(userCourse => {
+              if (userCourse.course.id === course.properties.id) {
+                vm.userRegisteredFiltered.push(userCourse)
               }
-            )
+            })
           } else {
             this.courseRegisteredUserItems.forEach(userCourse => {
               this.classrooms.forEach(classroom => {
@@ -1366,7 +1578,6 @@ export default {
         })
       }
     },
-
     async fetchDataCourses() {
       this.loading = true
       const { success, message } = await this.fetchCourseItems()
@@ -1415,33 +1626,44 @@ export default {
       setTimeout(async () => {
         const { data } = await axios.get(`/api/v2/registered-user/${this.rut}`)
 
-        console.log(data)
+        const { _data, statusCode, message } = data
 
-        if (data.registeredUser !== null) {
-          this.userCourse = data.registeredUser
-
-          const userInter = this.courseRegisteredUserItems.filter(
-            userCourse => {
-              return userCourse.registered_user.id === this.userCourse.id
-            }
-          )[0]
-
-          this.user = { ...this.user, ...userInter }
-
-          this.editedTicketItem.courseRegisteredUser = Object.assign(
-            {},
-            this.user
-          )
-
-          console.log('edit', this.editedTicketItem)
-          this.findActivities(this.user.id)
-        } else {
+        if (statusCode === 204) {
           vm.snackbar = true
-          vm.message = 'El alumno no se encuentra registrado'
-        }
+          vm.message = message
+        } else if (statusCode === 406) {
+          vm.snackbar = true
+          vm.message = message
+        } else if (statusCode === 200) {
+          if (_data !== null) {
+            this.userCourse = _data
 
+            this.arrayCourseUserSelect = this.courseRegisteredUserItems.filter(
+              userCourse => {
+                return userCourse.registered_user.id === this.userCourse.id
+              }
+            )
+
+            if (
+              this.arrayCourseUserSelect.length > 1 &&
+              this.editedTicketIndex === -1
+            ) {
+              this.dialogSelectCourse = true
+            }
+          } else {
+            vm.snackbar = true
+            vm.message = 'El alumno no se encuentra registrado'
+          }
+        }
         this.searchRutLoading = false
       }, 1000)
+    },
+    selectCourse(user) {
+      this.dialogSelectCourse = false
+
+      this.editedTicketItem.courseRegisteredUser = Object.assign({}, user)
+
+      this.user = Object.assign({}, user)
     },
     async findActivities(id) {
       const { data } = await axios.get(
@@ -1462,12 +1684,10 @@ export default {
       })
     },
     async deleteItem(ticket) {
-      console.log(ticket)
       this.editedTicketIndex = this.tickets.findIndex(
-        find => find.properties.id === ticket.id
+        find => find.properties.id === ticket.properties.id
       )
-      this.editItem_ = Object.assign({}, ticket)
-
+      this.editItem_ = Object.assign({}, this.tickets[this.editedTicketIndex])
       this.dialogConfirm = true
     },
     async confirmDelete() {
@@ -1507,65 +1727,76 @@ export default {
       if (this.rulesValueStepThree) {
         this.completeStepThree = true
 
-        let dataStoreTicket = {
-          type_ticket_id: this.type.id,
-          source_ticket_id: this.source.id,
-          status_ticket_id: this.status.id,
-          priority_ticket_id: this.priority.id,
-          motive_ticket_id: this.motive.id,
-          user_create_id: this.userLog.id,
-          user_assigned_id: this.operator.id
-        }
-
-        if (this.status.description === 'Cerrado') {
-          let arrayDate = new Date().toISOString().substr(0, 10)
-
-          dataStoreTicket = Object.assign(dataStoreTicket, {
-            closing_date: arrayDate
-          })
-        }
-
-        this.selected.forEach(async userCourse => {
-          dataStoreTicket = {
-            ...dataStoreTicket,
-            ...{ course_registered_user_id: userCourse.id }
+        if (
+          this.status.description === 'Cerrado' &&
+          this.observation === '' &&
+          this.statusDetail === null
+        ) {
+          this.snackbar = true
+          this.message =
+            'Debe seleccionar un intento de contacto y agregar una observación'
+          this.checkCloseStatus = false
+          this.$v.observation.$touch()
+          this.$v.statusDetail.$touch()
+        } else {
+          let dataStoreTicket = {
+            type_ticket_id: this.type.id,
+            source_ticket_id: this.source.id,
+            status_ticket_id: this.status.id,
+            priority_ticket_id: this.priority.id,
+            motive_ticket_id: this.motive.id,
+            user_create_id: this.userLog.id,
+            user_assigned_id: this.operator.id
           }
 
-          const { success, message, _data } = await this.postTicket(
-            dataStoreTicket
-          )
+          if (this.status.description === 'Cerrado') {
+            let arrayDate = new Date().toISOString().substr(0, 10)
 
-          console.log('_data', _data)
-          console.log('statusDetailMasive', this.statusDetailMasive)
-          if (success) {
-            if (this.statusDetailMasive) {
-              const dataDetailTicket = {
-                comment: this.observationMassive,
-                ticket_id: _data.properties.id,
-                status_detail_ticket_id: this.statusDetailMasive.id,
-                user_created_id: this.userLog.id
-              }
-              console.log('dataDetailTicket', dataDetailTicket)
+            dataStoreTicket = Object.assign(dataStoreTicket, {
+              closing_date: arrayDate
+            })
+          }
 
-              const { success } = await this.postDetailTicket(dataDetailTicket)
-
-              if (success) {
-                this.snackbar = true
-                this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
-              }
+          this.selected.forEach(async userCourse => {
+            dataStoreTicket = {
+              ...dataStoreTicket,
+              ...{ course_registered_user_id: userCourse.id }
             }
 
-            this.snackbar = true
-            this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
-          } else {
-            this.snackbar = true
-            this.message = message
-          }
-        })
-        this.clearTicket()
-        setTimeout(() => {
-          this.fetchItems()
-        }, 2000)
+            const { success, message, _data } = await this.postTicket(
+              dataStoreTicket
+            )
+            if (success) {
+              if (this.statusDetailMasive) {
+                const dataDetailTicket = {
+                  comment: this.observationMassive,
+                  ticket_id: _data.properties.id,
+                  status_detail_ticket_id: this.statusDetailMasive.id,
+                  user_created_id: this.userLog.id
+                }
+
+                const { success } = await this.postDetailTicket(
+                  dataDetailTicket
+                )
+
+                if (success) {
+                  this.snackbar = true
+                  this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
+                }
+              }
+
+              this.snackbar = true
+              this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
+            } else {
+              this.snackbar = true
+              this.message = message
+            }
+          })
+          this.clearTicket()
+          setTimeout(() => {
+            this.fetchItems()
+          }, 2000)
+        }
       }
     },
     showComment(comment) {
@@ -1628,6 +1859,9 @@ export default {
       this.editedTicketItem = Object.assign({}, this.defaultTicketItem)
       this.showStatusDetailTicket = true
       this.showObservation = true
+      this.classrooms = []
+      this.ticketClose = false
+      this.checkCloseStatus = false
       this.clearTicketDetail()
     },
     checkStepTwo() {
@@ -1686,10 +1920,19 @@ export default {
   },
   created() {
     this.fetchCourseRegisteredUserItems()
-    this.fetchItems()
     this.fetchDataCourses()
     this.fetchDataCategories()
     this.filterUsersByCategories()
+    this.fetchMotiveTicket()
+    this.fetchPriorityTicket()
+    this.fetchSourceTicket()
+    this.fetchTypeTicket()
+    this.fetchUser()
+    this.fetchStatusTicket()
+    this.fetchClassroom()
+    this.fetchStatusDetailTicket()
+    this.fetchDetailTicket()
+    this.fetchItems()
   },
   watch: {
     category() {
@@ -1714,7 +1957,9 @@ export default {
       userLog: 'auth/user',
       statusDetailTicketItems: 'statusDetailTicket/statusDetailTickets',
       savedTicket: 'ticket/getLastTicket',
-      ticketDetails: 'ticket/ticketDetailsByTicket'
+      ticketDetails: 'ticket/ticketDetailsByTicket',
+      loggedUser: 'auth/user',
+      isAdmin: 'auth/isAdmin'
     }),
     titleTicket() {
       return this.editedTicketIndex > -1 ? 'Agregar contacto' : 'Generar ticket'
@@ -1789,7 +2034,7 @@ export default {
     statusDetailErrors() {
       const errors = []
 
-      if (this.editedTicketIndex > -1) {
+      if (this.editedTicketIndex > -1 && this.checkCloseStatus) {
         if (!this.$v.statusDetail.$dirty) return errors
         !this.$v.statusDetail.required && errors.push('Es obligatorio.')
       }
@@ -1799,7 +2044,7 @@ export default {
     observationErrors() {
       const errors = []
 
-      if (this.editedTicketIndex > -1) {
+      if (this.editedTicketIndex > -1 && this.checkCloseStatus) {
         if (!this.$v.observation.$dirty) return errors
         !this.$v.observation.required && errors.push('Es obligatorio.')
         !this.$v.observation.maxLength &&
@@ -1838,38 +2083,59 @@ export default {
         })
     },
     tickets() {
+      const vm = this
       if (this.category !== null) {
-        return this.items.filter(item => {
-          if (this.openTicket === true && this.closeTicket === false) {
-            return (
-              item.properties.statusTicket.description === 'Abierto' &&
-              item.properties.courseRegisteredUser.course.category
-                .description === this.category.description
-            )
-          } else if (this.openTicket === false && this.closeTicket === true) {
-            return (
-              item.properties.statusTicket.description === 'Cerrado' &&
-              item.properties.courseRegisteredUser.course.category
-                .description === this.category.description
-            )
-          } else {
-            return (
-              item &&
-              item.properties.courseRegisteredUser.course.category
-                .description === this.category.description
-            )
-          }
-        })
+        return this.items
+          .filter(item => {
+            if (this.openTicket === true && this.closeTicket === false) {
+              return (
+                item.properties.statusTicket.description === 'Abierto' &&
+                item.properties.courseRegisteredUser.course.category
+                  .description === this.category.description
+              )
+            } else if (this.openTicket === false && this.closeTicket === true) {
+              return (
+                item.properties.statusTicket.description === 'Cerrado' &&
+                item.properties.courseRegisteredUser.course.category
+                  .description === this.category.description
+              )
+            } else {
+              return (
+                item &&
+                item.properties.courseRegisteredUser.course.category
+                  .description === this.category.description
+              )
+            }
+          })
+          .filter(item => {
+            if (vm.loggedUser) {
+              if (vm.isAdmin) {
+                return true
+              } else {
+                return item.properties.userAssigned.id === vm.loggedUser.id
+              }
+            }
+          })
       } else {
-        return this.items.filter(item => {
-          if (this.openTicket === true && this.closeTicket === false) {
-            return item.properties.statusTicket.description === 'Abierto'
-          } else if (this.openTicket === false && this.closeTicket === true) {
-            return item.properties.statusTicket.description === 'Cerrado'
-          } else {
-            return item
-          }
-        })
+        return this.items
+          .filter(item => {
+            if (this.openTicket === true && this.closeTicket === false) {
+              return item.properties.statusTicket.description === 'Abierto'
+            } else if (this.openTicket === false && this.closeTicket === true) {
+              return item.properties.statusTicket.description === 'Cerrado'
+            } else {
+              return item
+            }
+          })
+          .filter(item => {
+            if (vm.loggedUser) {
+              if (vm.isAdmin) {
+                return true
+              } else {
+                return item.properties.userAssigned.id === vm.loggedUser.id
+              }
+            }
+          })
       }
     },
     courseId() {

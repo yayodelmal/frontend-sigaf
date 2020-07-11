@@ -1,15 +1,38 @@
 <template>
-  <v-navigation-drawer app left :mini-variant.sync="drawerLocal" dark permanent>
+  <v-navigation-drawer
+    v-model="drawerLocal"
+    app
+    left
+    dark
+    :mini-variant="drawerLocal && !bp"
+    :permanent="!bp"
+    :temporary="drawerLocal && bp"
+  >
     <v-list>
-      <v-list-item link>
-        <v-list-item-content>
-          <v-list-item-title class="title">{{
-            user !== null ? user.name : ''
-          }}</v-list-item-title>
-          <v-list-item-subtitle>{{
-            user !== null ? user.email : ''
-          }}</v-list-item-subtitle>
-        </v-list-item-content>
+      <v-list-item class="px-2">
+        <v-list-item-avatar>
+          <v-avatar color="redS">
+            <span class="white--text headline">{{ getAvatarName }}</span>
+          </v-avatar>
+          <!-- <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img> -->
+        </v-list-item-avatar>
+        <v-list-item-title class="title">{{
+          user !== null ? user.name : ''
+        }}</v-list-item-title>
+      </v-list-item>
+      <v-list-item class="px-2">
+        <v-list-item-avatar>
+          <v-avatar color="whiteS">
+            <span class="blueS--text headline">{{ getAvatarRole }}</span>
+          </v-avatar>
+          <!-- <span class="white--text headline">CJ</span> -->
+        </v-list-item-avatar>
+        <v-list-item-subtitle class="mt-3"
+          ><span class="mr-2">
+            Rol:
+          </span>
+          {{ user !== null ? user.role.description : '' }}
+        </v-list-item-subtitle>
       </v-list-item>
     </v-list>
 
@@ -17,7 +40,7 @@
 
     <v-list dense nav shaped>
       <v-list-item
-        v-for="link in links.main"
+        v-for="link in getPrivilegesMainLinks"
         :key="link.name"
         :to="link.to"
         link
@@ -31,7 +54,7 @@
 
     <v-divider></v-divider>
 
-    <v-list dense nav shaped>
+    <v-list v-if="isAdmin" dense nav shaped>
       <v-list-group
         v-for="link in links.secondary"
         :key="link.name"
@@ -63,7 +86,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'NavigationDrawerApp',
   data: () => ({
@@ -73,17 +96,20 @@ export default {
         {
           name: 'Dashboard',
           icon: 'mdi-view-dashboard',
-          to: { name: 'Dashboard' }
+          to: { name: 'Dashboard' },
+          privileges: ['Administrador']
         },
         {
           name: 'Cursos',
           icon: 'mdi-google-classroom',
-          to: { name: 'Classroom' }
+          to: { name: 'Classroom' },
+          privileges: ['Administrador', 'Tutor', 'Operador']
         },
         {
           name: 'Ticket',
           icon: 'mdi-ticket-account',
-          to: { name: 'Ticket' }
+          to: { name: 'Ticket' },
+          privileges: ['Administrador', 'Operador']
         }
       ],
       secondary: [
@@ -167,12 +193,41 @@ export default {
   props: {
     drawer: {
       type: Boolean
-    }
+    },
+    breakpoint: String
+  },
+  created() {
+    this.attempt(localStorage.getItem('access_token'))
   },
   computed: {
     ...mapGetters({
-      user: 'auth/user'
+      user: 'auth/user',
+      isAdmin: 'auth/isAdmin',
+      isTutor: 'auth/isTutor',
+      isOperator: 'auth/isOperator',
+      role: 'auth/typeRole'
     }),
+    getAvatarName() {
+      if (this.user) {
+        const splitName = this.user.name.split(' ')
+        return `${splitName[0].charAt(0)}${splitName[1].charAt(0)}`
+      } else {
+        return ''
+      }
+    },
+    getAvatarRole() {
+      if (this.user) {
+        const role = this.user.role.description
+        return `${role.charAt(0)}${role.charAt(1)}`
+      } else {
+        return ''
+      }
+    },
+    getPrivilegesMainLinks() {
+      return this.links.main.filter(link =>
+        link.privileges.includes(this.role.description)
+      )
+    },
     drawerLocal: {
       get: function() {
         return this.drawer
@@ -180,7 +235,15 @@ export default {
       set: function(value) {
         this.$emit('update:drawer', value)
       }
+    },
+    bp() {
+      return this.breakpoint === 'sm' || this.breakpoint === 'xs'
     }
+  },
+  methods: {
+    ...mapActions({
+      attempt: 'auth/attempt'
+    })
   }
 }
 </script>

@@ -1,10 +1,39 @@
 <template>
   <div>
     <base-card color="blueS" class="px-5 py-3" title="Actividades">
+      <v-card flat outlined>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" sm="6" md="4" lg="4">
+              <v-btn
+                dark
+                depressed
+                color="blueS"
+                @click="syncActivities"
+                class="py-5"
+              >
+                <v-icon size="40" left>mdi-sync</v-icon>
+                Sincronizar actividades</v-btn
+              >
+            </v-col>
+            <v-col cols="12" sm="6" md="8" lg="8">
+              <base-autocomplete
+                v-model="category"
+                :items="categoryItems"
+                label="Categoría"
+                item-value="id"
+                item-text="description"
+                return-object
+              >
+              </base-autocomplete>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-card>
       <v-data-table
         :headers="headers"
         :items="activitiesFiltered"
-        class="elevation-1 grayS--text"
+        class="elevation-1 grayS--text mt-3"
         :loading="loading"
         loading-text="Cargando... por favor espere"
       >
@@ -14,85 +43,6 @@
             :height="3"
             indeterminate
           ></v-progress-linear>
-        </template>
-        <template v-slot:top>
-          <v-toolbar flat color="white">
-            <v-spacer></v-spacer>
-            <base-autocomplete
-              v-model="category"
-              :items="categoryItems"
-              label="Categoría"
-              item-value="id"
-              item-text="description"
-              return-object
-            >
-            </base-autocomplete>
-            <v-dialog v-model="dialog" max-width="500px" persistent>
-              <v-form>
-                <v-card>
-                  <v-card-title>
-                    <span class="headline">{{ formTitle }}</span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="12">
-                          <base-textfield
-                            v-model="editedItem.description"
-                            label="Nombre"
-                            required
-                            readonly
-                            @input="$v.description.$touch()"
-                            @blur="$v.description.$touch()"
-                            :error-messages="descriptionErrors"
-                          ></base-textfield>
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="4">
-                          <base-textfield
-                            v-model="editedItem.weighing"
-                            label="Ponderación (%)"
-                            required
-                            clearable
-                            @input="$v.weighing.$touch()"
-                            @blur="$v.weighing.$touch()"
-                            :error-messages="weighingErrors"
-                          ></base-textfield>
-                        </v-col>
-                        <v-col cols="8">
-                          <base-autocomplete
-                            v-model="sectionModel"
-                            :items="sectionItems"
-                            label="Sección"
-                            item-value="id"
-                            item-text="description"
-                            return-object
-                            @change="$v.sectionModel.$touch()"
-                            @blur="$v.sectionModel.$touch()"
-                            :error-messages="sectionErrors"
-                          >
-                          </base-autocomplete>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <base-button
-                      icon="mdi-check-circle"
-                      label="Guardar"
-                      @click="save"
-                    ></base-button>
-                    <v-btn text color="grayS" @click="close">
-                      <v-icon size="30" left>mdi-close-circle</v-icon>
-                      Cancelar</v-btn
-                    >
-                  </v-card-actions>
-                </v-card>
-              </v-form>
-            </v-dialog>
-          </v-toolbar>
         </template>
         <template v-slot:item.actions="{ item }">
           <v-tooltip color="blueS" bottom>
@@ -108,6 +58,71 @@
         </template>
       </v-data-table>
     </base-card>
+    <v-dialog v-model="dialog" max-width="500px" persistent>
+      <v-form>
+        <v-card>
+          <v-card-title>
+            <span class="headline">{{ formTitle }}</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <base-textfield
+                    v-model="editedItem.description"
+                    label="Nombre"
+                    required
+                    readonly
+                    @input="$v.description.$touch()"
+                    @blur="$v.description.$touch()"
+                    :error-messages="descriptionErrors"
+                  ></base-textfield>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="4">
+                  <base-textfield
+                    v-model="editedItem.weighing"
+                    label="Ponderación (%)"
+                    required
+                    clearable
+                    @input="$v.weighing.$touch()"
+                    @blur="$v.weighing.$touch()"
+                    :error-messages="weighingErrors"
+                  ></base-textfield>
+                </v-col>
+                <v-col cols="8">
+                  <base-autocomplete
+                    v-model="sectionModel"
+                    :items="sectionItems"
+                    label="Sección"
+                    item-value="id"
+                    item-text="description"
+                    return-object
+                    @change="$v.sectionModel.$touch()"
+                    @blur="$v.sectionModel.$touch()"
+                    :error-messages="sectionErrors"
+                  >
+                  </base-autocomplete>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <base-button
+              icon="mdi-check-circle"
+              label="Guardar"
+              @click="save"
+            ></base-button>
+            <v-btn text color="grayS" @click="close">
+              <v-icon size="30" left>mdi-close-circle</v-icon>
+              Cancelar</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-form>
+    </v-dialog>
     <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
       {{ message }}
       <v-btn dark text @click="snackbar = false">
@@ -262,6 +277,7 @@ export default {
       fetchCategoryItems: 'category/fetchCategories',
       putItem: 'activity/putActivity'
     }),
+    syncActivities() {},
     editItem(item) {
       this.editedIndex = this.activitiesFiltered.indexOf(item)
 

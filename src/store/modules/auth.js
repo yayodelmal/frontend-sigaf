@@ -10,7 +10,11 @@ export default {
   },
   mutations: {
     SET_LOGIN_USER: (state, user) => {
-      state.loginUser = Object.assign({}, user)
+      if (user !== null) {
+        state.loginUser = Object.assign({}, user.properties)
+      } else {
+        state.loginUser = user
+      }
     },
     SET_ACCESS_TOKEN: (state, access_token) => {
       state.access_token = access_token
@@ -25,6 +29,39 @@ export default {
     },
     user(state) {
       return state.loginUser
+    },
+    isAdmin(state) {
+      if (state.loginUser) {
+        return state.loginUser.role.description === 'Administrador'
+      } else {
+        return false
+      }
+
+      // return localStorage.getItem('role') === 'Administrador'
+    },
+    isTutor(state) {
+      if (state.loginUser) {
+        return state.loginUser.role.description === 'Tutor'
+      } else {
+        return false
+      }
+      // return localStorage.getItem('role') === 'Tutor'
+    },
+    isOperator(state) {
+      if (state.loginUser) {
+        return state.loginUser.role.description === 'Operador'
+      } else {
+        return false
+      }
+      // return localStorage.getItem('role') === 'Operador'
+    },
+    typeRole(state) {
+      if (state.loginUser) {
+        return state.loginUser.role
+      } else {
+        return false
+      }
+      //  return localStorage.getItem('role')
     }
   },
   actions: {
@@ -57,6 +94,20 @@ export default {
 
         commit('SET_ACCESS_TOKEN', null)
         commit('SET_LOGIN_USER', null)
+      }
+    },
+    logout: async ({ commit }) => {
+      try {
+        console.log('exe')
+        const { data } = await axios.get(`${BASE_URL}/logout`)
+
+        commit('SET_LOGIN_USER', null)
+        commit('SET_ACCESS_TOKEN', null)
+
+        return { success: true, message: data.message }
+      } catch (error) {
+        console.log(error)
+        return { success: false }
       }
     }
   }

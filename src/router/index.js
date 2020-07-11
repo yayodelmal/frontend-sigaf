@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../views/Login.vue'
+//import store from '../store/index'
 
 Vue.use(VueRouter)
 
@@ -217,6 +218,10 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
+
+// store.dispatch('auth/attempt', localStorage.getItem('access_token'))
+
+// console.log('dispatch')
 
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem('access_token')

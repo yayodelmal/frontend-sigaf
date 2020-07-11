@@ -9,17 +9,46 @@
           FORMATIVAS</v-toolbar-title
         >
         <v-spacer></v-spacer>
+        <v-btn @click="showLogoutConfirmation" icon dark color="grayS"
+          ><v-icon>mdi-logout</v-icon></v-btn
+        >
       </v-app-bar>
-      <navigation-drawer-app :drawer.sync="drawer"></navigation-drawer-app>
+      <navigation-drawer-app
+        :drawer.sync="drawer"
+        :breakpoint="breackPoint"
+      ></navigation-drawer-app>
       <router-view></router-view>
       <footer-app></footer-app>
     </v-container>
+    <v-dialog v-model="dialog" max-width="290">
+      <v-card>
+        <v-card-title class="headline text-center">SIGAF</v-card-title>
+
+        <v-card-text class="text-center text-h6">
+          ¿Cerrar sesión?
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="grayS" dark depressed @click="dialog = false">
+            CANCELAR
+          </v-btn>
+
+          <v-btn color="blueS" dark depressed @click="logout">
+            ACEPTAR
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-main>
 </template>
 
 <script>
 import NavigationDrawerApp from '../components/my/NavigationDrawer'
 import FooterApp from '../components/my/Footer'
+import { mapActions } from 'vuex'
+
 export default {
   components: {
     'navigation-drawer-app': NavigationDrawerApp,
@@ -29,7 +58,8 @@ export default {
     return {
       drawer: false,
       mini: false,
-      title: 'Ticket'
+      title: 'Ticket',
+      dialog: false
     }
   },
   computed: {
@@ -38,17 +68,30 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      logoutStore: 'auth/logout'
+    }),
     setMini() {
       this.mini = !this.mini
     },
     setDrawer() {
       this.drawer = !this.drawer
+    },
+    showLogoutConfirmation() {
+      this.dialog = true
+    },
+    async logout() {
+      const { success } = await this.logoutStore()
+
+      if (success) {
+        this.dialog = false
+        this.$router.push({ name: 'Login' })
+      }
     }
   },
   watch: {
     breackPoint(newValue) {
       if (newValue === 'sm' || newValue === 'xs') {
-        console.log('branch true')
         this.drawer = true
       } else {
         this.drawer = false

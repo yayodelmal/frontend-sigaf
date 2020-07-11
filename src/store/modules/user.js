@@ -14,13 +14,18 @@ export default {
   },
   getters: {
     users: state => {
-      return state.users.map(({ properties }) => {
-        return {
-          id: properties.id,
-          name: properties.name,
-          email: properties.email
-        }
-      })
+      return state.users
+        .map(({ properties }) => {
+          return {
+            id: properties.id,
+            name: properties.name,
+            email: properties.email,
+            role: properties.role
+          }
+        })
+        .filter(item => {
+          return item.role.description !== 'Tutor'
+        })
     }
   },
   actions: {

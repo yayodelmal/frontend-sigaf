@@ -29,24 +29,61 @@ export default {
       Object.assign(state.tickets[editedIndex], ticket)
     },
     DELETE_TICKET: (state, ticket) => {
-      console.log(ticket)
       const editedIndex = state.tickets.findIndex(find => {
-        console.log(ticket.id)
-        console.log(find.properties.id)
         return find.properties.id === ticket.id
       })
-
-      console.log(editedIndex)
       state.tickets.splice(editedIndex, 1)
     }
   },
   getters: {
-    tickets: state => {
+    tickets: (state, getters, rootState) => {
       return state.tickets.map(ticket => {
-        if (ticket.relationships.numberOfElements === 0) {
-          return Object.assign(ticket, { showDeleteButton: true })
+        if (rootState.auth.loginUser !== null) {
+          if (ticket.relationships.numberOfElements === 0) {
+            if (ticket.properties.statusTicket.description === 'Cerrado') {
+              if (
+                ticket.properties.userCreated.id === rootState.auth.loginUser.id
+              ) {
+                return Object.assign(ticket, {
+                  showDeleteButton: true,
+                  close: true
+                })
+              } else {
+                return Object.assign(ticket, {
+                  showDeleteButton: false,
+                  close: true
+                })
+              }
+            } else {
+              if (
+                ticket.properties.userCreated.id === rootState.auth.loginUser.id
+              ) {
+                return Object.assign(ticket, {
+                  showDeleteButton: true,
+                  close: false
+                })
+              } else {
+                return Object.assign(ticket, {
+                  showDeleteButton: false,
+                  close: false
+                })
+              }
+            }
+          } else {
+            if (ticket.properties.statusTicket.description === 'Cerrado') {
+              return Object.assign(ticket, {
+                showDeleteButton: false,
+                close: true
+              })
+            } else {
+              return Object.assign(ticket, {
+                showDeleteButton: false,
+                close: false
+              })
+            }
+          }
         } else {
-          return Object.assign(ticket, { showDeleteButton: false })
+          return ticket
         }
       })
     },
@@ -67,12 +104,9 @@ export default {
       const response = await axios.get(
         `${BASE_URL}/${ticket.id}/ticket-details`
       )
-
-      console.log(response)
       const { _data, success, error, message } = response.data
 
       if (success) {
-        console.log(_data.relationships.collection.data)
         commit('SET_TICKET_DETAILS', _data.relationships.collection.data)
 
         return { success, error, message }
@@ -84,11 +118,9 @@ export default {
     findTicket: async ({ commit }, ticket) => {
       const response = await axios.get(`${BASE_URL}/${ticket.id}`)
 
-      console.log(response)
       const { _data, success, error, message } = response.data
 
       if (success) {
-        console.log(_data.collections)
         commit('SET_TICKET', _data.collections)
 
         return { success, error, message }
@@ -103,7 +135,6 @@ export default {
       const { _data, success, error, message } = response.data
 
       if (success) {
-        console.log(_data.collections)
         commit('SET_TICKETS', _data.collections)
 
         return { success, error, message }
@@ -146,8 +177,6 @@ export default {
       try {
         const { data } = await axios.post(BASE_URL, ticket)
 
-        console.log(ticket)
-
         const { _data, success, error, message } = data
 
         if (success) {
@@ -155,8 +184,6 @@ export default {
         } else {
           console.log(error)
         }
-
-        console.log('_dataStore', _data)
 
         return { success, message, _data }
       } catch (error) {
