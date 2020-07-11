@@ -28,6 +28,14 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: 'followUp',
+        name: 'FollowUp',
+        component: () =>
+          import(/* webpackChunkName: "Seguimiento" */ '../views/FollowUp.vue'),
+        meta: { requiresAuth: true },
+        props: true
+      },
+      {
         path: 'ticket',
         name: 'Ticket',
         component: () =>

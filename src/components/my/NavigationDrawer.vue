@@ -100,9 +100,9 @@ export default {
           privileges: ['Administrador']
         },
         {
-          name: 'Cursos',
+          name: 'Seguimiento',
           icon: 'mdi-google-classroom',
-          to: { name: 'Classroom' },
+          to: { name: 'FollowUp' },
           privileges: ['Administrador', 'Tutor', 'Operador']
         },
         {
