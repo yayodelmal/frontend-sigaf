@@ -1,5 +1,5 @@
 <template>
-  <v-card v-bind="$attrs" :class="classes" class="v-card--material" fluid>
+  <v-card v-bind="$attrs" :class="classes" class="v-card--material mt-5" fluid>
     <div class="d-flex grow flex-wrap">
       <v-sheet
         :color="color"

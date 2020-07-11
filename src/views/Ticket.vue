@@ -2,7 +2,7 @@
   <v-container>
     <base-card
       color="blueS"
-      class="px-5 py-3 mt-10"
+      class="px-5 py-3"
       icon="mdi-ticket-account"
       title="Ticket"
     >
