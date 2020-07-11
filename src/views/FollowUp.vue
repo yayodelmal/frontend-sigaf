@@ -17,7 +17,7 @@
         >
         </base-autocomplete>
       </v-col>
-      <v-sheet :color="white" class="px-3 pt-3 pb-3">
+      <v-sheet color="white" class="px-3 pt-3 pb-3">
         <v-data-iterator
           :items="courseRegisteredUserItems"
           :items-per-page.sync="itemsPerPage"
