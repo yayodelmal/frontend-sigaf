@@ -110,6 +110,33 @@ export default {
           message: 'Error grave. Contacte al Administrador.'
         }
       }
+    },
+    getCourseRegisteredUserByUser: async (_, courseRegisteredUser) => {
+      console.log(courseRegisteredUser)
+      const idUser = courseRegisteredUser.registeredUser.id
+      const idCourse = courseRegisteredUser.course.id
+
+      const URL = `api/v2/sync/users/${idUser}/courses/${idCourse}/activities`
+      try {
+        const { data } = await axios.get(URL)
+
+        const { success, error, message } = data
+
+        if (success) {
+          return { success, error }
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        const { data } = error.response
+        console.log(error)
+        return {
+          success: data.success,
+          message: data.message
+        }
+      }
     }
   }
 }

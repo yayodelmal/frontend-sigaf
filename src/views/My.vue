@@ -17,6 +17,7 @@
         :drawer.sync="drawer"
         :breakpoint="breackPoint"
       ></navigation-drawer-app>
+
       <router-view></router-view>
       <footer-app></footer-app>
     </v-container>
@@ -50,9 +51,28 @@ import FooterApp from '../components/my/Footer'
 import { mapActions } from 'vuex'
 
 export default {
+  inject: ['theme'],
   components: {
     'navigation-drawer-app': NavigationDrawerApp,
     'footer-app': FooterApp
+    // VBoilerplate: {
+    //   functional: true,
+
+    //   render(h, { data, props, children }) {
+    //     return h(
+    //       'v-skeleton-loader',
+    //       {
+    //         ...data,
+    //         props: {
+    //           boilerplate: false,
+    //           elevation: 2,
+    //           ...props
+    //         }
+    //       },
+    //       children
+    //     )
+    //   }
+    // }
   },
   data() {
     return {

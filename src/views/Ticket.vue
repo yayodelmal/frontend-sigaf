@@ -920,7 +920,22 @@
       </template>
       <v-card flat>
         <v-card-text>
+          <div v-if="loading">
+            <v-skeleton-loader
+              :loading="loading"
+              :transition="transition"
+              class="mx-auto"
+              type="table-tbody"
+            ></v-skeleton-loader>
+            <v-skeleton-loader
+              :loading="loading"
+              :transition="transition"
+              class="mx-auto"
+              type="table-tfoot"
+            ></v-skeleton-loader>
+          </div>
           <v-data-table
+            v-else
             :headers="headers"
             :search="search"
             :items="tickets"
@@ -1107,6 +1122,7 @@ import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 export default {
+  inject: ['theme'],
   mixins: [validationMixin],
   validations: {
     category: {
@@ -1329,7 +1345,8 @@ export default {
       arrayCourseUserSelect: [],
       currentCourseUser: {},
       ticketClose: false,
-      checkCloseStatus: false
+      checkCloseStatus: false,
+      transition: 'scale-transition'
     }
   },
   methods: {
@@ -1579,24 +1596,20 @@ export default {
       }
     },
     async fetchDataCourses() {
-      this.loading = true
       const { success, message } = await this.fetchCourseItems()
       if (!success) {
         this.snackbar = true
 
         this.message = message
       }
-      this.loading = false
     },
     async fetchDataCategories() {
-      this.loading = true
       const { success, message } = await this.fetchCategoryItems()
       console.log()
       if (!success) {
         this.snackbar = true
         this.message = message
       }
-      this.loading = false
     },
     getColor(priority) {
       if (priority === 'Alta') return 'red'
@@ -1919,6 +1932,7 @@ export default {
     }
   },
   created() {
+    this.loading = true
     this.fetchCourseRegisteredUserItems()
     this.fetchDataCourses()
     this.fetchDataCategories()
@@ -1932,7 +1946,7 @@ export default {
     this.fetchClassroom()
     this.fetchStatusDetailTicket()
     this.fetchDetailTicket()
-    this.fetchItems()
+    this.fetchItems().then(() => (this.loading = false))
   },
   watch: {
     category() {

@@ -1,10 +1,18 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify/lib'
+import Vuetify, { VSkeletonLoader } from 'vuetify/lib'
 import { es, en } from 'vuetify/es5/locale'
+import { Ripple } from 'vuetify/lib/directives'
 
-Vue.use(Vuetify)
+Vue.use(Vuetify, {
+  components: {
+    VSkeletonLoader
+  },
+  directives: {
+    Ripple
+  }
+})
 
-export default new Vuetify({
+const options = {
   lang: {
     locales: { es, en },
     current: 'es'
@@ -19,4 +27,6 @@ export default new Vuetify({
       }
     }
   }
-})
+}
+
+export default new Vuetify(options)

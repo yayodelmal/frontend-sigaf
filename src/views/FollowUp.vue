@@ -41,6 +41,7 @@
                   v-if="loading"
                   class="mx-auto"
                   type="card"
+                  max-width="350"
                 ></v-skeleton-loader>
               </v-col>
             </v-row>
@@ -109,7 +110,7 @@
                         <div
                           v-if="hover"
                           class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal display-3 white--text rounded-t-xl"
-                          style="height: 100%;"
+                          style="height: 68%;"
                         >
                           <div class="d-flex flex-column">
                             <div
@@ -145,7 +146,7 @@
                               class="d-flex flex-row mb-5 align-content-space-between"
                             >
                               <v-col cols="6">
-                                <h3 class="headline">Unidad 1:</h3>
+                                <h3 class="headline">Unidad 2:</h3>
                               </v-col>
                               <v-col>
                                 <v-tooltip color="blueS" bottom>
@@ -154,7 +155,7 @@
                                       <kbd>6.9</kbd>
                                     </h3>
                                   </template>
-                                  <span>Unidad 1.1</span>
+                                  <span>Unidad 2.1</span>
                                 </v-tooltip>
                               </v-col>
                               <v-col>
@@ -164,7 +165,7 @@
                                       <kbd>6.9</kbd>
                                     </h3>
                                   </template>
-                                  <span>Unidad 1.2</span>
+                                  <span>Unidad 2.2</span>
                                 </v-tooltip>
                               </v-col>
                             </div>
@@ -172,7 +173,7 @@
                               class="d-flex flex-row mb-5 align-content-space-between"
                             >
                               <v-col cols="6">
-                                <h3 class="headline">Unidad 1:</h3>
+                                <h3 class="headline">Unidad 3:</h3>
                               </v-col>
                               <v-col>
                                 <v-tooltip color="blueS" bottom>
@@ -181,7 +182,7 @@
                                       <kbd>6.9</kbd>
                                     </h3>
                                   </template>
-                                  <span>Unidad 1.1</span>
+                                  <span>Unidad 3.1</span>
                                 </v-tooltip>
                               </v-col>
                               <v-col>
@@ -191,7 +192,7 @@
                                       <kbd>6.9</kbd>
                                     </h3>
                                   </template>
-                                  <span>Unidad 1.2</span>
+                                  <span>Unidad 3.2</span>
                                 </v-tooltip>
                               </v-col>
                             </div>
@@ -418,7 +419,7 @@ export default {
 <style scoped>
 .v-card--reveal {
   align-items: flex-start;
-  bottom: 0;
+  bottom: 32%;
   padding: 0.2em;
   justify-content: left;
   opacity: 0.9;

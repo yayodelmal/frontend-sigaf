@@ -11,10 +11,10 @@
                 color="blueS"
                 @click="syncActivities"
                 class="py-5"
+                icon
               >
-                <v-icon size="40" left>mdi-sync</v-icon>
-                Sincronizar actividades</v-btn
-              >
+                <v-icon size="30">mdi-sync</v-icon>
+              </v-btn>
             </v-col>
             <v-col cols="12" sm="6" md="8" lg="8">
               <base-autocomplete
@@ -160,22 +160,19 @@ import Activity from '../../models/Activity'
 import { validationMixin } from 'vuelidate'
 import { required, numeric, minValue, maxValue } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+import axios from '../../services/axios'
 
 export default {
   mixins: [validationMixin],
   validations: {
-    description: {
-      required
-    },
+    description: { required },
     weighing: {
       required,
       numeric,
       minValue: minValue(0),
       maxValue: maxValue(100)
     },
-    sectionModel: {
-      required
-    }
+    sectionModel: { required }
   },
   data: () => ({
     dialog: false,
@@ -277,7 +274,19 @@ export default {
       fetchCategoryItems: 'category/fetchCategories',
       putItem: 'activity/putActivity'
     }),
-    syncActivities() {},
+    syncActivities() {
+      if (this.category !== null) {
+        this.coursesByCategory.forEach(async course => {
+          if (course.properties.idCourseMoodle) {
+            await axios.get(
+              `api/v2/sync/course/${course.properties.idCourseMoodle}/activities`
+            )
+          }
+        })
+
+        this.filterActivitiesByCategories()
+      }
+    },
     editItem(item) {
       this.editedIndex = this.activitiesFiltered.indexOf(item)
 
@@ -285,12 +294,15 @@ export default {
       this.dialog = true
     },
     async filterActivitiesByCategories() {
+      this.activitiesFiltered = []
       if (this.category !== null) {
         await this.fetchCourseByCategory(this.category.courses.href)
 
         this.coursesByCategory.forEach(course => {
-          this.activitiesFiltered = this.activitiesItems.filter(activity => {
-            return activity.course.id === course.properties.id
+          this.activitiesItems.forEach(activity => {
+            if (activity.course.id === course.properties.id) {
+              this.activitiesFiltered.push(activity)
+            }
           })
         })
       }
