@@ -19,7 +19,7 @@
       </v-col>
       <v-sheet color="white" class="px-3 pt-3 pb-3">
         <v-data-iterator
-          :items="courseRegisteredUserItems"
+          :items="usersRegisteredFiltered"
           :items-per-page.sync="itemsPerPage"
           :page.sync="page"
           :loading="loading"
@@ -109,90 +109,34 @@
                       <v-expand-transition>
                         <div
                           v-if="hover"
-                          class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal display-3 white--text rounded-t-xl"
+                          class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
                           style="height: 68%;"
                         >
                           <div class="d-flex flex-column">
                             <div
-                              class="d-flex flex-row mb-5 align-content-space-between"
+                              v-for="section in sectionFiltered"
+                              :key="section.id"
+                              class="d-flex flex-row align-content-space-between"
                             >
                               <v-col cols="6">
-                                <h3 class="headline">Unidad 1:</h3>
+                                <h6 class="mt-2">{{ section.description }}</h6>
                               </v-col>
-                              <v-col>
+                              <v-col
+                                v-for="grade in getGrades(
+                                  section,
+                                  user.activities
+                                )"
+                                :key="grade.idActivityMoodle"
+                              >
                                 <v-tooltip color="white" bottom>
                                   <template v-slot:activator="{ on }">
-                                    <h3 class="headline" v-on="on">
-                                      <kbd>6.9</kbd>
-                                    </h3>
+                                    <h4 v-on="on">
+                                      <kbd>{{ grade.qualificationMoodle }}</kbd>
+                                    </h4>
                                   </template>
-                                  <span class="blueS--text darken-2"
-                                    >Unidad 1.1</span
-                                  >
-                                </v-tooltip>
-                              </v-col>
-                              <v-col>
-                                <v-tooltip color="blueS" bottom>
-                                  <template v-slot:activator="{ on }">
-                                    <h3 class="headline" v-on="on">
-                                      <kbd>6.9</kbd>
-                                    </h3>
-                                  </template>
-                                  <span>Unidad 1.2</span>
-                                </v-tooltip>
-                              </v-col>
-                            </div>
-                            <div
-                              class="d-flex flex-row mb-5 align-content-space-between"
-                            >
-                              <v-col cols="6">
-                                <h3 class="headline">Unidad 2:</h3>
-                              </v-col>
-                              <v-col>
-                                <v-tooltip color="blueS" bottom>
-                                  <template v-slot:activator="{ on }">
-                                    <h3 class="headline" v-on="on">
-                                      <kbd>6.9</kbd>
-                                    </h3>
-                                  </template>
-                                  <span>Unidad 2.1</span>
-                                </v-tooltip>
-                              </v-col>
-                              <v-col>
-                                <v-tooltip color="blueS" bottom>
-                                  <template v-slot:activator="{ on }">
-                                    <h3 class="headline" v-on="on">
-                                      <kbd>6.9</kbd>
-                                    </h3>
-                                  </template>
-                                  <span>Unidad 2.2</span>
-                                </v-tooltip>
-                              </v-col>
-                            </div>
-                            <div
-                              class="d-flex flex-row mb-5 align-content-space-between"
-                            >
-                              <v-col cols="6">
-                                <h3 class="headline">Unidad 3:</h3>
-                              </v-col>
-                              <v-col>
-                                <v-tooltip color="blueS" bottom>
-                                  <template v-slot:activator="{ on }">
-                                    <h3 class="headline" v-on="on">
-                                      <kbd>6.9</kbd>
-                                    </h3>
-                                  </template>
-                                  <span>Unidad 3.1</span>
-                                </v-tooltip>
-                              </v-col>
-                              <v-col>
-                                <v-tooltip color="blueS" bottom>
-                                  <template v-slot:activator="{ on }">
-                                    <h3 class="headline" v-on="on">
-                                      <kbd>6.9</kbd>
-                                    </h3>
-                                  </template>
-                                  <span>Unidad 3.2</span>
+                                  <span class="blueS--text darken-2">{{
+                                    grade.description
+                                  }}</span>
                                 </v-tooltip>
                               </v-col>
                             </div>
@@ -314,8 +258,16 @@ export default {
       courseRegisteredUserItems: 'courseRegisteredUser/courseRegisteredUsers',
       courseItems: 'course/courses',
       categoryItems: 'category/categories',
-      courseByCategory: 'course/coursesByCategory'
+      courseByCategory: 'course/coursesByCategory',
+      sections: 'section/sections'
     }),
+    sectionFiltered() {
+      return this.sections.filter(
+        section =>
+          section.description !== 'Formativa' &&
+          section.description !== 'Renuncia'
+      )
+    },
     breackPoint() {
       return this.$vuetify.breakpoint.name
     },
@@ -339,6 +291,7 @@ export default {
     this.fetchDataCourseRegisteredUserItems()
     this.fetchCourseItems()
     this.fetchDataCategoryItems()
+
     if (this.isXS) this.itemsPerPage = 3
     if (this.isSM) this.itemsPerPage = 6
     if (this.isMD) this.itemsPerPage = 6
@@ -366,6 +319,9 @@ export default {
         default:
           this.itemsPerPage = 6
       }
+    },
+    category() {
+      this.fetchUserByCourse()
     }
   },
   methods: {
@@ -374,8 +330,69 @@ export default {
         'courseRegisteredUser/fetchCourseRegisteredUsers',
       fetchCourseItems: 'course/fetchCourses',
       fetchCategoryItems: 'category/fetchCategories',
-      fetchCourseByCategory: 'course/getCoursesByCategory'
+      fetchCourseByCategory: 'course/getCoursesByCategory',
+      fetchCourseUserByCategory:
+        'courseRegisteredUser/getCourseRegisteredByCourse',
+      fetchSections: 'section/fetchSections'
     }),
+    groupBy(objectArray, property) {
+      return objectArray.reduce(function(acc, obj) {
+        let key = obj[property]
+        if (!acc[key]) {
+          acc[key] = []
+        }
+        acc[key].push(obj)
+        return acc
+      }, {})
+    },
+    getGrades(section, activities) {
+      console.log(section)
+      console.log(activities)
+
+      return activities[section.id]
+    },
+    async fetchUserByCourse() {
+      if (this.category !== null) {
+        await this.fetchCourseByCategory(this.category.courses.href)
+
+        await this.fetchSections()
+
+        const vm = this
+
+        vm.courseByCategory.forEach(async course => {
+          const response = await vm.fetchCourseUserByCategory(course)
+          if (response) {
+            response._data.forEach(user => {
+              const activities = user.activity_course_users
+                .map(activity => {
+                  if (activity) {
+                    return {
+                      qualificationMoodle: activity.qualification_moodle,
+                      statusMoodle: activity.status_moodle,
+                      description: activity.activity.description,
+                      idActivityMoodle: activity.activity.id_activity_moodle,
+                      idSection: activity.activity.section_id,
+                      section: activity.activity.section.description,
+                      type: activity.activity.type,
+                      weighing: activity.activity.weighing
+                    }
+                  } else {
+                    return activity
+                  }
+                })
+                .filter(activity => {
+                  if (activity) {
+                    return activity.section !== 'Formativa'
+                  }
+                })
+
+              user['activities'] = this.groupBy(activities, 'idSection')
+              vm.usersRegisteredFiltered.push(user)
+            })
+          }
+        })
+      }
+    },
     async fetchDataCourseRegisteredUserItems() {
       this.loading = true
       const { success, message } = await this.fetchCourseRegisteredUserItems()
@@ -393,25 +410,24 @@ export default {
         this.message = message
       }
       this.loading = false
-    },
-    async filterUsersByCategory() {
-      this.userRegisteredFiltered = []
-      if (this.category !== null) {
-        await this.fetchCourseByCategory(this.category.courses.href)
-
-        const vm = this
-
-        this.courseByCategory.forEach(function(course) {
-          vm.courseRegisteredUserItems.forEach(courseUser => {
-            if (courseUser.course.id === course.properties.id) {
-              vm.usersRegisteredFiltered.push(courseUser)
-            }
-          })
-        })
-      } else {
-        this.userRegisteredFiltered = this.courseRegisteredUserItems
-      }
     }
+    // async filterUsersByCategory() {
+    //   if (this.category !== null) {
+    //     await this.fetchCourseByCategory(this.category.courses.href)
+
+    //     const vm = this
+
+    //     this.courseByCategory.forEach(function(course) {
+    //       vm.courseRegisteredUserItems.forEach(courseUser => {
+    //         if (courseUser.course.id === course.properties.id) {
+    //           vm.usersRegisteredFiltered.push(courseUser)
+    //         }
+    //       })
+    //     })
+    //   } else {
+    //     this.userRegisteredFiltered = this.courseRegisteredUserItems
+    //   }
+    // }
   }
 }
 </script>
