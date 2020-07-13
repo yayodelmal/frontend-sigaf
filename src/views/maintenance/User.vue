@@ -38,12 +38,18 @@
                           <base-textfield
                             label="RUT"
                             v-model="editedItem.rut"
+                            clearable
+                            @blur="$v.rut.$touch()"
+                            :error-messages="rutErrors"
                           ></base-textfield>
                         </v-col>
                         <v-col cols="6">
                           <base-textfield
                             label="Nombre"
                             v-model="editedItem.name"
+                            clearable
+                            @blur="$v.name.$touch()"
+                            :error-messages="nameErrors"
                           ></base-textfield>
                         </v-col>
                       </v-row>
@@ -76,6 +82,8 @@
                             item-value="id"
                             item-text="description"
                             return-object
+                            @blur="$v.roleModel.$touch()"
+                            :error-messages="roleErrors"
                           ></base-autocomplete>
                         </v-col>
                       </v-row>
@@ -145,22 +153,22 @@ export default {
   validations: {
     rut: {
       required,
-      minLenght: minLength(11),
+      minLength: minLength(11),
       maxLength: maxLength(12)
     },
     name: {
       required,
-      minLenght: minLength(10),
+      minLength: minLength(10),
       maxLength: maxLength(200)
     },
     mobile: {
       required,
-      minLenght: minLength(10),
+      minLength: minLength(10),
       maxLength: maxLength(12)
     },
     email: {
       required,
-      minLenght: minLength(10),
+      minLength: minLength(10),
       maxLength: maxLength(255)
     },
     roleModel: {
@@ -199,7 +207,47 @@ export default {
     roleModel: null
   }),
   computed: {
-    ...mapGetters({ usersItems: 'user/allUsers', rolesItems: 'role/roles' }),
+    ...mapGetters({
+      usersItems: 'user/allUsers',
+      rolesItems: 'role/roles'
+    }),
+    rutErrors() {
+      const errors = []
+
+      if (!this.$v.rut.$dirty) return errors
+      !this.$v.rut.required && errors.push('RUT es obligatorio.')
+      !this.$v.rut.minLength &&
+        errors.push('RUT debe contener al menos 11 caracteres.')
+      !this.$v.rut.maxLength &&
+        errors.push('RUT debe contener máximo 12 caracteres.')
+      return errors
+    },
+    nameErrors() {
+      const errors = []
+
+      if (!this.$v.name.$dirty) return errors
+      !this.$v.name.required && errors.push('Nombre es obligatorio.')
+      !this.$v.name.minLength &&
+        errors.push('Nombre debe contener al menos 10 caracteres.')
+      !this.$v.name.maxLength &&
+        errors.push('Nombre debe contener máximo 200 caracteres.')
+      return errors
+    },
+    mobileErrors() {
+      const errors = []
+      return errors
+    },
+    emailErrors() {
+      const errors = []
+      return errors
+    },
+    roleErrors() {
+      const errors = []
+      if (!this.$v.roleModel.$dirty) return errors
+      !this.$v.roleModel.required && errors.push('Rol es obligatorio.')
+      return errors
+    },
+
     formTitle() {
       return this.editedIndex === -1 ? 'Crear usuario' : 'Editar usuario'
     }
@@ -221,6 +269,7 @@ export default {
       item
     },
     close() {
+      this.dialog = false
       setTimeout(() => {
         this.clear()
       }, 300)
