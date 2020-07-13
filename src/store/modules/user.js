@@ -18,14 +18,34 @@ export default {
         .map(({ properties }) => {
           return {
             id: properties.id,
+            rut: properties.rut,
             name: properties.name,
+            phone: properties.phone,
+            mobile: properties.mobile,
             email: properties.email,
-            role: properties.role
+            role: properties.role,
+            password: properties.password,
+            isFirstLogin: properties.isFirstLogin
           }
         })
         .filter(item => {
           return item.role.description !== 'Tutor'
         })
+    },
+    allUsers: state => {
+      return state.users.map(({ properties }) => {
+        return {
+          id: properties.id,
+          rut: properties.rut,
+          name: properties.name,
+          phone: properties.phone,
+          mobile: properties.mobile,
+          email: properties.email,
+          role: properties.role,
+          password: properties.password,
+          isFirstLogin: properties.isFirstLogin
+        }
+      })
     }
   },
   actions: {
