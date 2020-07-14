@@ -38,7 +38,7 @@
                           <base-textfield
                             label="RUT"
                             v-model="editedItem.rut"
-                            clearable
+                            @input="$v.rut.$touch()"
                             @blur="$v.rut.$touch()"
                             :error-messages="rutErrors"
                           ></base-textfield>
@@ -47,8 +47,8 @@
                           <base-textfield
                             label="Nombre"
                             v-model="editedItem.name"
-                            clearable
                             @blur="$v.name.$touch()"
+                            @input="$v.name.$touch()"
                             :error-messages="nameErrors"
                           ></base-textfield>
                         </v-col>
@@ -58,12 +58,18 @@
                           <base-textfield
                             label="Teléfono"
                             v-model="editedItem.phone"
+                            @blur="$v.phone.$touch()"
+                            @input="$v.phone.$touch()"
+                            :error-messages="phoneErrors"
                           ></base-textfield>
                         </v-col>
                         <v-col cols="6">
                           <base-textfield
                             label="Celular"
                             v-model="editedItem.mobile"
+                            @blur="$v.mobile.$touch()"
+                            @input="$v.mobile.$touch()"
+                            :error-messages="mobileErrors"
                           ></base-textfield>
                         </v-col>
                       </v-row>
@@ -72,6 +78,9 @@
                           <base-textfield
                             label="Correo electrónico"
                             v-model="editedItem.email"
+                            @blur="$v.email.$touch()"
+                            @input="$v.email.$touch()"
+                            :error-messages="emailErrors"
                           ></base-textfield>
                         </v-col>
                         <v-col cols="6">
@@ -83,6 +92,7 @@
                             item-text="description"
                             return-object
                             @blur="$v.roleModel.$touch()"
+                            @change="setRole($event)"
                             :error-messages="roleErrors"
                           ></base-autocomplete>
                         </v-col>
@@ -161,6 +171,11 @@ export default {
       minLength: minLength(10),
       maxLength: maxLength(200)
     },
+    phone: {
+      required,
+      minLength: minLength(10),
+      maxLength: maxLength(12)
+    },
     mobile: {
       required,
       minLength: minLength(10),
@@ -233,12 +248,34 @@ export default {
         errors.push('Nombre debe contener máximo 200 caracteres.')
       return errors
     },
+    phoneErrors() {
+      const errors = []
+      if (!this.$v.phone.$dirty) return errors
+      !this.$v.phone.minLength &&
+        errors.push('Teléfono debe contener al menos 10 caracteres.')
+      !this.$v.phone.maxLength &&
+        errors.push('Teléfono debe contener máximo 12 caracteres.')
+      return errors
+    },
     mobileErrors() {
       const errors = []
+
+      if (!this.$v.mobile.$dirty) return errors
+      !this.$v.mobile.required && errors.push('Celular es obligatorio.')
+      !this.$v.mobile.minLength &&
+        errors.push('Celular debe contener al menos 10 caracteres.')
+      !this.$v.mobile.maxLength &&
+        errors.push('Celular debe contener máximo 12 caracteres.')
       return errors
     },
     emailErrors() {
       const errors = []
+      if (!this.$v.email.$dirty) return errors
+      !this.$v.email.required && errors.push('Es obligatorio.')
+      !this.$v.email.minLength &&
+        errors.push('Debe contener al menos 10 caracteres.')
+      !this.$v.email.maxLength &&
+        errors.push('Debe contener máximo 255 caracteres.')
       return errors
     },
     roleErrors() {
@@ -247,7 +284,21 @@ export default {
       !this.$v.roleModel.required && errors.push('Rol es obligatorio.')
       return errors
     },
-
+    rut() {
+      return this.editedItem.rut
+    },
+    name() {
+      return this.editedItem.name
+    },
+    phone() {
+      return this.editedItem.phone
+    },
+    mobile() {
+      return this.editedItem.mobile
+    },
+    email() {
+      return this.editedItem.email
+    },
     formTitle() {
       return this.editedIndex === -1 ? 'Crear usuario' : 'Editar usuario'
     }
@@ -259,8 +310,13 @@ export default {
   methods: {
     ...mapActions({
       fetchUserItems: 'user/fetchUsers',
+      postItem: 'user/postUser',
       fetchRoleItems: 'role/fetchRoles'
     }),
+    setRole(value) {
+      this.editedItem.role = value
+      this.$v.roleModel.$touch()
+    },
     async save() {},
     editItem(item) {
       item

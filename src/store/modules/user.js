@@ -71,6 +71,7 @@ export default {
           message: data.message
         }
       }
-    }
+    },
+    postUser: async () => {}
   }
 }
