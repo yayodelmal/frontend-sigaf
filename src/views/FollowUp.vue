@@ -6,16 +6,23 @@
       icon="mdi-google-classroom"
       title="Seguimiento de alumnos"
     >
-      <v-col cols="12" sm="6" md="8" lg="8">
-        <base-autocomplete
-          v-model="category"
-          :items="categoryItems"
-          label="Categoría"
-          item-value="id"
-          item-text="description"
-          return-object
-        >
-        </base-autocomplete>
+      <v-col cols="12">
+        <v-toolbar dark color="blueS darken-1" class="mb-1">
+          <v-select
+            v-model="category"
+            :items="categoryItems"
+            label="Categoría"
+            item-value="id"
+            item-text="description"
+            color="blueS"
+            flat
+            solo-inverted
+            hide-details
+            return-object
+            prepend-inner-icon="mdi-filter-outline"
+          >
+          </v-select>
+        </v-toolbar>
       </v-col>
       <v-sheet color="white" class="px-3 pt-3 pb-3">
         <v-data-iterator
@@ -25,6 +32,9 @@
           :loading="loading"
           hide-default-footer
           @page-count="pageCount = $event"
+          :search="search"
+          :sort-by="sortBy"
+          :sort-desc="sortDesc"
         >
           <template v-slot:loading>
             <v-row>
@@ -46,16 +56,49 @@
               </v-col>
             </v-row>
           </template>
-          <!-- <template v-slot:header>
-            <v-toolbar class="mb-2" color="blueS" dark flat>
-              <v-toolbar-title>Listado alumnos</v-toolbar-title>
+
+          <template v-if="usersRegisteredFiltered.length" v-slot:header>
+            <v-toolbar dark color="blueS darken-1" class="mb-1">
+              <v-text-field
+                v-model="search"
+                color="blueS"
+                clearable
+                flat
+                solo-inverted
+                hide-details
+                prepend-inner-icon="mdi-magnify"
+                label="Buscar"
+              ></v-text-field>
+              <template v-if="$vuetify.breakpoint.mdAndUp">
+                <v-spacer></v-spacer>
+                <v-select
+                  v-model="sortBy"
+                  flat
+                  item-value="key"
+                  item-text="value"
+                  solo-inverted
+                  hide-details
+                  :items="keys"
+                  prepend-inner-icon="mdi-filter-outline"
+                  label="Ordernar por"
+                ></v-select>
+                <v-spacer></v-spacer>
+                <v-btn-toggle v-model="sortDesc" mandatory>
+                  <v-btn large depressed color="blueS" :value="false">
+                    <v-icon>mdi-arrow-up</v-icon>
+                  </v-btn>
+                  <v-btn large depressed color="blueS" :value="true">
+                    <v-icon>mdi-arrow-down</v-icon>
+                  </v-btn>
+                </v-btn-toggle>
+              </template>
             </v-toolbar>
-          </template> -->
+          </template>
           <template v-slot:default="props">
             <v-row>
               <v-col
-                v-for="user in props.items"
-                :key="user.rut"
+                v-for="(user, index) in props.items"
+                :key="index"
                 cols="12"
                 sm="6"
                 md="6"
@@ -81,15 +124,19 @@
                       outlined
                     >
                       <v-card-text>
+                        <span class="headline font-weight-bold">
+                          {{ user.classroom.description }}</span
+                        ><br />
+                        <span class="text-caption"> Progreso:</span><br />
                         <v-avatar size="120">
                           <v-progress-circular
                             :rotate="-90"
                             :size="100"
                             :width="15"
-                            :value="30"
+                            :value="getValueProgress(user)"
                             color="blueS"
                           >
-                            30
+                            {{ getValueProgress(user) }}%
                           </v-progress-circular>
                         </v-avatar>
                         <h3 class="headline mb-2">
@@ -110,18 +157,21 @@
                         <div
                           v-if="hover"
                           class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
-                          style="height: 68%;"
+                          style="height: 78%;"
                         >
                           <div class="d-flex flex-column">
                             <div
                               v-for="section in sectionFiltered"
                               :key="section.id"
-                              class="d-flex flex-row align-content-space-between"
+                              class="d-flex flex-row"
                             >
-                              <v-col cols="6">
-                                <h6 class="mt-2">{{ section.description }}</h6>
-                              </v-col>
-                              <v-col
+                              <div class="px-3 py-2 title-section">
+                                <h6 class="text-overline">
+                                  {{ section.description }}:
+                                </h6>
+                              </div>
+                              <div
+                                class="px-1 py-2"
                                 v-for="grade in getGrades(
                                   section,
                                   user.activities
@@ -138,25 +188,32 @@
                                     grade.description
                                   }}</span>
                                 </v-tooltip>
-                              </v-col>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </v-expand-transition>
                       <v-divider></v-divider>
-                      <v-row class="text-left" tag="v-card-text">
-                        <v-col class="mb-2 pl-8" tag="strong" cols="5"
-                          >Estado:</v-col
-                        >
-                        <v-col>ACTIVO</v-col>
-                        <v-col class="mb-2 pl-8" tag="strong" cols="5"
-                          >Conexión:</v-col
-                        >
-                        <v-col>
-                          <span
-                            class="font-weight-bold font-italic custom-class"
+                      <v-row class="text-center">
+                        <v-col cols="6" class="mx-auto">
+                          <v-card
+                            :color="getColorState(user.state)"
+                            flat
+                            dark
+                            class="py-1"
+                            ><span>{{
+                              user.state ? 'RENUNCIADO' : 'ACTIVO'
+                            }}</span></v-card
                           >
-                            Hace {{ user.last_access_registered_moodle }}</span
+                        </v-col>
+
+                        <v-col cols="12">
+                          <span class="font-weight-bold">
+                            <v-icon class="mr-2">
+                              mdi-clock
+                            </v-icon>
+                            Última conexión:
+                            {{ user.last_access_registered_moodle }}</span
                           >
                         </v-col>
                       </v-row>
@@ -251,7 +308,15 @@ export default {
     itemsPerPage: 6,
     page: 1,
     pageCount: 0,
-    transition: 'scale-transition'
+    transition: 'scale-transition',
+    sortBy: 'state',
+    keys: [
+      { key: 'state', value: 'Estado' },
+      { key: 'classroom_id', value: 'Aula' },
+      { key: 'progress', value: 'Progreso' }
+    ],
+    filter: {},
+    sortDesc: false
   }),
   computed: {
     ...mapGetters({
@@ -285,12 +350,27 @@ export default {
     },
     isXL() {
       return this.breackPoint === 'xl'
+    },
+    filterKeys() {
+      let array = []
+      this.keys.forEach(key => {
+        array.push(Object.values(key))
+      })
+
+      return array
+    },
+    // numberOfPages() {
+    //   return Math.ceil(this.items.length / this.itemsPerPage)
+    // },
+    filteredKeys() {
+      return this.filterKeys.filter(key => key !== `Estado`)
     }
   },
   created() {
     this.fetchDataCourseRegisteredUserItems()
     this.fetchCourseItems()
     this.fetchDataCategoryItems()
+    this.fetchSections()
 
     if (this.isXS) this.itemsPerPage = 3
     if (this.isSM) this.itemsPerPage = 6
@@ -321,6 +401,7 @@ export default {
       }
     },
     category() {
+      this.loading = true
       this.fetchUserByCourse()
     }
   },
@@ -335,37 +416,70 @@ export default {
         'courseRegisteredUser/getCourseRegisteredByCourse',
       fetchSections: 'section/fetchSections'
     }),
+    getValueProgress(user) {
+      return user.progress
+    },
+    getColorState(state) {
+      if (state) return 'redS darken-1'
+      return 'blueS darken-1'
+    },
     groupBy(objectArray, property) {
-      return objectArray.reduce(function(acc, obj) {
-        let key = obj[property]
-        if (!acc[key]) {
-          acc[key] = []
+      return objectArray.reduce(function(accumulator, object) {
+        let key = object[property]
+        if (!accumulator[key]) {
+          accumulator[key] = []
         }
-        acc[key].push(obj)
-        return acc
+        accumulator[key].push(object)
+        return accumulator
       }, {})
     },
     getGrades(section, activities) {
-      console.log(section)
-      console.log(activities)
-
-      return activities[section.id]
+      if (activities && section) {
+        return activities[section.id].filter(activity => {
+          return activity.qualificationMoodle !== '-'
+        })
+      }
     },
     async fetchUserByCourse() {
       if (this.category !== null) {
         await this.fetchCourseByCategory(this.category.courses.href)
 
-        await this.fetchSections()
+        this.mapActivityUser(this.courseByCategory)
+      }
+    },
 
-        const vm = this
+    mapActivityUser(categories) {
+      const vm = this
+      categories.forEach(async course => {
+        const response = await vm.fetchCourseUserByCategory(course)
 
-        vm.courseByCategory.forEach(async course => {
-          const response = await vm.fetchCourseUserByCategory(course)
-          if (response) {
-            response._data.forEach(user => {
+        if (response) {
+          response._data.forEach(user => {
+            if (user.activity_course_users.length !== 0) {
+              let state
+              let progress = 0
               const activities = user.activity_course_users
                 .map(activity => {
                   if (activity) {
+                    if (
+                      activity.activity.section.description === 'Renuncia' &&
+                      activity.status_moodle === 'Finalizado'
+                    ) {
+                      state = true
+                    } else {
+                      state = false
+                    }
+
+                    let checkQualificationMoodle = ['', '-']
+                    if (
+                      !checkQualificationMoodle.includes(
+                        activity.qualification_moodle
+                      ) &&
+                      activity.activity.weighing !== 0
+                    ) {
+                      progress++
+                    }
+
                     return {
                       qualificationMoodle: activity.qualification_moodle,
                       statusMoodle: activity.status_moodle,
@@ -386,12 +500,37 @@ export default {
                   }
                 })
 
+              const totalProgress = this.sections
+                .filter(section => {
+                  const filterSection = [
+                    'Formativa',
+                    'Renuncia',
+                    'Inicio',
+                    'Cierre'
+                  ]
+                  return !filterSection.includes(section.description)
+                })
+                .reduce(
+                  (accumulator, currentValue) =>
+                    accumulator + currentValue.numberActivities,
+                  0
+                )
+
+              const accumulativeProgress = Number.parseFloat(
+                (progress / totalProgress) * 100
+              )
+              user['state'] = state
+              user[
+                'fullname'
+              ] = `${user.registered_user.name} ${user.registered_user.last_name}`
+              user['progress'] = accumulativeProgress
               user['activities'] = this.groupBy(activities, 'idSection')
               vm.usersRegisteredFiltered.push(user)
-            })
-          }
-        })
-      }
+            }
+          })
+          this.loading = false
+        }
+      })
     },
     async fetchDataCourseRegisteredUserItems() {
       this.loading = true
@@ -435,12 +574,16 @@ export default {
 <style scoped>
 .v-card--reveal {
   align-items: flex-start;
-  bottom: 32%;
+  bottom: 22%;
   padding: 0.2em;
   justify-content: left;
   opacity: 0.9;
   position: absolute;
   width: 100%;
+}
+.title-section {
+  width: 100px;
+  text-align: left;
 }
 /* 
 .custom-class {

@@ -93,14 +93,14 @@
                 </v-col>
                 <v-col cols="8">
                   <base-autocomplete
-                    v-model="sectionModel"
+                    v-model="editedItem.section"
                     :items="sectionItems"
                     label="Sección"
                     item-value="id"
                     item-text="description"
                     return-object
-                    @change="$v.sectionModel.$touch()"
-                    @blur="$v.sectionModel.$touch()"
+                    @change="$v.section.$touch()"
+                    @blur="$v.section.$touch()"
                     :error-messages="sectionErrors"
                   >
                   </base-autocomplete>
@@ -172,7 +172,7 @@ export default {
       minValue: minValue(0),
       maxValue: maxValue(100)
     },
-    sectionModel: { required }
+    section: { required }
   },
   data: () => ({
     dialog: false,
@@ -244,8 +244,8 @@ export default {
     sectionErrors() {
       const errors = []
 
-      if (!this.$v.sectionModel.$dirty) return errors
-      !this.$v.sectionModel.required && errors.push('Es obligatorio.')
+      if (!this.$v.section.$dirty) return errors
+      !this.$v.section.required && errors.push('Es obligatorio.')
 
       return errors
     },
@@ -257,6 +257,9 @@ export default {
     },
     weighing() {
       return this.editedItem.weighing
+    },
+    section() {
+      return this.editedItem.section
     }
   },
   created() {
@@ -291,6 +294,7 @@ export default {
       this.editedIndex = this.activitiesFiltered.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
+
       this.dialog = true
     },
     async filterActivitiesByCategories() {
@@ -352,7 +356,6 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
-        this.editedItem.section = { ...this.sectionModel }
         const { success, message } = await this.putItem(this.editedItem)
         if (success) {
           this.snackbar = true

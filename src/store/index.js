@@ -47,5 +47,13 @@ export default new Vuex.Store({
     statusDetailTicket,
     courseRegisteredUser,
     platform
+  },
+  state: {
+    drawer: null
+  },
+  mutations: {
+    SET_DRAWER(state, payload) {
+      state.drawer = payload
+    }
   }
 })

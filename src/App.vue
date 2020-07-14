@@ -8,14 +8,6 @@
 // import Login from './views/Login'
 
 export default {
-  name: 'App',
-
-  // components: {
-  //   Login
-  // },
-
-  data: () => ({
-    //
-  })
+  name: 'App'
 }
 </script>

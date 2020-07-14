@@ -44,6 +44,24 @@ export default {
           }
         }
       })
+    },
+    statusTicketByOperator: state => {
+      return state.statusTickets.map(status => {
+        const array = status.relationships.data.reduce(function(
+          accumulator,
+          object
+        ) {
+          let key = object.name
+          if (!accumulator[key]) {
+            accumulator[key] = []
+          }
+          accumulator[key].push(object)
+          return accumulator
+        },
+        {})
+
+        return { status: status.properties, array }
+      })
     }
   },
   actions: {
