@@ -4,14 +4,20 @@
     class="px-5 py-3 mt-5"
     title="Gestión de estudiantes"
   >
-    <v-card flat height="200px" v-if="loadingCourse" class="text-center">
-      <v-progress-circular
-        class="mt-10"
-        :size="50"
-        color="blueS"
-        indeterminate
-      ></v-progress-circular>
-    </v-card>
+    <div v-if="loadingCourse">
+      <v-skeleton-loader
+        :loading="loadingCourse"
+        :transition="transition"
+        class="mx-auto"
+        type="card-heading"
+      ></v-skeleton-loader>
+      <v-skeleton-loader
+        :loading="loadingCourse"
+        :transition="transition"
+        class="mx-auto"
+        type="actions"
+      ></v-skeleton-loader>
+    </div>
     <v-card v-else-if="!isData" flat outlined>
       <v-card-title>
         Seleccione un curso:
@@ -60,25 +66,35 @@
         <v-card-text>
           <v-data-table
             :headers="headers"
+            :search="search"
             :items="usersByCourse"
             loading-text="Cargando... por favor espere"
             calculate-widths
             :loading="loadingTable"
+            show-select
+            v-model="selected"
           >
             <template v-slot:top>
               <v-toolbar flat color="white">
                 <v-row>
                   <base-textfield
                     label="Buscar"
+                    v-model="search"
                     required
                     clearable
                   ></base-textfield>
                   <v-spacer></v-spacer>
                   <base-button
                     icon="mdi-sync"
-                    label="Sincronizar usuarios"
+                    label="usuarios"
                     @click="syncUsers"
                     :loading="loadingSync"
+                  ></base-button>
+                  <base-button
+                    icon="mdi-sync"
+                    label="Actividades"
+                    @click="syncActivities"
+                    :loading="loadingSynActivities"
                   ></base-button>
                   <v-dialog v-model="dialog" max-width="1000px" persistent>
                     <v-form>
@@ -367,6 +383,20 @@
                 </v-row>
               </v-toolbar>
             </template>
+            <template v-slot:header.data-table-select="{ props, on }">
+              <v-simple-checkbox
+                color="blueS"
+                v-bind="props"
+                v-on="on"
+              ></v-simple-checkbox>
+            </template>
+            <template v-slot:item.data-table-select="{ isSelected, select }">
+              <v-simple-checkbox
+                color="blueS"
+                :value="isSelected"
+                @input="select($event)"
+              ></v-simple-checkbox>
+            </template>
             <template v-slot:item.status="{ item }">
               <v-tooltip color="blueS" bottom>
                 <template v-slot:activator="{ on }">
@@ -413,6 +443,12 @@
         </v-card-text>
       </v-card>
     </v-expand-transition>
+    <v-overlay :value="overlay" color="grayS" :opacity="opacity">
+      <div class="text-center">
+        <v-progress-circular indeterminate size="64"> </v-progress-circular>
+      </div>
+      <h3 class="headline text-center mt-5">Sincronizando...</h3>
+    </v-overlay>
     <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
       {{ message }}
       <v-btn dark text @click="snackbar = false">
@@ -548,7 +584,13 @@ export default {
     rulesValueStepOne: true,
     completeStepOne: false,
     finalSave: false,
-    loadingSync: false
+    loadingSync: false,
+    transition: 'scale-transition',
+    search: '',
+    selected: [],
+    loadingSynActivities: false,
+    overlay: false,
+    opacity: 0.8
   }),
   created() {
     this.loadingCourse = true
@@ -566,7 +608,8 @@ export default {
   computed: {
     ...mapGetters({
       courseItems: 'course/courses',
-      usersByCourse: 'course/usersByCourse'
+      usersByCourse: 'course/usersByCourse',
+      classrooms: 'classroom/classrooms'
     }),
     options() {
       return {
@@ -659,7 +702,9 @@ export default {
       fetchCourses: 'course/fetchCourses',
       fetchUsersByCourse: 'course/getUsersByCourse',
       postRegisteredUser: 'registeredUser/postRegisteredUser',
-      postCourseUser: 'courseRegisteredUser/postCourseRegisteredUser'
+      postCourseUser: 'courseRegisteredUser/postCourseRegisteredUser',
+      fetchClassroom: 'classroom/fetchClassrooms',
+      fethActivitiesByUser: 'courseRegisteredUser/getCourseRegisteredUserByUser'
     }),
     getStatus(status) {
       if (status) return 'mdi-check'
@@ -670,8 +715,7 @@ export default {
       else return 'redS'
     },
     async syncUser(item) {
-      console.log(item)
-
+      this.overlay = true
       if (item.course.id_course_moodle) {
         const URL = `/api/v2/sync/course-users/${item.course.id_course_moodle}/users/${item.registeredUser.rut}`
         const { status } = await axios.get(URL)
@@ -679,16 +723,67 @@ export default {
         if (status === 204) {
           this.snackbar = true
           this.message = 'El usuario no se encuentra registrado en moodle'
+          this.overlay = false
         } else if (status === 201) {
-          this.snackbar = true
-          this.message = 'Sincronización exitosa'
+          setTimeout(async () => {
+            try {
+              const { success } = await this.fethActivitiesByUser(item)
+              if (success) {
+                this.snackbar = true
+                this.message = `Sincronización exitosa ${item.registeredUser.name} ${item.registeredUser.last_name}`
+
+                this.overlay = false
+              }
+            } catch (error) {
+              console.log(error)
+            }
+          }, 500)
         } else if (status === 416) {
           this.snackbar = true
           this.message = 'RUT no válido'
+          this.overlay = false
         }
       }
     },
 
+    async syncActivities() {
+      this.overlay = true
+      if (this.selected.length === 0) {
+        const { success } = await this.fetchClassroom()
+
+        if (success) {
+          this.classrooms.forEach((classroom, index) => {
+            setTimeout(async () => {
+              const { data } = await axios.get(
+                `api/v2/sync/courses/${this.courseModel.idCourseMoodle}/classrooms/${classroom.id}/activities`
+              )
+
+              if (data.success) {
+                this.snackbar = true
+                this.message = `Sincronización exitosa ${classroom.description}`
+              }
+
+              if (index === this.classrooms.length - 1) {
+                this.overlay = false
+              }
+            }, 500)
+          })
+        }
+      } else {
+        this.selected.forEach(async (userCourse, index) => {
+          setTimeout(async () => {
+            const { success } = await this.fethActivitiesByUser(userCourse)
+            if (success) {
+              this.snackbar = true
+              this.message = `Sincronización exitosa ${userCourse.registeredUser.name} ${userCourse.registeredUser.last_name}`
+            }
+            if (index === this.selected.length - 1) {
+              this.overlay = false
+            }
+          }, 500)
+        })
+      }
+    },
     async syncUsers() {
       if (this.courseModel.idCourseMoodle) {
         const URL = `/api/v2/sync/course-users/${this.courseModel.idCourseMoodle}/users`

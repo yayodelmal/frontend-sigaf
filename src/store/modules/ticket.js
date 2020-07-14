@@ -97,6 +97,16 @@ export default {
     },
     getLastTicket: state => {
       return state.tickets[state.tickets.length - 1]
+    },
+    getStatusTicket: state => {
+      return state.tickets.reduce(function(accumulator, object) {
+        let key = object.properties.statusTicket.description
+        if (!accumulator[key]) {
+          accumulator[key] = []
+        }
+        accumulator[key].push(object)
+        return accumulator
+      }, {})
     }
   },
   actions: {

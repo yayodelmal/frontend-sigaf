@@ -1,7 +1,28 @@
 <template>
   <div>
     <base-card color="blueS" class="px-5 py-3" title="Categoría de curso">
+      <div v-if="loading">
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-heading"
+        ></v-skeleton-loader>
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-tbody"
+        ></v-skeleton-loader>
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-tfoot"
+        ></v-skeleton-loader>
+      </div>
       <v-data-table
+        v-else
         :headers="headers"
         :items="categoriesItems"
         class="elevation-1 grayS--text"
@@ -162,6 +183,7 @@ import {
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
+  inject: ['theme'],
   mixins: [validationMixin],
   validations: {
     description: {
@@ -206,7 +228,8 @@ export default {
     snackbar: false,
     timeout: 3000,
     loading: false,
-    platformModel: null
+    platformModel: null,
+    transition: 'scale-transition'
   }),
   computed: {
     ...mapGetters({
@@ -254,8 +277,9 @@ export default {
     }
   },
   created() {
+    this.loading = true
     this.fetchDataCategories()
-    this.fetchDataPlatforms()
+    this.fetchDataPlatforms().then(() => (this.loading = false))
   },
   methods: {
     ...mapActions({
@@ -282,23 +306,19 @@ export default {
       this.dialog = true
     },
     async fetchDataCategories() {
-      this.loading = true
       const { success, message } = await this.fetchCategoryItems()
       if (!success) {
         this.snackbar = true
         this.message = message
       }
-      this.loading = false
     },
     async fetchDataPlatforms() {
-      this.loading = true
       const { success, message } = await this.fetchPlatformItems()
       console.log()
       if (!success) {
         this.snackbar = true
         this.message = message
       }
-      this.loading = false
     },
     deleteItem(item) {
       this.editedIndex = this.categoriesItems.indexOf(item)

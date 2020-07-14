@@ -11,10 +11,10 @@
                 color="blueS"
                 @click="syncActivities"
                 class="py-5"
+                icon
               >
-                <v-icon size="40" left>mdi-sync</v-icon>
-                Sincronizar actividades</v-btn
-              >
+                <v-icon size="30">mdi-sync</v-icon>
+              </v-btn>
             </v-col>
             <v-col cols="12" sm="6" md="8" lg="8">
               <base-autocomplete
@@ -93,14 +93,14 @@
                 </v-col>
                 <v-col cols="8">
                   <base-autocomplete
-                    v-model="sectionModel"
+                    v-model="editedItem.section"
                     :items="sectionItems"
                     label="Sección"
                     item-value="id"
                     item-text="description"
                     return-object
-                    @change="$v.sectionModel.$touch()"
-                    @blur="$v.sectionModel.$touch()"
+                    @change="$v.section.$touch()"
+                    @blur="$v.section.$touch()"
                     :error-messages="sectionErrors"
                   >
                   </base-autocomplete>
@@ -160,22 +160,19 @@ import Activity from '../../models/Activity'
 import { validationMixin } from 'vuelidate'
 import { required, numeric, minValue, maxValue } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+import axios from '../../services/axios'
 
 export default {
   mixins: [validationMixin],
   validations: {
-    description: {
-      required
-    },
+    description: { required },
     weighing: {
       required,
       numeric,
       minValue: minValue(0),
       maxValue: maxValue(100)
     },
-    sectionModel: {
-      required
-    }
+    section: { required }
   },
   data: () => ({
     dialog: false,
@@ -247,8 +244,8 @@ export default {
     sectionErrors() {
       const errors = []
 
-      if (!this.$v.sectionModel.$dirty) return errors
-      !this.$v.sectionModel.required && errors.push('Es obligatorio.')
+      if (!this.$v.section.$dirty) return errors
+      !this.$v.section.required && errors.push('Es obligatorio.')
 
       return errors
     },
@@ -260,6 +257,9 @@ export default {
     },
     weighing() {
       return this.editedItem.weighing
+    },
+    section() {
+      return this.editedItem.section
     }
   },
   created() {
@@ -277,20 +277,36 @@ export default {
       fetchCategoryItems: 'category/fetchCategories',
       putItem: 'activity/putActivity'
     }),
-    syncActivities() {},
+    syncActivities() {
+      if (this.category !== null) {
+        this.coursesByCategory.forEach(async course => {
+          if (course.properties.idCourseMoodle) {
+            await axios.get(
+              `api/v2/sync/course/${course.properties.idCourseMoodle}/activities`
+            )
+          }
+        })
+
+        this.filterActivitiesByCategories()
+      }
+    },
     editItem(item) {
       this.editedIndex = this.activitiesFiltered.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
+
       this.dialog = true
     },
     async filterActivitiesByCategories() {
+      this.activitiesFiltered = []
       if (this.category !== null) {
         await this.fetchCourseByCategory(this.category.courses.href)
 
         this.coursesByCategory.forEach(course => {
-          this.activitiesFiltered = this.activitiesItems.filter(activity => {
-            return activity.course.id === course.properties.id
+          this.activitiesItems.forEach(activity => {
+            if (activity.course.id === course.properties.id) {
+              this.activitiesFiltered.push(activity)
+            }
           })
         })
       }
@@ -340,7 +356,6 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
-        this.editedItem.section = { ...this.sectionModel }
         const { success, message } = await this.putItem(this.editedItem)
         if (success) {
           this.snackbar = true

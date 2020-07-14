@@ -5,8 +5,8 @@
         :color="color"
         :max-height="icon ? 90 : undefined"
         :width="icon ? 'auto' : '100%'"
-        elevation="6"
-        class="text-start v-card--material__heading mb-n6 pa-7"
+        elevation="12"
+        class="v-card--material__heading mb-n6 pa-7 rounded-lg"
         dark
       >
         <slot v-if="$slots.heading" name="heading" />
@@ -22,7 +22,7 @@
         <div v-if="text" class="headline font-weight-thin" v-text="text" />
       </v-sheet>
 
-      <div v-if="$slots['after-heading']" class="ml-6">
+      <div v-if="$slots['after-heading']" class="ml-16">
         <slot name="after-heading" />
       </div>
 
@@ -46,7 +46,7 @@
 <script>
 export default {
   inheritAttrs: false,
-  name: 'BaseCard',
+  name: 'DashboardCard',
   props: {
     avatar: {
       type: String,
@@ -95,7 +95,7 @@ export default {
 
   &__heading
     position: relative
-    top: -40px
+    top: -30px
     transition: .3s ease
     z-index: 1
 </style>

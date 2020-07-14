@@ -1,15 +1,30 @@
 <template>
-  <v-card v-bind="$attrs" :class="classes" class="v-card--material mt-5" fluid>
+  <v-card v-bind="$attrs" :class="classes" class="v-card--material pa-3">
     <div class="d-flex grow flex-wrap">
+      <v-avatar
+        v-if="avatar"
+        size="128"
+        class="mx-auto v-card--material__avatar elevation-6"
+        color="grey"
+      >
+        <v-img :src="avatar" />
+      </v-avatar>
+
       <v-sheet
+        v-else
+        :class="{
+          'pa-7': !$slots.image
+        }"
         :color="color"
         :max-height="icon ? 90 : undefined"
         :width="icon ? 'auto' : '100%'"
         elevation="6"
-        class="text-start v-card--material__heading mb-n6 pa-7"
+        class="text-start v-card--material__heading mb-n6"
         dark
       >
         <slot v-if="$slots.heading" name="heading" />
+
+        <slot v-else-if="$slots.image" name="image" />
 
         <div
           v-else-if="title && !icon"
@@ -27,26 +42,26 @@
       </div>
 
       <div v-else-if="icon && title" class="ml-4">
-        <div class="display-1 font-weight-light" v-text="title" />
+        <div class="card-title font-weight-light" v-text="title" />
       </div>
     </div>
-    <v-card-text>
-      <slot v-if="$slots.searchInput" name="searchInput" />
-    </v-card-text>
 
     <slot />
 
     <template v-if="$slots.actions">
       <v-divider class="mt-2" />
-      <slot name="actions" />
+
+      <v-card-actions class="pb-0">
+        <slot name="actions" />
+      </v-card-actions>
     </template>
   </v-card>
 </template>
 
 <script>
 export default {
-  inheritAttrs: false,
-  name: 'BaseCard',
+  name: 'MaterialCard',
+
   props: {
     avatar: {
       type: String,
@@ -59,6 +74,10 @@ export default {
     icon: {
       type: String,
       default: undefined
+    },
+    image: {
+      type: Boolean,
+      default: false
     },
     text: {
       type: String,
@@ -86,7 +105,7 @@ export default {
 }
 </script>
 
-<style scope lang="sass">
+<style lang="sass">
 .v-card--material
   &__avatar
     position: relative
@@ -95,7 +114,8 @@ export default {
 
   &__heading
     position: relative
-    top: -40px
+    top: -30px
+    border-radius: 5px
     transition: .3s ease
     z-index: 1
 </style>

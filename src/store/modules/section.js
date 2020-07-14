@@ -32,7 +32,9 @@ export default {
       return state.sections.map(({ properties }) => {
         return {
           id: properties.id,
-          description: properties.description
+          description: properties.description,
+          activities: properties.activities,
+          numberActivities: properties.activities.length
         }
       })
     }

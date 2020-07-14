@@ -35,7 +35,6 @@ export default {
       try {
         const { data } = await axios.get(BASE_URL)
 
-        console.log('data', data)
         const { _data, success, error, message } = data
 
         if (success) {
@@ -63,9 +62,6 @@ export default {
 
         if (status === 200) {
           const { _data, success, error, message } = data
-
-          console.log('_data', _data)
-
           if (success) {
             commit('course/PUT_USER_BY_COURSE', _data, { root: true })
           } else {
@@ -89,11 +85,7 @@ export default {
           courseRegisteredUser
         )
 
-        console.log(courseRegisteredUser)
-
         const { _data, success, error, message } = data
-
-        console.log(data)
 
         if (success) {
           commit('POST_COURSE_REGISTERED_USER', _data)
@@ -108,6 +100,55 @@ export default {
           success: false,
           error: error,
           message: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    getCourseRegisteredUserByUser: async (_, courseRegisteredUser) => {
+      console.log(courseRegisteredUser)
+      const idUser = courseRegisteredUser.registeredUser.id
+      const idCourse = courseRegisteredUser.course.id
+
+      const URL = `api/v2/sync/users/${idUser}/courses/${idCourse}/activities`
+      try {
+        const { data } = await axios.get(URL)
+
+        const { success, error } = data
+
+        if (success) {
+          return { success, error }
+        } else {
+          console.log(error)
+        }
+      } catch (error) {
+        const { data } = error.response
+        console.log(error)
+        return {
+          success: data.success,
+          message: data.message
+        }
+      }
+    },
+
+    getCourseRegisteredByCourse: async (_, { properties }) => {
+      const course = properties
+
+      if (course.idCourseMoodle !== null) {
+        const URL = `${BASE_URL}/${course.id}/users`
+        try {
+          const { data } = await axios.get(URL)
+
+          if (data.success) {
+            return data
+          } else {
+            console.log(data.error)
+          }
+        } catch (error) {
+          const { data } = error.response
+          console.log(error)
+          return {
+            success: data.success,
+            message: data.message
+          }
         }
       }
     }

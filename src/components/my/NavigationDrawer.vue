@@ -1,12 +1,12 @@
 <template>
   <v-navigation-drawer
-    v-model="drawerLocal"
+    v-model="drawer"
     app
-    left
     dark
-    :mini-variant="drawerLocal && !bp"
-    :permanent="!bp"
-    :temporary="drawerLocal && bp"
+    :expand-on-hover="hover"
+    width="260"
+    mobile-breakpoint="960"
+    v-bind="$attrs"
   >
     <v-list>
       <v-list-item class="px-2">
@@ -35,8 +35,6 @@
         </v-list-item-subtitle>
       </v-list-item>
     </v-list>
-
-    <v-divider></v-divider>
 
     <v-list dense nav shaped>
       <v-list-item
@@ -86,9 +84,13 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions, mapState, mapMutations } from 'vuex'
 export default {
   name: 'NavigationDrawerApp',
+  props: {
+    breakpoint: String
+  },
+
   data: () => ({
     mini: true,
     links: {
@@ -191,16 +193,16 @@ export default {
       ]
     }
   }),
-  props: {
-    drawer: {
-      type: Boolean
-    },
-    breakpoint: String
-  },
+  // props: {
+  //   // drawer: {
+  //   //   type: Boolean
+  //   // },
+  // },
   created() {
     this.attempt(localStorage.getItem('access_token'))
   },
   computed: {
+    ...mapState(['drawer']),
     ...mapGetters({
       user: 'auth/user',
       isAdmin: 'auth/isAdmin',
@@ -208,6 +210,18 @@ export default {
       isOperator: 'auth/isOperator',
       role: 'auth/typeRole'
     }),
+    hover() {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'md':
+          return true
+        case 'lg':
+          return false
+        case 'xl':
+          return true
+        default:
+          return false
+      }
+    },
     getAvatarName() {
       if (this.user) {
         const splitName = this.user.name.split(' ')
@@ -229,19 +243,30 @@ export default {
         link.privileges.includes(this.role.description)
       )
     },
-    drawerLocal: {
-      get: function() {
-        return this.drawer
+    // drawerLocal: {
+    //   get: function() {
+    //     return this.drawer
+    //   },
+    //   set: function(value) {
+    //     this.$emit('update:drawer', value)
+    //   }
+    // },
+    drawer: {
+      get() {
+        return this.$store.state.drawer
       },
-      set: function(value) {
-        this.$emit('update:drawer', value)
+      set(val) {
+        this.$store.commit('SET_DRAWER', val)
       }
-    },
-    bp() {
-      return this.breakpoint === 'sm' || this.breakpoint === 'xs'
     }
+    // bp() {
+    //   return this.breakpoint === 'sm' || this.breakpoint === 'xs'
+    // }
   },
   methods: {
+    ...mapMutations({
+      setDrawer: 'SET_DRAWER'
+    }),
     ...mapActions({
       attempt: 'auth/attempt'
     })

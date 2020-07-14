@@ -2,7 +2,7 @@
   <v-container>
     <base-card
       color="blueS"
-      class="px-5 py-3 mt-10"
+      class="px-5 py-3"
       icon="mdi-ticket-account"
       title="Ticket"
     >
@@ -141,7 +141,164 @@
                                     <v-spacer />
                                   </v-row>
                                 </form>
-                                <template v-if="user.isActive !== null">
+                                <div v-if="user !== null">
+                                  <v-col class="d-flex text-center">
+                                    <!-- <v-divider vertical></v-divider> -->
+                                    <v-hover
+                                      v-slot:default="{ hover }"
+                                      open-delay="200"
+                                    >
+                                      <v-card
+                                        class="pt-6 mx-auto rounded-t-xl"
+                                        flat
+                                        max-width="350"
+                                        :elevation="hover ? 16 : 0"
+                                        outlined
+                                      >
+                                        <v-card-text>
+                                          <span
+                                            class="headline font-weight-bold"
+                                          >
+                                            {{
+                                              user.classroom.description
+                                            }}</span
+                                          ><br />
+                                          <span class="text-caption">
+                                            Progreso:</span
+                                          ><br />
+                                          <v-avatar size="120">
+                                            <v-progress-circular
+                                              :rotate="-90"
+                                              :size="100"
+                                              :width="15"
+                                              :value="getValueProgress(user)"
+                                              color="blueS"
+                                            >
+                                              {{ getValueProgress(user) }}%
+                                            </v-progress-circular>
+                                          </v-avatar>
+                                          <h3 class="headline mb-2">
+                                            {{ user.registered_user.name }}
+                                          </h3>
+                                          <h3 class="mb-2">
+                                            {{ user.registered_user.last_name }}
+                                            {{
+                                              user.registered_user
+                                                .mother_last_name
+                                            }}
+                                          </h3>
+                                          <div class="blueS--text mb-2">
+                                            {{ user.registered_user.email }}
+                                          </div>
+                                          <div
+                                            class="redS--text subheading font-weight-bold"
+                                          >
+                                            {{ user.registered_user.mobile }}
+                                          </div>
+                                        </v-card-text>
+                                        <v-expand-transition>
+                                          <div
+                                            v-if="hover"
+                                            class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
+                                            style="height: 78%;"
+                                          >
+                                            <div class="d-flex flex-column">
+                                              <div
+                                                v-for="section in sectionFiltered"
+                                                :key="section.id"
+                                                class="d-flex flex-row"
+                                              >
+                                                <div
+                                                  class="px-3 py-2 title-section"
+                                                >
+                                                  <h6 class="text-overline">
+                                                    {{ section.description }}:
+                                                  </h6>
+                                                </div>
+                                                <div
+                                                  class="px-1 py-2"
+                                                  v-for="grade in getGrades(
+                                                    section,
+                                                    user.activities
+                                                  )"
+                                                  :key="grade.idActivityMoodle"
+                                                >
+                                                  <v-tooltip
+                                                    color="white"
+                                                    bottom
+                                                  >
+                                                    <template
+                                                      v-slot:activator="{ on }"
+                                                    >
+                                                      <h4 v-on="on">
+                                                        <kbd>{{
+                                                          grade.qualificationMoodle
+                                                        }}</kbd>
+                                                      </h4>
+                                                    </template>
+                                                    <span
+                                                      class="blueS--text darken-2"
+                                                      >{{
+                                                        grade.description
+                                                      }}</span
+                                                    >
+                                                  </v-tooltip>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </v-expand-transition>
+                                        <v-divider></v-divider>
+                                        <v-row class="text-center">
+                                          <v-col cols="6" class="mx-auto">
+                                            <v-card
+                                              :color="getColorState(user.state)"
+                                              flat
+                                              dark
+                                              class="py-1"
+                                              ><span>{{
+                                                user.state
+                                                  ? 'RENUNCIADO'
+                                                  : 'ACTIVO'
+                                              }}</span></v-card
+                                            >
+                                          </v-col>
+
+                                          <v-col cols="12">
+                                            <span class="font-weight-bold">
+                                              Última conexión hace
+                                              {{
+                                                user.last_access_registered_moodle
+                                              }}</span
+                                            >
+                                          </v-col>
+                                        </v-row>
+                                      </v-card>
+                                    </v-hover>
+                                  </v-col>
+                                  <v-row>
+                                    <v-spacer />
+                                    <v-btn
+                                      class="mt-3"
+                                      color="blueS"
+                                      depressed
+                                      dark
+                                      @click="
+                                        () => {
+                                          e1 = 2
+                                          completeStepOne = true
+                                        }
+                                      "
+                                    >
+                                      Continuar
+                                      <v-icon class="ml-3"
+                                        >mdi-arrow-right-bold-circle</v-icon
+                                      >
+                                    </v-btn>
+                                  </v-row>
+                                </div>
+
+                                <!-- <template v-if="user.isActive !== null">
                                   <v-row>
                                     <v-col cols="12" sm="6" md="6">
                                       <v-label>Último acceso:</v-label>
@@ -246,7 +403,7 @@
                                       >
                                     </v-btn>
                                   </v-row>
-                                </template>
+                                </template> -->
                               </v-stepper-content>
 
                               <v-stepper-content step="2">
@@ -920,7 +1077,22 @@
       </template>
       <v-card flat>
         <v-card-text>
+          <div v-if="loading">
+            <v-skeleton-loader
+              :loading="loading"
+              :transition="transition"
+              class="mx-auto"
+              type="table-tbody"
+            ></v-skeleton-loader>
+            <v-skeleton-loader
+              :loading="loading"
+              :transition="transition"
+              class="mx-auto"
+              type="table-tfoot"
+            ></v-skeleton-loader>
+          </div>
           <v-data-table
+            v-else
             :headers="headers"
             :search="search"
             :items="tickets"
@@ -1107,6 +1279,7 @@ import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 export default {
+  inject: ['theme'],
   mixins: [validationMixin],
   validations: {
     category: {
@@ -1297,12 +1470,7 @@ export default {
       dateSingle: new Date().toISOString().substr(0, 10),
       dateMassive: new Date().toISOString().substr(0, 10),
       menu: false,
-      user: {
-        registered_user: {},
-        course: {},
-        activities: [],
-        isActive: null
-      },
+      user: null,
       rut: '17.057.394-3',
       rutACTIVO: '17.057.394-3',
       rutRenunciado: '12.122.260-4',
@@ -1329,7 +1497,8 @@ export default {
       arrayCourseUserSelect: [],
       currentCourseUser: {},
       ticketClose: false,
-      checkCloseStatus: false
+      checkCloseStatus: false,
+      transition: 'scale-transition'
     }
   },
   methods: {
@@ -1355,8 +1524,23 @@ export default {
       findTicket: 'ticket/findTicket',
       fetchTicketDetails: 'ticket/fetchTicketDetails',
       postDetailTicket: 'detailTicket/postDetailTicket',
-      clearTicketDetail: 'ticket/clearDetailTickets'
+      clearTicketDetail: 'ticket/clearDetailTickets',
+      fetchSections: 'section/fetchSections'
     }),
+    getValueProgress(user) {
+      return user.progress
+    },
+    getColorState(state) {
+      if (state) return 'redS darken-1'
+      return 'blueS darken-1'
+    },
+    getGrades(section, activities) {
+      if (activities && section) {
+        return activities[section.id].filter(activity => {
+          return activity.qualificationMoodle !== '-'
+        })
+      }
+    },
     showIconSearch(item) {
       return item.close ? 'mdi-email-search' : 'mdi-chat-plus'
     },
@@ -1507,26 +1691,27 @@ export default {
       }
     },
     async editItem(ticket) {
-      const item = ticket.properties
+      console.log(ticket)
+      const localTicket = ticket.properties
 
-      this.priority = item.priorityTicket
-      this.type = item.typeTicket
-      this.motive = item.motiveTicket
-      this.status = item.statusTicket
-      this.source = item.sourceTicket
-      this.operator = item.userAssigned
-      this.rut = item.courseRegisteredUser.registered_user.rut_registered_moodle
+      this.priority = localTicket.priorityTicket
+      this.type = localTicket.typeTicket
+      this.motive = localTicket.motiveTicket
+      this.status = localTicket.statusTicket
+      this.source = localTicket.sourceTicket
+      this.operator = localTicket.userAssigned
+      this.rut = localTicket.courseRegisteredUser.registered_user.rut
 
-      this.fetchUserByRut(this.rut)
-      this.selectCourse(ticket.properties.courseRegisteredUser)
+      const user = localTicket.courseRegisteredUser
 
       this.editedTicketIndex = this.tickets.findIndex(
-        find => find.properties.id === item.id
+        find => find.properties.id === localTicket.id
       )
-      this.editItem_ = Object.assign({}, item)
-      this.editedTicketItem.id = item.id
 
-      console.log(ticket)
+      this.selectCourse(user)
+
+      this.editItem_ = Object.assign({}, localTicket)
+      this.editedTicketItem.id = localTicket.id
 
       this.ticketClose = ticket.close
       this.checkCloseStatus = true
@@ -1579,24 +1764,20 @@ export default {
       }
     },
     async fetchDataCourses() {
-      this.loading = true
       const { success, message } = await this.fetchCourseItems()
       if (!success) {
         this.snackbar = true
 
         this.message = message
       }
-      this.loading = false
     },
     async fetchDataCategories() {
-      this.loading = true
       const { success, message } = await this.fetchCategoryItems()
       console.log()
       if (!success) {
         this.snackbar = true
         this.message = message
       }
-      this.loading = false
     },
     getColor(priority) {
       if (priority === 'Alta') return 'red'
@@ -1658,12 +1839,93 @@ export default {
         this.searchRutLoading = false
       }, 1000)
     },
+    mapUser(user) {
+      if (user.activity_course_users.length !== 0) {
+        let state
+        let progress = 0
+        const activities = user.activity_course_users
+          .map(activity => {
+            if (activity) {
+              if (
+                activity.activity.section.description === 'Renuncia' &&
+                activity.status_moodle === 'Finalizado'
+              ) {
+                state = true
+              } else {
+                state = false
+              }
+
+              let checkQualificationMoodle = ['', '-']
+              if (
+                !checkQualificationMoodle.includes(
+                  activity.qualification_moodle
+                ) &&
+                activity.activity.weighing !== 0
+              ) {
+                progress++
+              }
+
+              return {
+                qualificationMoodle: activity.qualification_moodle,
+                statusMoodle: activity.status_moodle,
+                description: activity.activity.description,
+                idActivityMoodle: activity.activity.id_activity_moodle,
+                idSection: activity.activity.section_id,
+                section: activity.activity.section.description,
+                type: activity.activity.type,
+                weighing: activity.activity.weighing
+              }
+            } else {
+              return activity
+            }
+          })
+          .filter(activity => {
+            if (activity) {
+              return activity.section !== 'Formativa'
+            }
+          })
+
+        const totalProgress = this.sections
+          .filter(section => {
+            const filterSection = ['Formativa', 'Renuncia', 'Inicio', 'Cierre']
+            return !filterSection.includes(section.description)
+          })
+          .reduce(
+            (accumulator, currentValue) =>
+              accumulator + currentValue.numberActivities,
+            0
+          )
+
+        const accumulativeProgress = Number.parseFloat(
+          (progress / totalProgress) * 100
+        )
+        user['state'] = state
+        user[
+          'fullname'
+        ] = `${user.registered_user.name} ${user.registered_user.last_name}`
+        user['progress'] = accumulativeProgress
+        user['activities'] = this.groupBy(activities, 'idSection')
+      }
+      return user
+    },
     selectCourse(user) {
       this.dialogSelectCourse = false
 
       this.editedTicketItem.courseRegisteredUser = Object.assign({}, user)
 
-      this.user = Object.assign({}, user)
+      this.user = Object.assign({}, this.mapUser(user))
+
+      console.log(this.user)
+    },
+    groupBy(objectArray, property) {
+      return objectArray.reduce(function(accumulator, object) {
+        let key = object[property]
+        if (!accumulator[key]) {
+          accumulator[key] = []
+        }
+        accumulator[key].push(object)
+        return accumulator
+      }, {})
     },
     async findActivities(id) {
       const { data } = await axios.get(
@@ -1729,7 +1991,7 @@ export default {
 
         if (
           this.status.description === 'Cerrado' &&
-          this.observation === '' &&
+          this.observationMassive === '' &&
           this.statusDetail === null
         ) {
           this.snackbar = true
@@ -1848,12 +2110,7 @@ export default {
       this.em1 = 1
       this.dialogMassive = false
       this.dialog = false
-      this.user = {
-        registered_user: {},
-        course: {},
-        activities: [],
-        isActive: null
-      }
+      this.user = null
       this.$v.$reset()
       this.editedTicketIndex = -1
       this.editedTicketItem = Object.assign({}, this.defaultTicketItem)
@@ -1919,6 +2176,8 @@ export default {
     }
   },
   created() {
+    this.loading = true
+    this.fetchSections()
     this.fetchCourseRegisteredUserItems()
     this.fetchDataCourses()
     this.fetchDataCategories()
@@ -1932,7 +2191,7 @@ export default {
     this.fetchClassroom()
     this.fetchStatusDetailTicket()
     this.fetchDetailTicket()
-    this.fetchItems()
+    this.fetchItems().then(() => (this.loading = false))
   },
   watch: {
     category() {
@@ -1959,8 +2218,16 @@ export default {
       savedTicket: 'ticket/getLastTicket',
       ticketDetails: 'ticket/ticketDetailsByTicket',
       loggedUser: 'auth/user',
-      isAdmin: 'auth/isAdmin'
+      isAdmin: 'auth/isAdmin',
+      sections: 'section/sections'
     }),
+    sectionFiltered() {
+      return this.sections.filter(
+        section =>
+          section.description !== 'Formativa' &&
+          section.description !== 'Renuncia'
+      )
+    },
     titleTicket() {
       return this.editedTicketIndex > -1 ? 'Agregar contacto' : 'Generar ticket'
     },
@@ -2148,4 +2415,18 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped></style>
+<style scoped>
+.v-card--reveal {
+  align-items: flex-start;
+  bottom: 22%;
+  padding: 0.2em;
+  justify-content: left;
+  opacity: 0.9;
+  position: absolute;
+  width: 100%;
+}
+.title-section {
+  width: 100px;
+  text-align: left;
+}
+</style>

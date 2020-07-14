@@ -1,8 +1,8 @@
 <template>
   <v-main>
-    <v-container class="fill-height" fluid>
+    <v-container class="fill-height" fluid tag="section">
       <v-app-bar app clipped-right flat color="white">
-        <v-app-bar-nav-icon @click.stop="setDrawer()"></v-app-bar-nav-icon>
+        <v-app-bar-nav-icon @click="setDrawer()"></v-app-bar-nav-icon>
         <v-spacer></v-spacer>
         <v-toolbar-title class="blueS--text">
           SISTEMA DE INFORMACIÓN PARA LA GESTIÓN DE ACCIONES
@@ -13,10 +13,7 @@
           ><v-icon>mdi-logout</v-icon></v-btn
         >
       </v-app-bar>
-      <navigation-drawer-app
-        :drawer.sync="drawer"
-        :breakpoint="breackPoint"
-      ></navigation-drawer-app>
+      <navigation-drawer-app></navigation-drawer-app>
       <router-view></router-view>
       <footer-app></footer-app>
     </v-container>
@@ -47,27 +44,57 @@
 <script>
 import NavigationDrawerApp from '../components/my/NavigationDrawer'
 import FooterApp from '../components/my/Footer'
-import { mapActions } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 export default {
+  inject: ['theme'],
   components: {
     'navigation-drawer-app': NavigationDrawerApp,
     'footer-app': FooterApp
+    // VBoilerplate: {
+    //   functional: true,
+
+    //   render(h, { data, props, children }) {
+    //     return h(
+    //       'v-skeleton-loader',
+    //       {
+    //         ...data,
+    //         props: {
+    //           boilerplate: false,
+    //           elevation: 2,
+    //           ...props
+    //         }
+    //       },
+    //       children
+    //     )
+    //   }
+    // }
   },
   data() {
     return {
-      drawer: false,
       mini: false,
       title: 'Ticket',
       dialog: false
     }
   },
   computed: {
+    ...mapState(['drawer']),
     breackPoint() {
       return this.$vuetify.breakpoint.name
+    },
+    drawer: {
+      get() {
+        return this.$store.state.drawer
+      },
+      set(val) {
+        this.$store.commit('SET_DRAWER', val)
+      }
     }
   },
   methods: {
+    ...mapMutations({
+      setDrawer: 'SET_DRAWER'
+    }),
     ...mapActions({
       logoutStore: 'auth/logout'
     }),
@@ -90,13 +117,13 @@ export default {
     }
   },
   watch: {
-    breackPoint(newValue) {
-      if (newValue === 'sm' || newValue === 'xs') {
-        this.drawer = true
-      } else {
-        this.drawer = false
-      }
-    }
+    // breackPoint(newValue) {
+    //   if (newValue === 'sm' || newValue === 'xs') {
+    //     this.drawer = true
+    //   } else {
+    //     this.drawer = false
+    //   }
+    // }
   }
 }
 </script>
