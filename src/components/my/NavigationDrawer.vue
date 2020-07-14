@@ -168,7 +168,8 @@ export default {
             {
               name: 'Curso',
               to: { name: 'Course' }
-            }
+            },
+            { name: 'Usuario', to: { name: 'User' } }
           ]
         },
         {

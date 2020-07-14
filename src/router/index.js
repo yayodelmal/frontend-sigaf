@@ -168,6 +168,14 @@ const routes = [
                 /*webpackChunkName: "Curso" */ '../views/maintenance/Course.vue'
               ),
             meta: { requiresAuth: true }
+          },
+          {
+            name: 'User',
+            path: 'Usuario',
+            component: () =>
+              import(
+                /*webpackChunkName:"Usuario"*/ '../views/maintenance/User.vue'
+              )
           }
         ]
       },
