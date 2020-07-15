@@ -70,14 +70,14 @@
                       <v-row>
                         <v-col cols="8">
                           <base-autocomplete
-                            v-model="platformModel"
+                            v-model="editedItem.platform"
                             :items="platformsItems"
                             label="Plataforma"
                             item-value="id"
                             item-text="description"
                             return-object
-                            @change="setPlatform($event)"
-                            @blur="$v.platformModel.$touch()"
+                            @change="$v.platform.$touch()"
+                            @blur="$v.platform.$touch()"
                             :error-messages="platformErrors"
                           >
                           </base-autocomplete>
@@ -191,7 +191,7 @@ export default {
       minLength: minLength(5),
       maxLength: maxLength(150)
     },
-    platformModel: {
+    platform: {
       required
     },
     idMoodle: {
@@ -250,8 +250,8 @@ export default {
     platformErrors() {
       const errors = []
 
-      if (!this.$v.platformModel.$dirty) return errors
-      !this.$v.platformModel.required && errors.push('Es obligatorio.')
+      if (!this.$v.platform.$dirty) return errors
+      !this.$v.platform.required && errors.push('Es obligatorio.')
 
       return errors
     },
@@ -272,6 +272,9 @@ export default {
     description() {
       return this.editedItem.description
     },
+    platform() {
+      return this.editedItem.platform
+    },
     idMoodle() {
       return this.editedItem.idCategoryMoodle
     }
@@ -289,19 +292,12 @@ export default {
       removeItem: 'category/deleteCategory',
       fetchPlatformItems: 'platform/fetchPlatforms'
     }),
-    setPlatform(value) {
-      console.log(value)
-      this.editedItem.platform = value
-      this.$v.platformModel.$touch()
-    },
     editItem(item) {
+      console.log(item)
       this.editedIndex = this.categoriesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
-
-      console.log('EDITEDITEM', this.editedItem)
-
-      this.platformModel = item.platform.properties
+      this.editedItem.platform = Object.assign({}, item.platform.properties)
 
       this.dialog = true
     },
