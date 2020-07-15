@@ -9,8 +9,8 @@
           FORMATIVAS</v-toolbar-title
         >
         <v-spacer></v-spacer>
-        <v-btn @click="showLogoutConfirmation" icon dark color="grayS"
-          ><v-icon>mdi-logout</v-icon></v-btn
+        <v-btn @click="showLogoutConfirmation" dark color="grayS lighten-1"
+          ><v-icon>mdi-logout</v-icon>CERRAR SESIÓN</v-btn
         >
       </v-app-bar>
       <navigation-drawer-app></navigation-drawer-app>

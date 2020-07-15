@@ -92,7 +92,6 @@ export default {
   },
 
   data: () => ({
-    mini: true,
     links: {
       main: [
         {
@@ -217,7 +216,7 @@ export default {
         case 'lg':
           return false
         case 'xl':
-          return true
+          return false
         default:
           return false
       }
@@ -257,6 +256,18 @@ export default {
       },
       set(val) {
         this.$store.commit('SET_DRAWER', val)
+      }
+    },
+    mini() {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'md':
+          return false
+        case 'lg':
+          return true
+        case 'xl':
+          return true
+        default:
+          return false
       }
     }
     // bp() {

@@ -21,39 +21,27 @@ export default {
     }
   },
   getters: {
-    authenticated(state) {
-      return state.loginUser && state.access_token
-    },
-    token(state) {
-      return state.access_token
-    },
-    user(state) {
-      return state.loginUser
-    },
-    isAdmin(state) {
-      if (state.loginUser) {
-        return state.loginUser.role.description === 'Administrador'
-      } else {
-        return false
-      }
-
-      // return localStorage.getItem('role') === 'Administrador'
-    },
+    authenticated: state => state.loginUser && state.access_token,
+    token: state => state.access_token,
+    user: state => state.loginUser,
+    isAdmin: state =>
+      state.loginUser
+        ? state.loginUser.role.description === 'Administrador'
+        : false,
     isTutor(state) {
       if (state.loginUser) {
         return state.loginUser.role.description === 'Tutor'
       } else {
         return false
       }
-      // return localStorage.getItem('role') === 'Tutor'
     },
+    isFirstLogin: state => state.loginUser.isFirstLogin === 0,
     isOperator(state) {
       if (state.loginUser) {
         return state.loginUser.role.description === 'Operador'
       } else {
         return false
       }
-      // return localStorage.getItem('role') === 'Operador'
     },
     typeRole(state) {
       if (state.loginUser) {
@@ -61,7 +49,6 @@ export default {
       } else {
         return false
       }
-      //  return localStorage.getItem('role')
     }
   },
   actions: {

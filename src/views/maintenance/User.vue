@@ -86,13 +86,13 @@
                         <v-col cols="6">
                           <base-autocomplete
                             label="Rol"
-                            v-model="roleModel"
+                            v-model="editedItem.role"
                             :items="rolesItems"
                             item-value="id"
                             item-text="description"
                             return-object
-                            @blur="$v.roleModel.$touch()"
-                            @change="setRole($event)"
+                            @blur="$v.role.$touch()"
+                            @change="$v.role.$touch()"
                             :error-messages="roleErrors"
                           ></base-autocomplete>
                         </v-col>
@@ -144,7 +144,7 @@
         </template>
       </v-data-table>
     </base-card>
-    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
+    <v-snackbar :color="colorSnackbar" v-model="snackbar" :timeout="timeout">
       {{ message }}
       <v-btn dark text @click="snackbar = false">
         Cerrar
@@ -156,7 +156,7 @@
 <script>
 import User from '../../models/User'
 import { validationMixin } from 'vuelidate'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+import { required, minLength, maxLength, email } from 'vuelidate/lib/validators'
 import { mapGetters, mapActions } from 'vuex'
 export default {
   mixins: [validationMixin],
@@ -184,15 +184,15 @@ export default {
     email: {
       required,
       minLength: minLength(10),
-      maxLength: maxLength(255)
+      maxLength: maxLength(255),
+      email
     },
-    roleModel: {
+    role: {
       required
     }
   },
   data: () => ({
     headers: [
-      { text: '#', value: 'id', class: 'redS--text' },
       { text: 'RUT', value: 'rut', class: 'redS--text' },
       { text: 'Nombre', value: 'name', class: 'redS--text' },
       { text: 'Celular', value: 'mobile', class: 'redS--text' },
@@ -212,14 +212,15 @@ export default {
     loading: false,
     dialog: false,
     snackbar: false,
-    timeout: -1,
+    timeout: 4000,
     editedIndex: -1,
     editedItem: new User(),
     defaultItem: new User(),
     message: null,
     successMessage: 'Operación realizada con éxito.',
     errorMEssage: 'Ha ocurrido un error.',
-    roleModel: null
+    roleModel: null,
+    colorSnackbar: 'blueS'
   }),
   computed: {
     ...mapGetters({
@@ -272,6 +273,7 @@ export default {
       const errors = []
       if (!this.$v.email.$dirty) return errors
       !this.$v.email.required && errors.push('Es obligatorio.')
+      !this.$v.email.email && errors.push('Email inválido.')
       !this.$v.email.minLength &&
         errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.email.maxLength &&
@@ -280,8 +282,8 @@ export default {
     },
     roleErrors() {
       const errors = []
-      if (!this.$v.roleModel.$dirty) return errors
-      !this.$v.roleModel.required && errors.push('Rol es obligatorio.')
+      if (!this.$v.role.$dirty) return errors
+      !this.$v.role.required && errors.push('Rol es obligatorio.')
       return errors
     },
     rut() {
@@ -299,6 +301,9 @@ export default {
     email() {
       return this.editedItem.email
     },
+    role() {
+      return this.editedItem.role
+    },
     formTitle() {
       return this.editedIndex === -1 ? 'Crear usuario' : 'Editar usuario'
     }
@@ -311,18 +316,80 @@ export default {
     ...mapActions({
       fetchUserItems: 'user/fetchUsers',
       postItem: 'user/postUser',
-      fetchRoleItems: 'role/fetchRoles'
+      fetchRoleItems: 'role/fetchRoles',
+      removeItem: 'user/deleteUser',
+      putItem: 'user/putUser'
     }),
-    setRole(value) {
-      this.editedItem.role = value
-      this.$v.roleModel.$touch()
+    async save() {
+      //agregamos las propiedades faltantes al objecto user
+      Object.defineProperties(this.editedItem, {
+        isFirstLogin: {
+          value: 0,
+          writable: false,
+          enumerable: true
+        },
+        role_id: {
+          value: this.editedItem.role.id,
+          writable: false,
+          enumerable: true
+        },
+        password: {
+          value: 'sigaf',
+          writable: false,
+          enumerable: true
+        }
+      })
+
+      this.$v.$touch()
+
+      let response
+      if (!this.$v.$invalid) {
+        if (this.editedIndex > -1) {
+          response = await this.putItem(this.editedItem)
+        } else {
+          response = await this.postItem(this.editedItem)
+        }
+        if (response.success) {
+          this.colorSnackbar = 'success'
+          this.message = this.successMessage
+          this.snackbar = true
+
+          this.close()
+        } else {
+          const keys = Object.keys(response.message)
+          const hasEmail = 'email'
+
+          if (keys.includes(hasEmail)) {
+            this.colorSnackbar = 'warning'
+            this.message = response.message.email
+            this.snackbar = true
+          } else {
+            this.colorSnackbar = 'error'
+            this.message = this.errorMEssage
+            this.snackbar = true
+          }
+        }
+      }
     },
-    async save() {},
-    editItem(item) {
-      item
+    editItem(user) {
+      this.editedItem = Object.assign({}, user)
+      this.editedIndex = this.usersItems.findIndex(
+        findUser => findUser.id === user.id
+      )
+      this.dialog = true
     },
-    deleteItem(item) {
-      item
+    async deleteItem(user) {
+      const { success } = this.removeItem(user)
+
+      if (success) {
+        this.colorSnackbar = 'success'
+        this.message = this.successMessage
+        this.snackbar = true
+      } else {
+        this.colorSnackbar = 'error'
+        this.message = this.errorMEssage
+        this.snackbar = true
+      }
     },
     close() {
       this.dialog = false
@@ -332,8 +399,8 @@ export default {
     },
     clear() {
       this.editedItem = Object.assign({}, this.defaultItem)
-      this.roleModel = null
       this.editedIndex = -1
+      this.$v.$reset()
     }
   }
 }
