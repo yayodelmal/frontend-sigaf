@@ -7,6 +7,26 @@
       title="Dashboard"
     >
       <v-row>
+        <v-col cols="12">
+          <v-toolbar dark color="blueS darken-1" class="mb-1">
+            <v-select
+              v-model="category"
+              :items="categoryItems"
+              label="Curso"
+              item-value="id"
+              item-text="description"
+              color="blueS"
+              flat
+              solo-inverted
+              hide-details
+              return-object
+              prepend-inner-icon="mdi-filter-outline"
+            >
+            </v-select>
+          </v-toolbar>
+        </v-col>
+      </v-row>
+      <v-row v-if="loaded">
         <v-col cols="12" sm="6" md="6" lg="3">
           <base-material-stats-card
             color="info"
@@ -154,6 +174,7 @@ export default {
   },
   data: () => ({
     loaded: false,
+    category: null,
     chartData: {
       labels: [],
       datasets: [
@@ -223,6 +244,7 @@ export default {
   async created() {
     this.fetchTicket()
     this.fetchUsers()
+    this.fetchDataCategoryItems()
   },
   mounted() {
     this.loaded = false
@@ -242,7 +264,10 @@ export default {
       statusTicket: 'statusTicket/statusTickets',
       priorityTicket: 'priorityTicket/priorityTickets',
       statusByOperator: 'statusTicket/statusTicketByOperator',
-      users: 'user/users'
+      users: 'user/users',
+      courseItems: 'course/courses',
+      categoryItems: 'category/categories',
+      courseByCategory: 'course/coursesByCategory'
     })
   },
   methods: {
@@ -250,7 +275,10 @@ export default {
       fetchTicket: 'ticket/fetchTickets',
       fetchStatusTicket: 'statusTicket/fetchStatusTickets',
       fetchPriorityticket: 'priorityTicket/fetchPriorityTickets',
-      fetchUsers: 'user/fetchUsers'
+      fetchUsers: 'user/fetchUsers',
+      fetchCourseItems: 'course/fetchCourses',
+      fetchCategoryItems: 'category/fetchCategories',
+      fetchCourseByCategory: 'course/getCoursesByCategory'
     }),
     fillChartStatusTicket() {
       this.statusTicket.forEach(status => {
@@ -291,6 +319,13 @@ export default {
           this.chartDataBar.datasets[index].data.push(data.length)
         })
       })
+    },
+    async fetchDataCategoryItems() {
+      const { success, message } = await this.fetchCategoryItems()
+      if (!success) {
+        this.snackbar = true
+        this.message = message
+      }
     }
   }
 }

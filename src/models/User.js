@@ -7,10 +7,10 @@ export default class User {
     name,
     phone,
     mobile,
-    email,
+    email = 'sa@sigaf.com',
     role = new Role(),
     password = 'sigaf',
-    isFirstLogin = 0
+    isFirstLogin
   ) {
     this.id = id
     this.rut = rut
