@@ -347,7 +347,7 @@ export default {
       this.$v.$touch()
       if (!this.$v.$error) {
         let dataStore = Object.assign(this.editedItem, {
-          platform_id: this.editedItem.platform.properties.id,
+          platform_id: this.editedItem.platform.id,
           id_category_moodle: this.editedItem.idCategoryMoodle,
           status: 1
         })
