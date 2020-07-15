@@ -226,20 +226,20 @@ export default {
         const { success, token } = await this.login(this.userEdited)
 
         if (success) {
-          if (this.isFirstLogin) {
-            this.dialogLogin = false
-            this.dialogFirstLogin = true
-            console.log('firstLogin')
-          } else {
-            const { success } = await this.attempt(token)
-
-            if (success) {
-              this.$router.push({ name: 'My' })
+          const { success } = await this.attempt(token)
+          if (success) {
+            if (this.isFirstLogin) {
+              this.dialogLogin = false
+              this.dialogFirstLogin = true
+              console.log('firstLogin')
             } else {
               this.dialogLogin = false
-              this.snackbar = true
-              this.message = 'Usuario/contraseña inválidos'
+              this.$router.push({ name: 'My' })
             }
+          } else {
+            this.dialogLogin = false
+            this.snackbar = true
+            this.message = 'Usuario/contraseña inválidos'
           }
         } else {
           this.dialogLogin = false
