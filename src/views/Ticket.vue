@@ -297,113 +297,6 @@
                                     </v-btn>
                                   </v-row>
                                 </div>
-
-                                <!-- <template v-if="user.isActive !== null">
-                                  <v-row>
-                                    <v-col cols="12" sm="6" md="6">
-                                      <v-label>Último acceso:</v-label>
-                                      <v-chip
-                                        v-if="user"
-                                        :color="colorLastAccess"
-                                        label
-                                        dark
-                                        class="ma-2"
-                                      >
-                                        <v-icon left>{{
-                                          iconLastAccess
-                                        }}</v-icon>
-                                        {{ user.last_access_registered_moodle }}
-                                      </v-chip>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="6">
-                                      <v-label>Estado participante:</v-label>
-                                      <v-chip
-                                        v-if="user"
-                                        :color="colorStatusStudent"
-                                        label
-                                        dark
-                                        class="ma-2"
-                                      >
-                                        <v-icon left>{{
-                                          iconStatusStudent
-                                        }}</v-icon>
-                                        {{
-                                          user.isActive === null
-                                            ? ''
-                                            : user.isActive
-                                            ? 'ACTIVO'
-                                            : 'RENUNCIADO'
-                                        }}
-                                      </v-chip>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row>
-                                    <v-col cols="12" sm="4" md="4">
-                                      <base-textfield
-                                        label="Nombre"
-                                        :disabled="ticketClose"
-                                        required
-                                        color="blueS"
-                                        v-model="
-                                          user.registered_user
-                                            .name_registered_moodle
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="4" md="4">
-                                      <base-textfield
-                                        :disabled="ticketClose"
-                                        label="Correo electrónico"
-                                        required
-                                        color="blueS"
-                                        v-model="
-                                          user.registered_user
-                                            .email_registered_moodle
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="4" md="4">
-                                      <base-textfield
-                                        :disabled="ticketClose"
-                                        label="Teléfono"
-                                        required
-                                        color="blueS"
-                                        v-model="user.registered_user.mobile"
-                                      ></base-textfield>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row>
-                                    <v-col cols="12">
-                                      <base-textfield
-                                        :disabled="ticketClose"
-                                        label="Curso"
-                                        required
-                                        dense
-                                        v-model="user.course.description"
-                                      ></base-textfield>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row>
-                                    <v-spacer />
-                                    <v-btn
-                                      class="mt-3"
-                                      color="blueS"
-                                      depressed
-                                      dark
-                                      @click="
-                                        () => {
-                                          e1 = 2
-                                          completeStepOne = true
-                                        }
-                                      "
-                                    >
-                                      Continuar
-                                      <v-icon class="ml-3"
-                                        >mdi-arrow-right-bold-circle</v-icon
-                                      >
-                                    </v-btn>
-                                  </v-row>
-                                </template> -->
                               </v-stepper-content>
 
                               <v-stepper-content step="2">
@@ -1268,6 +1161,18 @@
         </v-card>
       </v-dialog>
     </base-card>
+    <v-overlay :value="overlay" color="grayS" :opacity="opacity">
+      <h3 class="text-body-2 text-center mb-16">
+        Por favor espere. Esto puede tardar un momento
+      </h3>
+      <div class="text-center">
+        <v-progress-circular indeterminate size="64"> </v-progress-circular>
+      </div>
+      <h3 class="headline text-center mt-5">
+        Generando ticket {{ indexCurrentSyncUser }}
+      </h3>
+      <h3 class="headline text-center mt-3">{{ currentTicket }}</h3>
+    </v-overlay>
   </v-container>
 </template>
 
@@ -1278,6 +1183,14 @@ import DetailTicket from '../models/DetailTicket'
 import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+
+Array.prototype.forEachAsync = function(fn) {
+  return this.reduce(
+    (promise, n, index) => promise.then(() => fn(n, index)),
+    Promise.resolve()
+  )
+}
+
 export default {
   inject: ['theme'],
   mixins: [validationMixin],
@@ -1498,7 +1411,11 @@ export default {
       currentCourseUser: {},
       ticketClose: false,
       checkCloseStatus: false,
-      transition: 'scale-transition'
+      transition: 'scale-transition',
+      overlay: false,
+      currentTicket: '',
+      indexCurrentSyncUser: '',
+      opacity: 0.8
     }
   },
   methods: {
@@ -1978,6 +1895,60 @@ export default {
         this.clearTicket()
       }, 300)
     },
+    async showSyncTickets(userCourse, index) {
+      await new Promise(resolve => setTimeout(() => resolve(), 100))
+
+      let dataStoreTicket = {
+        type_ticket_id: this.type.id,
+        source_ticket_id: this.source.id,
+        status_ticket_id: this.status.id,
+        priority_ticket_id: this.priority.id,
+        motive_ticket_id: this.motive.id,
+        user_create_id: this.userLog.id,
+        user_assigned_id: this.operator.id
+      }
+
+      if (this.status.description === 'Cerrado') {
+        let arrayDate = new Date().toISOString().substr(0, 10)
+
+        dataStoreTicket = Object.assign(dataStoreTicket, {
+          closing_date: arrayDate
+        })
+      }
+
+      dataStoreTicket = {
+        ...dataStoreTicket,
+        ...{ course_registered_user_id: userCourse.id }
+      }
+      const { success, message, _data } = await this.postTicket(dataStoreTicket)
+
+      if (success) {
+        if (this.statusDetailMasive) {
+          const dataDetailTicket = {
+            comment: this.observationMassive,
+            ticket_id: _data.properties.id,
+            status_detail_ticket_id: this.statusDetailMasive.id,
+            user_created_id: this.userLog.id
+          }
+
+          await this.postDetailTicket(dataDetailTicket)
+        }
+
+        this.currentTicket = `${userCourse.registered_user.name} ${userCourse.registered_user.last_name} del ${userCourse.classroom.description}`
+
+        console.log('true')
+
+        this.indexCurrentSyncUser = `${index + 1} de ${
+          this.selected.length
+        } para`
+        if (index === this.selected.length - 1) {
+          this.overlay = false
+        }
+      } else {
+        this.snackbar = true
+        this.message = message
+      }
+    },
     async saveMassiveTicket() {
       this.rulesValueStepThree = true
 
@@ -2001,63 +1972,9 @@ export default {
           this.$v.observation.$touch()
           this.$v.statusDetail.$touch()
         } else {
-          let dataStoreTicket = {
-            type_ticket_id: this.type.id,
-            source_ticket_id: this.source.id,
-            status_ticket_id: this.status.id,
-            priority_ticket_id: this.priority.id,
-            motive_ticket_id: this.motive.id,
-            user_create_id: this.userLog.id,
-            user_assigned_id: this.operator.id
-          }
-
-          if (this.status.description === 'Cerrado') {
-            let arrayDate = new Date().toISOString().substr(0, 10)
-
-            dataStoreTicket = Object.assign(dataStoreTicket, {
-              closing_date: arrayDate
-            })
-          }
-
-          this.selected.forEach(async userCourse => {
-            dataStoreTicket = {
-              ...dataStoreTicket,
-              ...{ course_registered_user_id: userCourse.id }
-            }
-
-            const { success, message, _data } = await this.postTicket(
-              dataStoreTicket
-            )
-            if (success) {
-              if (this.statusDetailMasive) {
-                const dataDetailTicket = {
-                  comment: this.observationMassive,
-                  ticket_id: _data.properties.id,
-                  status_detail_ticket_id: this.statusDetailMasive.id,
-                  user_created_id: this.userLog.id
-                }
-
-                const { success } = await this.postDetailTicket(
-                  dataDetailTicket
-                )
-
-                if (success) {
-                  this.snackbar = true
-                  this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
-                }
-              }
-
-              this.snackbar = true
-              this.message = `Creando ticket de usuario ${userCourse.registered_user.name_registered_moodle}`
-            } else {
-              this.snackbar = true
-              this.message = message
-            }
-          })
-          this.clearTicket()
-          setTimeout(() => {
-            this.fetchItems()
-          }, 2000)
+          this.dialogMassive = false
+          this.overlay = true
+          this.selected.forEachAsync(this.showSyncTickets)
         }
       }
     },

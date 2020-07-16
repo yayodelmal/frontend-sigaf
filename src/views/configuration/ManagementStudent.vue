@@ -444,10 +444,20 @@
       </v-card>
     </v-expand-transition>
     <v-overlay :value="overlay" color="grayS" :opacity="opacity">
+      <h3 class="headline text-center mt-5">
+        Sincronizando {{ indexCurrentSyncUser }}
+      </h3>
       <div class="text-center">
         <v-progress-circular indeterminate size="64"> </v-progress-circular>
       </div>
-      <h3 class="headline text-center mt-5">Sincronizando...</h3>
+
+      <h3 class="headline text-center mt-3">{{ currentSyncUser }}</h3>
+
+      <h3 class="text-subtitle-1 text-center mt-3">{{ currentActivity }}</h3>
+      <v-spacer />
+      <h3 class="text-body-2 text-center mt-16">
+        Por favor espere. Esto puede tardar unos minutos
+      </h3>
     </v-overlay>
     <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
       {{ message }}
@@ -466,6 +476,13 @@ import CourseRegisteredUser from '../../models/CourseRegisteredUser'
 import axios from '../../services/axios'
 
 import * as easings from 'vuetify/es5/services/goto/easing-patterns'
+
+Array.prototype.forEachAsync = function(fn) {
+  return this.reduce(
+    (promise, n, index) => promise.then(() => fn(n, index)),
+    Promise.resolve()
+  )
+}
 
 const rutFormated = value => {
   if (value.length !== 0) {
@@ -590,7 +607,10 @@ export default {
     selected: [],
     loadingSynActivities: false,
     overlay: false,
-    opacity: 0.8
+    opacity: 0.8,
+    currentSyncUser: '',
+    currentActivity: '',
+    indexCurrentSyncUser: ''
   }),
   created() {
     this.loadingCourse = true
@@ -599,6 +619,7 @@ export default {
         this.loadingCourse = false
       }
     })
+    this.fetchActivities()
   },
   watch: {
     courseModel() {
@@ -609,7 +630,8 @@ export default {
     ...mapGetters({
       courseItems: 'course/courses',
       usersByCourse: 'course/usersByCourse',
-      classrooms: 'classroom/classrooms'
+      classrooms: 'classroom/classrooms',
+      activities: 'activity/activities'
     }),
     options() {
       return {
@@ -704,7 +726,10 @@ export default {
       postRegisteredUser: 'registeredUser/postRegisteredUser',
       postCourseUser: 'courseRegisteredUser/postCourseRegisteredUser',
       fetchClassroom: 'classroom/fetchClassrooms',
-      fethActivitiesByUser: 'courseRegisteredUser/getCourseRegisteredUserByUser'
+      fethActivitiesByUser:
+        'courseRegisteredUser/getCourseRegisteredUserByUser',
+      fetchActivities: 'activity/fetchActivities',
+      syncUserActivities: 'activity/getContributoryActivities'
     }),
     getStatus(status) {
       if (status) return 'mdi-check'
@@ -746,42 +771,85 @@ export default {
       }
     },
 
+    async syncAllUsers(classroom, index) {
+      await new Promise(resolve => setTimeout(() => resolve(), 100))
+      const { data } = await axios.get(
+        `api/v2/sync/courses/${this.courseModel.idCourseMoodle}/classrooms/${classroom.id}/activities`
+      )
+
+      if (data.success) {
+        this.snackbar = true
+        this.message = `Sincronización exitosa ${classroom.description}`
+      }
+
+      if (index === this.classrooms.length - 1) {
+        this.overlay = false
+      }
+    },
+
+    async syncSelectedUsers(userCourse, index) {
+      await new Promise(resolve => setTimeout(() => resolve(), 100))
+      const { success } = await this.fethActivitiesByUser(userCourse)
+      if (success) {
+        this.snackbar = true
+        this.message = `Sincronización exitosa ${userCourse.registeredUser.name} ${userCourse.registeredUser.last_name}`
+      }
+      if (index === this.selected.length - 1) {
+        this.overlay = false
+      }
+    },
+
+    async showSyncActivities(activity) {
+      await new Promise(resolve => setTimeout(() => resolve(), 70))
+      this.currentActivity = activity.description
+    },
+    async syncContributeActivities(userCourse, index) {
+      await new Promise(resolve => setTimeout(() => resolve(), 100))
+
+      const filterSection = 'Formativa'
+
+      const filterActivity = this.activities.filter(activity => {
+        return (
+          activity.section.description !== filterSection &&
+          this.courseModel.id === activity.course.id
+        )
+      })
+
+      let arrayActivities = new Array()
+
+      filterActivity.forEach(activity => {
+        arrayActivities.push(activity.idActivityMoodle)
+      })
+
+      const data = {
+        users: userCourse,
+        array: JSON.stringify(arrayActivities)
+      }
+
+      const { success } = await this.syncUserActivities(data)
+
+      if (success) {
+        this.currentSyncUser = `Actualizando actividades de ${userCourse.registeredUser.name} ${userCourse.registeredUser.last_name} del ${userCourse.classroom.description}`
+
+        this.indexCurrentSyncUser = `${index + 1}/${this.usersByCourse.length}`
+
+        filterActivity.forEachAsync(this.showSyncActivities)
+      }
+
+      if (index === this.usersByCourse.length - 1) {
+        this.overlay = false
+      }
+
+      console.log(userCourse)
+
+      console.log(JSON.stringify(arrayActivities))
+    },
     async syncActivities() {
       this.overlay = true
       if (this.selected.length === 0) {
-        const { success } = await this.fetchClassroom()
-
-        if (success) {
-          this.classrooms.forEach((classroom, index) => {
-            setTimeout(async () => {
-              const { data } = await axios.get(
-                `api/v2/sync/courses/${this.courseModel.idCourseMoodle}/classrooms/${classroom.id}/activities`
-              )
-
-              if (data.success) {
-                this.snackbar = true
-                this.message = `Sincronización exitosa ${classroom.description}`
-              }
-
-              if (index === this.classrooms.length - 1) {
-                this.overlay = false
-              }
-            }, 500)
-          })
-        }
+        this.usersByCourse.forEachAsync(this.syncContributeActivities)
       } else {
-        this.selected.forEach(async (userCourse, index) => {
-          setTimeout(async () => {
-            const { success } = await this.fethActivitiesByUser(userCourse)
-            if (success) {
-              this.snackbar = true
-              this.message = `Sincronización exitosa ${userCourse.registeredUser.name} ${userCourse.registeredUser.last_name}`
-            }
-            if (index === this.selected.length - 1) {
-              this.overlay = false
-            }
-          }, 500)
-        })
+        // this.selected.forEachAsync(this.syncSelectedUsers)
       }
     },
     async syncUsers() {

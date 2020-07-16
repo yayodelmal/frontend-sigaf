@@ -68,7 +68,7 @@ export default {
             console.log(error)
           }
 
-          return { success, message }
+          return { success, message, data: _data.properties }
         }
       } catch (error) {
         console.log(error)

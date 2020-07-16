@@ -363,6 +363,12 @@
         ></v-progress-linear>
       </v-col>
     </v-row>
+    <v-overlay :value="overlay" color="grayS" :opacity="opacity">
+      <div class="text-center">
+        <v-progress-circular indeterminate size="64"> </v-progress-circular>
+      </div>
+      <h3 class="headline text-center mt-5">Sincronizando...</h3>
+    </v-overlay>
     <base-snackbar
       :message="message"
       :type="typeSnackbar"
@@ -441,7 +447,8 @@ export default {
     step: 1,
     typeSnackbar: 'success',
     colorSnackBar: 'blueS',
-    finalSave: false
+    finalSave: false,
+    overlay: false
   }),
   created() {
     this.fetchCourseItems()

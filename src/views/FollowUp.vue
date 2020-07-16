@@ -181,7 +181,11 @@
                                 <v-tooltip color="white" bottom>
                                   <template v-slot:activator="{ on }">
                                     <h4 v-on="on">
-                                      <kbd>{{ grade.qualificationMoodle }}</kbd>
+                                      <kbd>{{
+                                        grade.qualificationMoodle === ''
+                                          ? 'S/I'
+                                          : grade.qualificationMoodle
+                                      }}</kbd>
                                     </h4>
                                   </template>
                                   <span class="blueS--text darken-2">{{
@@ -201,9 +205,9 @@
                             flat
                             dark
                             class="py-1"
-                            ><span>{{
-                              user.state ? 'RENUNCIADO' : 'ACTIVO'
-                            }}</span></v-card
+                            ><span>
+                              {{ user.state }}
+                            </span></v-card
                           >
                         </v-col>
 
@@ -402,6 +406,7 @@ export default {
     },
     category() {
       this.loading = true
+      this.usersRegisteredFiltered = []
       this.fetchUserByCourse()
     }
   },
@@ -420,8 +425,14 @@ export default {
       return user.progress
     },
     getColorState(state) {
-      if (state) return 'redS darken-1'
-      return 'blueS darken-1'
+      switch (state) {
+        case 'RENUNCIADO':
+          return 'redS darken-1'
+        case 'RENUNCIA EN CURSO':
+          return 'warning darken-1'
+        default:
+          return 'blueS darken-1'
+      }
     },
     groupBy(objectArray, property) {
       return objectArray.reduce(function(accumulator, object) {
@@ -434,7 +445,7 @@ export default {
       }, {})
     },
     getGrades(section, activities) {
-      if (activities && section) {
+      if (activities[section.id] !== undefined) {
         return activities[section.id].filter(activity => {
           return activity.qualificationMoodle !== '-'
         })
@@ -450,13 +461,14 @@ export default {
 
     mapActivityUser(categories) {
       const vm = this
+
       categories.forEach(async course => {
         const response = await vm.fetchCourseUserByCategory(course)
 
         if (response) {
           response._data.forEach(user => {
             if (user.activity_course_users.length !== 0) {
-              let state
+              let state = 'ACTIVO'
               let progress = 0
               const activities = user.activity_course_users
                 .map(activity => {
@@ -465,9 +477,14 @@ export default {
                       activity.activity.section.description === 'Renuncia' &&
                       activity.status_moodle === 'Finalizado'
                     ) {
-                      state = true
-                    } else {
-                      state = false
+                      state = 'Renunciado'.toUpperCase()
+                    }
+
+                    if (
+                      activity.activity.section.description === 'Renuncia' &&
+                      activity.status_moodle === 'En curso'
+                    ) {
+                      state = 'Renuncia en curso'.toUpperCase()
                     }
 
                     let checkQualificationMoodle = ['', '-']
@@ -518,7 +535,7 @@ export default {
 
               const accumulativeProgress = Number.parseFloat(
                 (progress / totalProgress) * 100
-              )
+              ).toFixed(0)
               user['state'] = state
               user[
                 'fullname'
@@ -526,6 +543,8 @@ export default {
               user['progress'] = accumulativeProgress
               user['activities'] = this.groupBy(activities, 'idSection')
               vm.usersRegisteredFiltered.push(user)
+
+              console.log(user)
             }
           })
           this.loading = false

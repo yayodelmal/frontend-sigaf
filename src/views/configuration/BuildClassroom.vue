@@ -293,6 +293,12 @@
         </v-card>
       </v-form>
     </v-dialog>
+    <v-overlay :value="overlay" color="grayS" :opacity="opacity">
+      <div class="text-center">
+        <v-progress-circular indeterminate size="64"> </v-progress-circular>
+      </div>
+      <h3 class="headline text-center mt-3">{{ currentSyncUser }}</h3>
+    </v-overlay>
   </base-card>
 </template>
 
@@ -304,6 +310,13 @@ import { required } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 
 import * as easings from 'vuetify/es5/services/goto/easing-patterns'
+
+Array.prototype.forEachAsync = function(fn) {
+  return this.reduce(
+    (promise, n, index) => promise.then(() => fn(n, index)),
+    Promise.resolve()
+  )
+}
 
 export default {
   mixins: [validationMixin],
@@ -399,7 +412,10 @@ export default {
     colorSnackbarError: 'redS',
     colorSnackbarSuccess: 'blueS',
     colorSnackbar: 'blueS',
-    selectionHasError: false
+    selectionHasError: false,
+    overlay: false,
+    opacity: 0.7,
+    currentSyncUser: ''
   }),
   created() {
     this.fetchCourseItems()
@@ -544,34 +560,40 @@ export default {
     },
     async makeClassroom() {
       if (this.selected.length !== 0 && this.courseModel !== null)
-        this.selected.forEach(async (courseUser, index) => {
-          let dataSend = Object.assign(courseUser, {
-            ...{
-              classroom_id: this.classroomModel.id,
-              classroom: this.classroomModel
-            }
-          })
+        this.overlay = true
+      await this.selected.forEachAsync(this.sendRequest)
+    },
+    async sendRequest(courseUser, index) {
+      await new Promise(resolve => setTimeout(() => resolve(), 100))
 
-          const { success } = await this.editCourseRegisteredUser(dataSend)
+      let dataSend = Object.assign(courseUser, {
+        ...{
+          classroom_id: this.classroomModel.id,
+          classroom: this.classroomModel
+        }
+      })
 
-          if (success && index === this.selected.length - 1) {
-            setTimeout(() => {
-              this.colorSnackbar = this.colorSnackbarSuccess
-              this.snackbar = true
-              this.message = `Se ha conformado el ${this.classroomModel.description} con ${this.selected.length} alumnos`
+      const { success } = await this.editCourseRegisteredUser(dataSend)
 
-              this.classroomModel = null
-              this.regionModel = null
-              this.selected = []
-              this.rulesValueStepThree = true
-              this.completeStepThree = false
-              this.completeStepTwo = false
+      if (success) {
+        this.currentSyncUser = `Agregando a ${courseUser.registeredUser.name} ${courseUser.registeredUser.last_name} al ${courseUser.classroom.description}`
+      }
 
-              this.e1 = 2
-            }, 1000)
-            this.completeStepThree = true
-          }
-        })
+      if (index === this.selected.length - 1) {
+        this.colorSnackbar = this.colorSnackbarSuccess
+        this.snackbar = true
+        this.message = `Se ha conformado el ${this.classroomModel.description} con ${this.selected.length} alumnos`
+
+        this.classroomModel = null
+        this.regionModel = null
+        this.selected = []
+        this.rulesValueStepThree = true
+        this.completeStepThree = false
+        this.completeStepTwo = false
+
+        this.overlay = false
+        this.e1 = 2
+      }
     },
     async downloadExcel() {
       const config = {

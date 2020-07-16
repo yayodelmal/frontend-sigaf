@@ -41,7 +41,9 @@ export default {
           description: properties.description,
           weighing: properties.weighing,
           section: properties.section.properties,
-          course: properties.course.properties
+          course: properties.course.properties,
+          idActivityMoodle: properties.idActivityMoodle,
+          type: properties.type
         }
       })
     },
@@ -183,6 +185,21 @@ export default {
           success: false,
           error: 'Error grave. Contacte al Administrador.'
         }
+      }
+    },
+    getContributoryActivities: async (_, data_) => {
+      try {
+        const URL = `api/v2/sync/course-users/${data_.users.course.id_course_moodle}/users/${data_.users.registeredUser.id_registered_moodle}/activities/${data_.array}`
+
+        const { data } = await axios.get(URL)
+
+        console.log(data)
+
+        const { success } = data
+
+        return { success }
+      } catch (error) {
+        console.log(error.message)
       }
     }
   }
