@@ -2,39 +2,44 @@
   <v-navigation-drawer
     v-model="drawer"
     app
+    color="blueS darken-2"
     dark
     :expand-on-hover="hover"
     width="260"
     mobile-breakpoint="960"
     v-bind="$attrs"
   >
-    <v-list>
-      <v-list-item class="px-2">
+    <!-- <v-list color="white">
+      <v-list-item>
+        <v-img
+          contain
+          max-height="50"
+          src="..\..\assets\iie_iso@2x.png"
+        ></v-img>
+      </v-list-item>
+    </v-list> -->
+
+    <v-list elevation="10">
+      <v-list-item two-line class="px-2">
         <v-list-item-avatar>
           <v-avatar color="redS">
             <span class="white--text headline">{{ getAvatarName }}</span>
           </v-avatar>
-          <!-- <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img> -->
         </v-list-item-avatar>
-        <v-list-item-title class="title">{{
-          user !== null ? user.name : ''
-        }}</v-list-item-title>
-      </v-list-item>
-      <v-list-item class="px-2">
-        <v-list-item-avatar>
-          <v-avatar color="whiteS">
-            <span class="blueS--text headline">{{ getAvatarRole }}</span>
-          </v-avatar>
-          <!-- <span class="white--text headline">CJ</span> -->
-        </v-list-item-avatar>
-        <v-list-item-subtitle class="mt-3"
-          ><span class="mr-2">
-            Rol:
-          </span>
-          {{ user !== null ? user.role.description : '' }}
-        </v-list-item-subtitle>
+        <v-list-item-content>
+          <v-list-item-title>{{
+            user !== null ? user.name : ''
+          }}</v-list-item-title>
+          <v-list-item-subtitle>
+            {{
+              user !== null ? user.role.description : ''
+            }}</v-list-item-subtitle
+          >
+        </v-list-item-content>
       </v-list-item>
     </v-list>
+
+    <v-divider></v-divider>
 
     <v-list dense nav shaped>
       <v-list-item
@@ -80,11 +85,41 @@
         </v-list-item>
       </v-list-group>
     </v-list>
+    <template v-slot:append>
+      <div class="pa-2">
+        <v-btn color="grayS" @click="showLogoutConfirmation" depressed block
+          >Cerrar sesión</v-btn
+        >
+      </div>
+    </template>
+    <v-dialog v-model="dialog" max-width="350">
+      <v-card>
+        <v-toolbar flat color="blueS" dark dense>
+          <v-toolbar-title>SIGAF</v-toolbar-title>
+        </v-toolbar>
+
+        <v-card-text class="text-center title my-6">
+          ¿Cerrar sesión?
+        </v-card-text>
+
+        <v-divider />
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn outlined @click="dialog = false">
+            CANCELAR
+          </v-btn>
+          <v-btn color="blueS" dark depressed @click="logout">
+            ACEPTAR
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-navigation-drawer>
 </template>
 
 <script>
 import { mapGetters, mapActions, mapState, mapMutations } from 'vuex'
+
 export default {
   name: 'NavigationDrawerApp',
   props: {
@@ -190,7 +225,8 @@ export default {
           ]
         }
       ]
-    }
+    },
+    dialog: false
   }),
   // props: {
   //   // drawer: {
@@ -279,8 +315,20 @@ export default {
       setDrawer: 'SET_DRAWER'
     }),
     ...mapActions({
-      attempt: 'auth/attempt'
-    })
+      attempt: 'auth/attempt',
+      logoutStore: 'auth/logout'
+    }),
+    showLogoutConfirmation() {
+      this.dialog = true
+    },
+    async logout() {
+      const { success } = await this.logoutStore()
+
+      if (success) {
+        this.dialog = false
+        this.$router.push({ name: 'Login' })
+      }
+    }
   }
 }
 </script>

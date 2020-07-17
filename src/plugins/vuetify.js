@@ -20,8 +20,8 @@ const options = {
   theme: {
     themes: {
       light: {
-        blueS: '#027087',
-        redS: '#AC1315',
+        blueS: '#006C8D', //'#027087'
+        redS: '#AC1315', //'#AC1315' '#BA2E38'
         whiteS: '#FEF7FB',
         grayS: '#404040'
       }

@@ -1,8 +1,9 @@
 <template>
-  <v-footer color="secondary" app dark>
+  <v-footer color="blueS darken-1" app dark inset>
     <v-spacer></v-spacer>
-    <span>&copy;SIGAF - 2020 - IIE</span>
+    <div>SIGAF</div>
     <v-spacer></v-spacer>
+    <div>v1.0.2</div>
   </v-footer>
 </template>
 

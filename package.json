@@ -1,6 +1,6 @@
 {
-  "name": "frontend-sigaf",
-  "version": "0.1.0",
+  "name": "sigaf",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
