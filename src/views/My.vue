@@ -1,7 +1,7 @@
 <template>
   <v-main>
-    <v-container class="fill-height" fluid tag="section">
-      <v-app-bar app clipped-right flat color="white">
+    <v-container class="fill-height bg-gray" fluid>
+      <v-app-bar app clipped-right color="white">
         <v-app-bar-nav-icon @click="setDrawer()"></v-app-bar-nav-icon>
         <v-spacer></v-spacer>
         <v-toolbar-title class="blueS--text">
@@ -10,8 +10,11 @@
         >
         <v-spacer></v-spacer>
       </v-app-bar>
+
       <navigation-drawer-app></navigation-drawer-app>
-      <router-view></router-view>
+
+      <router-view> </router-view>
+
       <!-- <footer-app></footer-app> -->
     </v-container>
   </v-main>
@@ -31,7 +34,8 @@ export default {
   data() {
     return {
       mini: false,
-      title: 'Ticket'
+      title: 'Ticket',
+      snackbar: true
     }
   },
   computed: {
@@ -74,4 +78,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style>
+.bg-gray {
+  background-color: #eceff1;
+}
+</style>

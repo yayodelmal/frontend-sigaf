@@ -153,6 +153,7 @@
 <script>
 import Navbar from '../components/my/Navbar'
 import User from '../models/User'
+
 import { validationMixin } from 'vuelidate'
 import { required, email } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
@@ -183,7 +184,8 @@ export default {
     confirmPassword: '',
     showCurrentPassword: false,
     showNewPassword: false,
-    showConfirmPassword: false
+    showConfirmPassword: false,
+    dialog: true
   }),
   computed: {
     ...mapGetters({

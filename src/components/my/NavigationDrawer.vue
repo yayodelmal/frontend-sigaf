@@ -2,7 +2,7 @@
   <v-navigation-drawer
     v-model="drawer"
     app
-    color="blueS darken-2"
+    color="blueS darken-1"
     dark
     :expand-on-hover="hover"
     width="260"
@@ -19,8 +19,8 @@
       </v-list-item>
     </v-list> -->
 
-    <v-list elevation="10">
-      <v-list-item two-line class="px-2">
+    <v-list elevation="10" height="64">
+      <v-list-item two-line class="px-2 mt-n3">
         <v-list-item-avatar>
           <v-avatar color="redS">
             <span class="white--text headline">{{ getAvatarName }}</span>
@@ -86,13 +86,27 @@
       </v-list-group>
     </v-list>
     <template v-slot:append>
-      <div class="pa-2">
-        <v-btn color="grayS" @click="showLogoutConfirmation" depressed block
-          >Cerrar sesión</v-btn
-        >
-      </div>
+      <v-list nav>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon>mdi-logout</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>
+              <v-btn
+                dark
+                color="blueS"
+                @click="showLogoutConfirmation"
+                depressed
+                block
+                >Cerrar sesión</v-btn
+              >
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
     </template>
-    <v-dialog v-model="dialog" max-width="350">
+    <!-- <v-dialog v-model="dialog" max-width="350">
       <v-card>
         <v-toolbar flat color="blueS" dark dense>
           <v-toolbar-title>SIGAF</v-toolbar-title>
@@ -113,19 +127,33 @@
           </v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
+    <confirm-dialog
+      :icon="'mdi-exit-to-app'"
+      :color-icon="'blueS'"
+      :dialog="dialog"
+      :cancel="closeDialog"
+      :accept="logout"
+    >
+      <template v-slot:content>
+        <h3 class="text-body-1">¿Cerrar sesión?</h3>
+      </template>
+    </confirm-dialog>
   </v-navigation-drawer>
 </template>
 
 <script>
 import { mapGetters, mapActions, mapState, mapMutations } from 'vuex'
+import ConfirmDialog from '../component/ConfirmCard'
 
 export default {
   name: 'NavigationDrawerApp',
   props: {
     breakpoint: String
   },
-
+  components: {
+    'confirm-dialog': ConfirmDialog
+  },
   data: () => ({
     links: {
       main: [
@@ -318,6 +346,9 @@ export default {
       attempt: 'auth/attempt',
       logoutStore: 'auth/logout'
     }),
+    closeDialog() {
+      this.dialog = false
+    },
     showLogoutConfirmation() {
       this.dialog = true
     },

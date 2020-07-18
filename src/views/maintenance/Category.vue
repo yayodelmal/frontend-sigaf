@@ -1,6 +1,11 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Categoría de curso">
+    <base-card
+      color="blueS"
+      class="px-5 py-3"
+      icon="mdi-cog"
+      title="Categoría de curso"
+    >
       <div v-if="loading">
         <v-skeleton-loader
           :loading="loading"
@@ -22,11 +27,12 @@
         ></v-skeleton-loader>
       </div>
       <v-data-table
+        :search="search"
         v-else
         :headers="headers"
         :items="categoriesItems"
-        class="elevation-1 grayS--text"
         :loading="loading"
+        class="elevation-1"
         loading-text="Cargando... por favor espere"
       >
         <template v-slot:progress>
@@ -37,76 +43,91 @@
           ></v-progress-linear>
         </template>
         <template v-slot:top>
-          <v-toolbar flat color="white">
+          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
+            <v-text-field
+              v-model="search"
+              color="blueS"
+              clearable
+              flat
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+              label="Buscar"
+            ></v-text-field>
             <v-spacer></v-spacer>
             <v-dialog v-model="dialog" max-width="500px" persistent>
               <template v-slot:activator="{ on }">
-                <base-button
-                  icon="mdi-plus-circle"
-                  v-on="on"
-                  label="Crear categoría"
-                ></base-button>
+                <v-btn depressed large color="blueS" v-on="on">
+                  <v-icon class="mr-2" size="25">mdi-plus</v-icon>
+                  Crear categoría
+                </v-btn>
               </template>
               <v-form>
-                <v-card>
-                  <v-card-title>
-                    <span class="headline">{{ formTitle }}</span>
-                  </v-card-title>
+                <v-card :loading="loadingSave">
+                  <template v-slot:progress>
+                    <v-progress-linear
+                      color="blueS"
+                      indeterminate
+                    ></v-progress-linear>
+                  </template>
+                  <v-toolbar dark color="blueS darken-1">
+                    <v-toolbar-title>
+                      {{ formTitle }}
+                    </v-toolbar-title>
+                  </v-toolbar>
                   <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="12">
-                          <base-textfield
-                            v-model="editedItem.description"
-                            label="Nombre"
-                            required
-                            clearable
-                            @input="$v.description.$touch()"
-                            @blur="$v.description.$touch()"
-                            :error-messages="descriptionErrors"
-                          ></base-textfield>
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="8">
-                          <base-autocomplete
-                            v-model="editedItem.platform"
-                            :items="platformsItems"
-                            label="Plataforma"
-                            item-value="id"
-                            item-text="description"
-                            return-object
-                            @change="$v.platform.$touch()"
-                            @blur="$v.platform.$touch()"
-                            :error-messages="platformErrors"
-                          >
-                          </base-autocomplete>
-                        </v-col>
-                        <v-col cols="4">
-                          <base-textfield
-                            v-model="editedItem.idCategoryMoodle"
-                            label="Id Moodle"
-                            required
-                            clearable
-                            @input="$v.idMoodle.$touch()"
-                            @blur="$v.idMoodle.$touch()"
-                            :error-messages="idMoodleErrors"
-                          ></base-textfield>
-                        </v-col>
-                      </v-row>
-                    </v-container>
+                    <v-row>
+                      <v-col cols="12">
+                        <base-textfield
+                          v-model="editedItem.description"
+                          label="Nombre"
+                          @input="$v.description.$touch()"
+                          @blur="$v.description.$touch()"
+                          :error-messages="descriptionErrors"
+                        ></base-textfield>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="8">
+                        <base-autocomplete
+                          v-model="editedItem.platform"
+                          :items="platformsItems"
+                          label="Plataforma"
+                          item-value="id"
+                          item-text="description"
+                          return-object
+                          @change="$v.platform.$touch()"
+                          @blur="$v.platform.$touch()"
+                          :error-messages="platformErrors"
+                        >
+                        </base-autocomplete>
+                      </v-col>
+                      <v-col cols="4">
+                        <base-textfield
+                          v-model="editedItem.idCategoryMoodle"
+                          label="Id Moodle"
+                          @input="$v.idMoodle.$touch()"
+                          @blur="$v.idMoodle.$touch()"
+                          :error-messages="idMoodleErrors"
+                        ></base-textfield>
+                      </v-col>
+                    </v-row>
                   </v-card-text>
+                  <v-divider></v-divider>
                   <v-card-actions>
                     <v-spacer></v-spacer>
-                    <base-button
-                      icon="mdi-check-circle"
-                      label="Guardar"
-                      @click="save"
-                    ></base-button>
-                    <v-btn text color="grayS" @click="close">
-                      <v-icon size="30" left>mdi-close-circle</v-icon>
-                      Cancelar</v-btn
+                    <v-btn text @click="close()">
+                      CANCELAR
+                    </v-btn>
+                    <v-btn
+                      :loading="loading"
+                      color="blueS"
+                      dark
+                      depressed
+                      @click="save()"
                     >
+                      ACEPTAR
+                    </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-form>
@@ -137,35 +158,19 @@
         </template>
       </v-data-table>
     </base-card>
-    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar>
-    <v-dialog v-model="dialogConfirm" persistent max-width="350">
-      <base-card
-        class="pt-12"
-        color="redS"
-        icon="mdi-hand-left"
-        title="¡Atención!"
-      >
-        <v-divider></v-divider>
-        <v-card-text>Eliminará un registro de forma permanente</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <base-button
-            icon="mdi-check-circle"
-            label="Aceptar"
-            @click.prevent="confirmDelete"
-          ></base-button>
-          <v-btn text color="grayS" @click="close">
-            <v-icon size="30" left>mdi-close-circle</v-icon>
-            Cancelar</v-btn
-          >
-        </v-card-actions>
-      </base-card>
-    </v-dialog>
+    <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
+    </sigaf-snackbar>
+    <confirm-dialog
+      icon="mdi-alert-circle"
+      color-icon="warning"
+      :dialog="dialogConfirm"
+      :cancel="close"
+      :accept="confirmDelete"
+    >
+      <template v-slot:content>
+        <h3 class="text-body-1">Eliminará un registro de forma permanente</h3>
+      </template>
+    </confirm-dialog>
   </div>
 </template>
 
@@ -181,10 +186,17 @@ import {
   maxValue
 } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+import SigafSnackbar from '../../components/component/Snackbar'
+import { Snackbar } from '../../utils/constants'
+import ConfirmDialog from '../../components/component/ConfirmCard'
 
 export default {
   inject: ['theme'],
   mixins: [validationMixin],
+  components: {
+    SigafSnackbar,
+    ConfirmDialog
+  },
   validations: {
     description: {
       required,
@@ -204,18 +216,25 @@ export default {
     dialog: false,
     dialogConfirm: false,
     headers: [
-      { text: '#', value: 'id', class: 'redS--text' },
-      { text: 'Nombre', value: 'description', class: 'redS--text' },
-      { text: 'ID moodle', value: 'idCategoryMoodle', class: 'redS--text' },
+      {
+        text: 'Nombre',
+        value: 'description',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
+        text: 'ID moodle',
+        value: 'idCategoryMoodle',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
       {
         text: 'Plataforma',
         value: 'platform.properties.description',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: 'redS--text',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -223,13 +242,13 @@ export default {
     editedItem: new Category(),
     defaultItem: new Category(),
     message: '',
-    successMessage: 'Operación realizada con éxito.',
-    errorMEssage: 'Ha ocurrido un error.',
     snackbar: false,
-    timeout: 3000,
+    type: '',
     loading: false,
-    platformModel: null,
-    transition: 'scale-transition'
+    transition: 'scale-transition',
+    loadingSave: false,
+    snakResponse: null,
+    search: ''
   }),
   computed: {
     ...mapGetters({
@@ -281,8 +300,8 @@ export default {
   },
   created() {
     this.loading = true
-    this.fetchDataCategories()
-    this.fetchDataPlatforms().then(() => (this.loading = false))
+    this.fetchCategoryItems()
+    this.fetchPlatformItems().then(() => (this.loading = false))
   },
   methods: {
     ...mapActions({
@@ -292,8 +311,19 @@ export default {
       removeItem: 'category/deleteCategory',
       fetchPlatformItems: 'platform/fetchPlatforms'
     }),
+    makeSnakResponse(message, type) {
+      this.snackbar = true
+      this.type = type
+      this.message = message
+      this.loadingSave = false
+    },
+    responseSuccessMessage() {
+      this.makeSnakResponse(Snackbar.SUCCESS.message, Snackbar.SUCCESS.type)
+    },
+    responseErrorMessage() {
+      this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
+    },
     editItem(item) {
-      console.log(item)
       this.editedIndex = this.categoriesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
@@ -301,35 +331,18 @@ export default {
 
       this.dialog = true
     },
-    async fetchDataCategories() {
-      const { success, message } = await this.fetchCategoryItems()
-      if (!success) {
-        this.snackbar = true
-        this.message = message
-      }
-    },
-    async fetchDataPlatforms() {
-      const { success, message } = await this.fetchPlatformItems()
-      console.log()
-      if (!success) {
-        this.snackbar = true
-        this.message = message
-      }
-    },
     deleteItem(item) {
       this.editedIndex = this.categoriesItems.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogConfirm = true
     },
     async confirmDelete() {
-      const { success, message } = await this.removeItem(this.editedItem)
+      const { success } = await this.removeItem(this.editedItem)
 
       if (success) {
-        this.snackbar = true
-        this.message = this.successMessage
+        this.responseSuccessMessage()
       } else {
-        this.snackbar = true
-        this.message = message
+        this.responseErrorMessage()
       }
       this.closeConfirmDelete()
     },
@@ -342,29 +355,25 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
+        this.loadingSave = true
         let dataStore = Object.assign(this.editedItem, {
           platform_id: this.editedItem.platform.id,
           id_category_moodle: this.editedItem.idCategoryMoodle,
           status: 1
         })
-        console.log('DATASTORE', dataStore)
         if (this.editedIndex > -1) {
-          const { success, message } = await this.putItem(dataStore)
+          const { success } = await this.putItem(dataStore)
           if (success) {
-            this.snackbar = true
-            this.message = this.successMessage
+            this.responseSuccessMessage()
           } else {
-            this.snackbar = true
-            this.message = message
+            this.responseErrorMessage()
           }
         } else {
-          const { success, message } = await this.postItem(dataStore)
+          const { success } = await this.postItem(dataStore)
           if (success) {
-            this.snackbar = true
-            this.message = this.successMessage
+            this.responseSuccessMessage()
           } else {
-            this.snackbar = true
-            this.message = message
+            this.responseErrorMessage()
           }
         }
         this.close()
@@ -380,11 +389,8 @@ export default {
     clear() {
       this.$v.$reset()
       this.editedItem = Object.assign({}, this.defaultItem)
-      this.platformModel = null
       this.editedIndex = -1
     }
   }
 }
 </script>
-
-<style scoped></style>

@@ -2,25 +2,36 @@
   <v-dialog
     v-bind="$attrs"
     v-on="$listeners"
-    v-model="computedDialog"
+    v-model="dialog"
     max-width="350"
+    persistent
   >
-    <base-card>
-      <v-toolbar flat color="blueS" dark dense>
+    <base-card :loading="loading">
+      <template v-slot:progress>
+        <v-progress-linear color="blueS" indeterminate></v-progress-linear>
+      </template>
+      <v-toolbar flat color="blueS darken-1" dark dense>
         <v-toolbar-title>SIGAF</v-toolbar-title>
       </v-toolbar>
-
-      <v-card-text class="text-center title my-6">
-        ¿Cerrar sesión?
+      <v-card-text class="d-flex align-center flex-column mt-6">
+        <v-icon :color="colorIcon" size="40">{{ icon }}</v-icon>
+        <div class="mt-2 text-center">
+          <slot name="content"> </slot>
+        </div>
       </v-card-text>
-
       <v-divider />
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn outlined @click="dialog = false">
+        <v-btn small outlined @click="cancel()">
           CANCELAR
         </v-btn>
-        <v-btn color="blueS" dark depressed @click="logout">
+        <v-btn
+          small
+          color="blueS"
+          dark
+          depressed
+          @click="generateLoadingButton()"
+        >
           ACEPTAR
         </v-btn>
       </v-card-actions>
@@ -35,17 +46,27 @@ export default {
   components: {
     BaseCard
   },
+  data: () => ({
+    loading: false
+  }),
   props: {
-    dialog: Boolean
+    dialog: Boolean,
+    cancel: Function,
+    accept: Function,
+    icon: String,
+    colorIcon: String
   },
-  computed: {
-    computedDialog: {
-      get() {
-        return this.dialog
-      },
-      set(value) {
-        this.$emit('update:dialog', value)
+  watch: {
+    dialog() {
+      if (this.dialog) {
+        this.loading = false
       }
+    }
+  },
+  methods: {
+    generateLoadingButton() {
+      this.loading = true
+      this.accept()
     }
   }
 }

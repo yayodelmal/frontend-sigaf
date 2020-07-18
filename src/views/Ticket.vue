@@ -1111,7 +1111,21 @@
           Cerrar
         </v-btn>
       </v-snackbar>
-      <v-dialog v-model="dialogConfirm" persistent max-width="350">
+
+      <confirm-dialog
+        :icon="'mdi-alert-circle-outline'"
+        :color-icon="'warning'"
+        :dialog="dialogConfirm"
+        :cancel="close"
+        :accept="confirmDelete"
+      >
+        <template v-slot:content>
+          <h3 class="text-button">
+            Eliminará un registro de forma permanente
+          </h3>
+        </template>
+      </confirm-dialog>
+      <!-- <v-dialog v-model="dialogConfirm" persistent max-width="350">
         <base-card
           class="pt-12"
           color="redS"
@@ -1133,7 +1147,7 @@
             >
           </v-card-actions>
         </base-card>
-      </v-dialog>
+      </v-dialog> -->
       <v-dialog v-model="dialogSelectCourse" max-width="400">
         <v-card>
           <v-card-title class="headline text-center"
@@ -1183,8 +1197,9 @@ import DetailTicket from '../models/DetailTicket'
 import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+import ConfirmDialog from '../components/component/ConfirmCard'
 
-Array.prototype.forEachAsync = function(fn) {
+Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
     (promise, n, index) => promise.then(() => fn(n, index)),
     Promise.resolve()
@@ -1194,6 +1209,9 @@ Array.prototype.forEachAsync = function(fn) {
 export default {
   inject: ['theme'],
   mixins: [validationMixin],
+  components: {
+    ConfirmDialog
+  },
   validations: {
     category: {
       required
@@ -1974,7 +1992,7 @@ export default {
         } else {
           this.dialogMassive = false
           this.overlay = true
-          this.selected.forEachAsync(this.showSyncTickets)
+          this.selected.forEachAsyncCustom(this.showSyncTickets)
         }
       }
     },
