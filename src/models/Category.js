@@ -1,11 +1,9 @@
-import Platform from './Platform'
-
 export default class Category {
   constructor(
     id = '',
     description = '',
     idCategoryMoodle = '',
-    platform = new Platform(),
+    platform = null,
     status = ''
   ) {
     this.id = id
