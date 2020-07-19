@@ -121,8 +121,7 @@
                   @change="$v.platform.$touch()"
                   @blur="$v.platform.$touch()"
                   :error-messages="platformErrors"
-                >
-                </base-autocomplete>
+                ></base-autocomplete>
               </v-col>
               <v-col cols="4">
                 <base-textfield
@@ -196,7 +195,7 @@ export default {
   validations: {
     description: {
       required,
-      minLength: minLength(5),
+      minLength: minLength(7),
       maxLength: maxLength(150)
     },
     platform: {
@@ -257,7 +256,7 @@ export default {
       if (!this.$v.description.$dirty) return errors
       !this.$v.description.required && errors.push('Es obligatorio.')
       !this.$v.description.minLength &&
-        errors.push('Debe contener al menos 5 caracteres.')
+        errors.push('Debe contener al menos 7 caracteres.')
       !this.$v.description.maxLength &&
         errors.push('Debe contener máximo 25 caracteres.')
       return errors

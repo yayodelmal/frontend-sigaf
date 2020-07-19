@@ -44,7 +44,7 @@
           ></v-progress-linear>
         </template>
         <template v-slot:top>
-          <v-toolbar title dark color="blueS darken-1" class="mb-1">
+          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
             <v-text-field
               v-model="search"
               color="blueS"
