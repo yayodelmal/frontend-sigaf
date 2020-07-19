@@ -3,7 +3,7 @@
     <base-card
       color="blueS"
       class="px-5 py-3"
-      icon="mdi-cog"
+      icon="mdi-hammer-wrench"
       title="Categoría de curso"
     >
       <div v-if="loading">
@@ -57,10 +57,11 @@
             <v-spacer></v-spacer>
             <v-dialog v-model="dialog" max-width="500px" persistent>
               <template v-slot:activator="{ on }">
-                <v-btn depressed large color="blueS" v-on="on">
-                  <v-icon class="mr-2" size="25">mdi-plus</v-icon>
-                  Crear categoría
-                </v-btn>
+                <base-button
+                  icon="mdi-plus-circle"
+                  v-on="on"
+                  label="Crear categoría"
+                ></base-button>
               </template>
               <v-form>
                 <v-card :loading="loadingSave">
@@ -259,11 +260,11 @@ export default {
       const errors = []
 
       if (!this.$v.description.$dirty) return errors
-      !this.$v.description.required && errors.push('El nombre es obligatorio.')
+      !this.$v.description.required && errors.push('Es obligatorio.')
       !this.$v.description.minLength &&
-        errors.push('El nombre debe contener al menos 5 carácteres')
+        errors.push('Debe contener al menos 5 caracteres.')
       !this.$v.description.maxLength &&
-        errors.push('El nombre debe contener máximo 25 carácteres')
+        errors.push('Debe contener máximo 25 caracteres.')
       return errors
     },
     platformErrors() {
