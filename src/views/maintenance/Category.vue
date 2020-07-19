@@ -31,6 +31,7 @@
         v-else
         :headers="headers"
         :items="categoriesItems"
+        :items-per-page="5"
         :loading="loading"
         class="elevation-1"
         loading-text="Cargando... por favor espere"
