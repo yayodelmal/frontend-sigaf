@@ -58,11 +58,10 @@
             <v-spacer></v-spacer>
             <v-dialog v-model="dialog" max-width="500px" persistent>
               <template v-slot:activator="{ on }">
-                <base-button
-                  icon="mdi-plus-circle"
-                  v-on="on"
-                  label="Crear aula"
-                ></base-button>
+                <v-btn depressed large color="blueS" v-on="on">
+                  <v-icon class="mr-2" size="25">mdi-plus</v-icon>
+                  Crear Aula
+                </v-btn>
               </template>
               <v-form>
                 <v-card :loading="loadingSave">
@@ -231,9 +230,14 @@ export default {
       return this.editedItem.description
     }
   },
-  created() {
+  async created() {
     this.loading = true
-    this.fetchData()
+    if (this.items.length === 0) {
+      const { success } = await this.fetchItems()
+      this.loading = !success
+    } else {
+      this.loading = false
+    }
   },
   methods: {
     ...mapActions({
@@ -259,15 +263,6 @@ export default {
 
       this.editedItem = Object.assign({}, item)
       this.dialog = true
-    },
-    async fetchData() {
-      this.loading = true
-      const { success, message } = await this.fetchItems()
-      if (!success) {
-        this.snackbar = true
-        this.message = message
-      }
-      this.loading = false
     },
     deleteItem(item) {
       this.editedIndex = this.items.indexOf(item)
