@@ -101,8 +101,8 @@
                       depressed
                       @click="save()"
                     >
-                      ACEPTAR</v-btn
-                    >
+                      ACEPTAR
+                    </v-btn>
                   </v-card-actions>
                 </v-card>
               </v-form>
