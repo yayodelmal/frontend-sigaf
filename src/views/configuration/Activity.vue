@@ -1,33 +1,52 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Actividades">
-      <v-card flat outlined>
+    <base-card
+      color="blueS"
+      class="px-5 py-3"
+      icon="mdi-hammer-wrench"
+      title="Actividades"
+    >
+      <v-card flat>
+        <v-card-title>
+          Seleccione:
+        </v-card-title>
         <v-card-text>
-          <v-row>
-            <v-col cols="12" sm="6" md="4" lg="4">
-              <v-btn
-                dark
-                depressed
+          <v-toolbar dark color="blueS darken-1" class="mb-1">
+            <v-select
+              v-model="category"
+              :items="categoryItems"
+              label="Categoría"
+              item-value="id"
+              item-text="description"
+              return-object
+              flat
+              color="blueS"
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-filter-outline"
+              :loading="loadingActivities"
+            ></v-select>
+
+            <template v-if="$vuetify.breakpoint.mdAndUp">
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="search"
                 color="blueS"
-                @click="syncActivities"
-                class="py-5"
-                icon
-              >
-                <v-icon size="30">mdi-sync</v-icon>
+                clearable
+                flat
+                solo-inverted
+                hide-details
+                prepend-inner-icon="mdi-magnify"
+                label="Buscar"
+              ></v-text-field>
+            </template>
+            <template v-if="category !== null">
+              <v-spacer />
+              <v-btn large dark depressed color="blueS" @click="syncActivities">
+                <v-icon size="25" class="mr-3">mdi-sync</v-icon> Actividades
               </v-btn>
-            </v-col>
-            <v-col cols="12" sm="6" md="8" lg="8">
-              <base-autocomplete
-                v-model="category"
-                :items="categoryItems"
-                label="Categoría"
-                item-value="id"
-                item-text="description"
-                return-object
-              >
-              </base-autocomplete>
-            </v-col>
-          </v-row>
+            </template>
+          </v-toolbar>
         </v-card-text>
       </v-card>
       <v-data-table
@@ -36,6 +55,7 @@
         class="elevation-1 grayS--text mt-3"
         :loading="loading"
         loading-text="Cargando... por favor espere"
+        :search="search"
       >
         <template v-slot:progress>
           <v-progress-linear
@@ -60,10 +80,15 @@
     </base-card>
     <v-dialog v-model="dialog" max-width="500px" persistent>
       <v-form>
-        <v-card>
-          <v-card-title>
-            <span class="headline">{{ formTitle }}</span>
-          </v-card-title>
+        <v-card :loading="loadingSave">
+          <template v-slot:progress>
+            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
+          </template>
+          <v-toolbar dark color="blueS darken-1">
+            <v-toolbar-title>
+              {{ formTitle }}
+            </v-toolbar-title>
+          </v-toolbar>
           <v-card-text>
             <v-container>
               <v-row>
@@ -108,27 +133,27 @@
               </v-row>
             </v-container>
           </v-card-text>
+          <v-divider></v-divider>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <base-button
-              icon="mdi-check-circle"
-              label="Guardar"
+            <v-btn text @click="close">
+              CANCELAR
+            </v-btn>
+            <v-btn
+              :loading="loading"
+              color="blueS"
+              dark
+              depressed
               @click="save"
-            ></base-button>
-            <v-btn text color="grayS" @click="close">
-              <v-icon size="30" left>mdi-close-circle</v-icon>
-              Cancelar</v-btn
             >
+              ACEPTAR
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-form>
     </v-dialog>
-    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar>
+    <snackbar-component v-model="snackbar" :type="type" :message="message">
+    </snackbar-component>
     <v-dialog v-model="dialogConfirm" persistent max-width="350">
       <base-card
         class="pt-12"
@@ -152,6 +177,14 @@
         </v-card-actions>
       </base-card>
     </v-dialog>
+    <v-overlay :value="overlay" color="grayS" :opacity="opacity">
+      <div class="text-center">
+        <v-progress-circular indeterminate size="64"> </v-progress-circular>
+      </div>
+      <h3 class="headline text-center mt-5">
+        Sincronizando...
+      </h3>
+    </v-overlay>
   </div>
 </template>
 
@@ -162,8 +195,15 @@ import { required, numeric, minValue, maxValue } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 import axios from '../../services/axios'
 
+import SnackbarComponent from '../../components/component/Snackbar'
+
+import { Snackbar } from '../../utils/constants'
+
 export default {
   mixins: [validationMixin],
+  components: {
+    SnackbarComponent
+  },
   validations: {
     description: { required },
     weighing: {
@@ -178,14 +218,25 @@ export default {
     dialog: false,
     dialogConfirm: false,
     headers: [
-      { text: '#', value: 'id', class: 'redS--text' },
-      { text: 'Nombre', value: 'description', class: 'redS--text' },
-      { text: 'Ponderación', value: 'weighing', class: 'redS--text' },
-      { text: 'Sección', value: 'section.description', class: 'redS--text' },
+      {
+        text: 'Nombre',
+        value: 'description',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
+        text: 'Ponderación',
+        value: 'weighing',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
+        text: 'Sección',
+        value: 'section.description',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
       {
         text: 'Acciones',
         value: 'actions',
-        class: 'redS--text',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -200,7 +251,13 @@ export default {
     loading: false,
     activitiesFiltered: [],
     category: null,
-    sectionModel: null
+    sectionModel: null,
+    search: '',
+    loadingActivities: false,
+    overlay: false,
+    opacity: 0.8,
+    type: '',
+    loadingSave: false
   }),
   watch: {
     category() {
@@ -277,17 +334,34 @@ export default {
       fetchCategoryItems: 'category/fetchCategories',
       putItem: 'activity/putActivity'
     }),
+    makeSnakResponse(message, type) {
+      this.snackbar = true
+      this.type = type
+      this.message = message
+      this.loadingSave = false
+      this.loadingButton = false
+    },
+    responseSuccessMessage() {
+      this.makeSnakResponse(Snackbar.SUCCESS.message, Snackbar.SUCCESS.type)
+    },
+    responseErrorMessage() {
+      this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
+    },
+
     syncActivities() {
       if (this.category !== null) {
+        this.overlay = true
         this.coursesByCategory.forEach(async course => {
           if (course.properties.idCourseMoodle) {
             await axios.get(
               `api/v2/sync/course/${course.properties.idCourseMoodle}/activities`
             )
+            this.overlay = false
           }
         })
-
-        this.filterActivitiesByCategories()
+      } else {
+        const message = 'Seleccione un curso.'
+        this.makeSnakResponse(message, Snackbar.WARNING.type)
       }
     },
     editItem(item) {
@@ -298,6 +372,7 @@ export default {
       this.dialog = true
     },
     async filterActivitiesByCategories() {
+      this.loadingActivities = true
       this.activitiesFiltered = []
       if (this.category !== null) {
         await this.fetchCourseByCategory(this.category.courses.href)
@@ -309,6 +384,8 @@ export default {
             }
           })
         })
+
+        this.loadingActivities = false
       }
     },
     async fetchDataActivities() {
@@ -330,14 +407,12 @@ export default {
       this.loading = false
     },
     async fetchDataCategories() {
-      this.loading = true
       const { success, message } = await this.fetchCategoryItems()
-      console.log()
+
       if (!success) {
         this.snackbar = true
         this.message = message
       }
-      this.loading = false
     },
     async fetchDataSections() {
       this.loading = true
@@ -356,14 +431,17 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
-        const { success, message } = await this.putItem(this.editedItem)
+        const { success } = await this.putItem(this.editedItem)
         if (success) {
-          this.snackbar = true
-          this.message = this.successMessage
-          this.filterActivitiesByCategories()
+          Object.assign(
+            this.activitiesFiltered[this.editedIndex],
+            this.editedItem
+          )
+
+          this.responseSuccessMessage()
+          // this.filterActivitiesByCategories()
         } else {
-          this.snackbar = true
-          this.message = message
+          this.responseErrorMessage()
         }
         this.close()
       }

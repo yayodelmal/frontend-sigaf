@@ -1,15 +1,10 @@
 <template>
-  <base-card color="blueS" class="px-5 py-3 mt-5" title="Conformación de aulas">
-    <v-row>
-      <v-spacer />
-      <base-button
-        class="mb-5"
-        icon="mdi-file-excel"
-        label="Descargar"
-        @click="downloadExcel"
-      ></base-button>
-    </v-row>
-
+  <base-card
+    color="blueS"
+    class="px-5 py-3"
+    icon="mdi-hammer-wrench"
+    title="Conformación de aulas"
+  >
     <template>
       <v-stepper alt-labels non-linear v-model="e1">
         <v-stepper-header>
@@ -47,97 +42,288 @@
         </v-stepper-header>
         <v-stepper-items>
           <v-stepper-content step="1">
-            <v-card flat outlined>
+            <v-card flat>
               <v-card-title>
-                Seleccione un curso:
+                Seleccione curso:
               </v-card-title>
               <v-card-text>
-                <base-autocomplete
-                  v-model="courseModel"
-                  :items="courseItems"
-                  label="Curso"
-                  item-value="id"
-                  item-text="description"
-                  return-object
-                  @change="$v.courseModel.$touch()"
-                  @blur="$v.courseModel.$touch()"
-                  :error-messages="courseErrors"
-                >
-                </base-autocomplete>
+                <v-toolbar tile dark color="blueS darken-1" class="mb-1">
+                  <v-select
+                    class="max-width"
+                    v-model="courseModel"
+                    flat
+                    item-value="id"
+                    item-text="description"
+                    solo-inverted
+                    hide-details
+                    color="blueS"
+                    return-object
+                    :items="courseItems"
+                    prepend-inner-icon="mdi-magnify"
+                    label="Curso"
+                    @change="$v.courseModel.$touch()"
+                    @blur="$v.courseModel.$touch()"
+                  ></v-select>
+                  <v-spacer></v-spacer>
+
+                  <v-switch
+                    v-if="$vuetify.breakpoint.mdAndUp"
+                    class="mt-4"
+                    color="white"
+                    v-model="detail"
+                    inset
+                    label="Ver detalle"
+                  ></v-switch>
+
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    depressed
+                    large
+                    color="blueS"
+                    @click="getStudents"
+                    :loading="loadingButton"
+                  >
+                    Generar
+                    <v-icon class="ml-2" size="25">mdi-arrow-right-bold</v-icon>
+                  </v-btn>
+                </v-toolbar>
+                <v-row v-if="loaded" class="mt-10">
+                  <v-col
+                    v-if="!detail || $vuetify.breakpoint.mdAndDown"
+                    cols="12"
+                    sm="12"
+                    md="12"
+                    xl="12"
+                  >
+                    <v-hover v-slot:default="{ hover }">
+                      <v-expand-transition>
+                        <v-card
+                          color="blueS"
+                          class="d-flex flex-column text-center"
+                        >
+                          <v-card
+                            class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
+                            color="white"
+                            :class="{ 'v-card--reveal': hover }"
+                            width="95%"
+                          >
+                            <bar-chart
+                              v-if="loaded"
+                              :chartData="chartDataBar"
+                              :options="optionsBar"
+                              class="max-height"
+                            >
+                            </bar-chart>
+                          </v-card>
+                          <v-row justify="center">
+                            <v-btn
+                              class="v-butron-position"
+                              @click="downloadExcel"
+                              dark
+                              depressed
+                              color="grayS"
+                            >
+                              <v-icon class="mr-3" size="25" color="success"
+                                >mdi-file-excel</v-icon
+                              >Descargar
+                            </v-btn>
+                          </v-row>
+                        </v-card>
+                      </v-expand-transition>
+                    </v-hover>
+                  </v-col>
+                  <v-col
+                    v-if="detail && $vuetify.breakpoint.lgAndUp"
+                    cols="12"
+                    sm="12"
+                    md="12"
+                    lg="4"
+                    xl="4"
+                  >
+                    <v-hover v-slot:default="{ hover }">
+                      <v-expand-transition>
+                        <v-card
+                          color="blueS"
+                          class="d-flex flex-column text-center"
+                        >
+                          <v-card
+                            class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
+                            color="white"
+                            :class="{ 'v-card--reveal': hover }"
+                            width="95%"
+                          >
+                            <horizontal-bar-chart
+                              v-if="loaded"
+                              :chartData="chartDataBar"
+                              :options="optionsBar"
+                              class="max-height-vertical"
+                            >
+                            </horizontal-bar-chart>
+                          </v-card>
+                          <v-row justify="center">
+                            <v-btn
+                              class="v-butron-position"
+                              @click="downloadExcel"
+                              dark
+                              depressed
+                              color="grayS"
+                            >
+                              <v-icon class="mr-3" size="25" color="success"
+                                >mdi-file-excel</v-icon
+                              >Descargar
+                            </v-btn>
+                          </v-row>
+                        </v-card>
+                      </v-expand-transition>
+                    </v-hover>
+                  </v-col>
+                  <v-col v-if="detail" cols="12" sm="12" md="12" lg="8" xl="8">
+                    <v-row justify="center">
+                      <v-expansion-panels focusable hover>
+                        <v-expansion-panel
+                          v-for="(data, index) in listClassroomUsers"
+                          :key="index"
+                        >
+                          <v-expansion-panel-header
+                            color="white"
+                            class="text-caption font-weigth-bold"
+                            >{{ data.classroom }} ({{ data.numberOfUser }}
+                            alumnos)
+                            <template v-slot:actions>
+                              <v-icon color="blueS">$expand</v-icon>
+                            </template>
+                          </v-expansion-panel-header>
+                          <v-expansion-panel-content>
+                            <v-row justify="center">
+                              <v-simple-table
+                                dense
+                                :fixed-header="true"
+                                height="300"
+                                :style="{ width: '100%' }"
+                              >
+                                <template v-slot:default>
+                                  <thead>
+                                    <tr>
+                                      <th
+                                        :style="{
+                                          width: '120px'
+                                        }"
+                                        class="text-left redS--text"
+                                      >
+                                        Rut
+                                      </th>
+                                      <th class="text-left redS--text">
+                                        Nombre
+                                      </th>
+                                      <th class="text-left redS--text">
+                                        Apellido paterno
+                                      </th>
+                                      <th class="text-left redS--text">
+                                        Apellido materno
+                                      </th>
+                                      <th class="text-left redS--text">
+                                        Región
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr
+                                      v-for="(user, index) in data.users"
+                                      :key="index"
+                                    >
+                                      <td>{{ user.registeredUser.rut }}</td>
+                                      <td>{{ user.registeredUser.name }}</td>
+                                      <td>
+                                        {{ user.registeredUser.last_name }}
+                                      </td>
+                                      <td>
+                                        {{
+                                          user.registeredUser.mother_last_name
+                                        }}
+                                      </td>
+                                      <td>{{ user.registeredUser.region }}</td>
+                                    </tr>
+                                  </tbody>
+                                </template>
+                              </v-simple-table>
+                            </v-row>
+                          </v-expansion-panel-content>
+                        </v-expansion-panel>
+                      </v-expansion-panels>
+                    </v-row>
+                  </v-col>
+                </v-row>
               </v-card-text>
               <v-card-actions>
                 <v-spacer />
                 <base-button
-                  :disabled="courseModel === null"
-                  icon="mdi-package-down"
-                  label="Continuar con seleccion"
-                  @click="getStudents"
-                  :loading="loadingButton"
+                  v-if="this.listClassroomUsers.length !== 0"
+                  @click="checkStepOne"
+                  icon="mdi-arrow-right-bold-circle"
+                  label="Continuar con aula"
                 ></base-button>
               </v-card-actions>
             </v-card>
           </v-stepper-content>
           <v-stepper-content step="2">
-            <v-card flat outlined>
-              <v-card-title>
-                Filtros:
-              </v-card-title>
-              <v-card-text>
-                <v-row>
-                  <v-col cols="11" md="6" sm="11" lg="6" class="mx-3">
-                    <v-row>
-                      <v-col cols="8" md="8" sm="12">
-                        <base-autocomplete
-                          v-if="regions"
-                          v-model="regionModel"
-                          :items="regions"
-                          label="Región"
-                          item-value="id"
-                          item-text="description"
-                          return-object
-                          @change="$vuetify.goTo(target, options)"
-                        >
-                        </base-autocomplete>
-                      </v-col>
-                      <v-col cols="4" md="4" sm="12">
-                        <base-textfield
-                          label="Buscar"
-                          required
-                          clearable
-                          v-model="searchStudent"
-                        ></base-textfield>
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                  <v-col cols="12" md="5" sm="12" lg="5">
-                    <v-row justify="space-around">
-                      <v-row>
-                        <v-checkbox
-                          v-for="profile in profiles"
-                          :key="profile.id"
-                          :label="profile.description"
-                          v-model="selectedFilter"
-                          color="redS"
-                          :value="profile"
-                          multiple
-                          class="ml-10"
-                        >
-                        </v-checkbox>
-                      </v-row>
-                      <v-row>
-                        <v-btn
-                          dark
-                          color="blueS"
-                          class="mt-3"
-                          @click="clearFilter"
-                          ><v-icon class="mr-3">mdi-close</v-icon> Limpiar
-                        </v-btn>
-                      </v-row>
-                    </v-row>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
+            <v-toolbar tile dark color="blueS darken-1" class="mb-1">
+              <v-select
+                v-if="regions"
+                class="max-width"
+                v-model="regionModel"
+                flat
+                item-value="id"
+                item-text="description"
+                solo-inverted
+                hide-details
+                color="blueS"
+                return-object
+                :items="regions"
+                prepend-inner-icon="mdi-magnify"
+                label="Región"
+                @change="
+                  $v.courseModel.$touch()
+                  $vuetify.goTo(target, options)
+                "
+                @blur="$v.courseModel.$touch()"
+              ></v-select>
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="searchStudent"
+                color="blueS"
+                clearable
+                flat
+                solo-inverted
+                hide-details
+                prepend-inner-icon="mdi-magnify"
+                label="Buscar"
+              ></v-text-field>
+              <v-spacer></v-spacer>
+              <v-row>
+                <v-checkbox
+                  v-for="profile in profiles"
+                  :key="profile.id"
+                  :label="profile.description"
+                  v-model="selectedFilter"
+                  :value="profile"
+                  multiple
+                  class="mt-4 ml-2"
+                >
+                </v-checkbox>
+              </v-row>
+              <v-spacer></v-spacer>
+              <v-btn
+                depressed
+                large
+                color="blueS"
+                @click="clearFilter"
+                :loading="loadingButton"
+              >
+                Limpiar
+                <v-icon class="ml-2" size="25">mdi-close</v-icon>
+              </v-btn>
+            </v-toolbar>
+
             <v-card flat outlined class="my-3">
               <v-card-title>
                 Seleccione usuarios:
@@ -202,32 +388,36 @@
               </v-card-actions>
             </v-card>
           </v-stepper-content>
-
           <v-stepper-content step="3">
-            <v-card flat outlined>
+            <v-card flat>
               <v-card-title>
                 Seleccionar aula:
               </v-card-title>
               <v-card-text>
-                <v-row class="mx-3">
-                  <base-autocomplete
+                <v-toolbar tile dark color="blueS darken-1" class="mb-1">
+                  <v-select
                     v-if="regions"
+                    class="max-width"
                     v-model="classroomModel"
                     :items="classrooms"
-                    label="Aula"
+                    flat
                     item-value="id"
                     item-text="description"
+                    solo-inverted
+                    hide-details
+                    color="blueS"
                     return-object
-                  >
-                  </base-autocomplete>
-                  <v-spacer />
-                  <base-button
-                    icon="mdi-check-circle"
-                    label="Conformar aula"
-                    @click="makeClassroom"
-                  ></base-button>
-                </v-row>
+                    prepend-inner-icon="mdi-magnify"
+                    label="Aula"
+                  ></v-select>
+                  <v-spacer></v-spacer>
+                  <v-btn depressed large color="blueS" @click="makeClassroom">
+                    Conformar aula
+                    <v-icon class="ml-2" size="25">mdi-check-circle</v-icon>
+                  </v-btn>
+                </v-toolbar>
               </v-card-text>
+
               <v-card-actions>
                 <v-spacer />
                 <v-btn text color="grayS" @click="e1 = 2">
@@ -240,18 +430,17 @@
         </v-stepper-items>
       </v-stepper>
     </template>
-    <v-snackbar :color="colorSnackbar" v-model="snackbar" :timeout="timeout">
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar>
     <v-dialog v-model="dialog" max-width="500px" persistent>
       <v-form>
-        <v-card>
-          <v-card-title>
-            <span class="headline">Modificar</span>
-          </v-card-title>
+        <v-card :loading="loadingEdit">
+          <template v-slot:progress>
+            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
+          </template>
+          <v-toolbar dark color="blueS darken-1">
+            <v-toolbar-title>
+              Modificar
+            </v-toolbar-title>
+          </v-toolbar>
           <v-card-text>
             <base-autocomplete
               v-if="regions"
@@ -278,17 +467,21 @@
             >
             </base-autocomplete>
           </v-card-text>
+          <v-divider></v-divider>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <base-button
-              icon="mdi-check-circle"
-              label="Guardar"
+            <v-btn text @click="close">
+              CANCELAR
+            </v-btn>
+            <v-btn
+              :loading="loadingEdit"
+              color="blueS"
+              dark
+              depressed
               @click="save"
-            ></base-button>
-            <v-btn text color="grayS" @click="close">
-              <v-icon size="30" left>mdi-close-circle</v-icon>
-              Cancelar</v-btn
             >
+              ACEPTAR
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-form>
@@ -297,8 +490,17 @@
       <div class="text-center">
         <v-progress-circular indeterminate size="64"> </v-progress-circular>
       </div>
+
+      <h3 class="headline text-center mt-5">
+        Sincronizando {{ indexCurrentSyncUser }}
+      </h3>
       <h3 class="headline text-center mt-3">{{ currentSyncUser }}</h3>
+      <h3 class="text-body-2 text-center mt-16">
+        Por favor espere. Esto puede tardar unos minutos
+      </h3>
     </v-overlay>
+    <snackbar-component v-model="snackbar" :type="type" :message="message">
+    </snackbar-component>
   </base-card>
 </template>
 
@@ -309,9 +511,15 @@ import { validationMixin } from 'vuelidate'
 import { required } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 
+import SnackbarComponent from '../../components/component/Snackbar'
+import { Snackbar, groupBy } from '../../utils/constants'
+
 import * as easings from 'vuetify/es5/services/goto/easing-patterns'
 
-Array.prototype.forEachAsync = function(fn) {
+import BarChart from '../../components/chart/BarChart'
+import HorizontalBarChart from '../../components/chart/HorizontalBar'
+
+Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
     (promise, n, index) => promise.then(() => fn(n, index)),
     Promise.resolve()
@@ -320,6 +528,11 @@ Array.prototype.forEachAsync = function(fn) {
 
 export default {
   mixins: [validationMixin],
+  components: {
+    SnackbarComponent,
+    HorizontalBarChart,
+    BarChart
+  },
   validations: {
     description: {
       required
@@ -336,39 +549,43 @@ export default {
       {
         text: 'Aula',
         value: 'classroom.description',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
-      { text: 'RUT', value: 'registeredUser.rut', class: 'redS--text' },
+      {
+        text: 'RUT',
+        value: 'registeredUser.rut',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
+        width: 150
+      },
       {
         text: 'Nombre',
         value: 'registeredUser.name',
-        class: 'redS--text',
-        width: 150
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Apellido Paterno',
         value: 'registeredUser.last_name',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Apellido materno',
         value: 'registeredUser.mother_last_name',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Región',
         value: 'registeredUser.region',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Ciudad',
         value: 'registeredUser.city_school',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: 'redS--text',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -414,8 +631,50 @@ export default {
     colorSnackbar: 'blueS',
     selectionHasError: false,
     overlay: false,
-    opacity: 0.7,
-    currentSyncUser: ''
+    opacity: 0.8,
+    currentSyncUser: '',
+    indexCurrentSyncUser: '',
+    type: '',
+    transition: 'scale-transition',
+    listClassroomUsers: [],
+    chartDataBar: {
+      labels: [],
+      datasets: []
+    },
+    optionsBar: {
+      responsive: true,
+      maintainAspectRatio: false,
+      tooltips: {
+        mode: 'index',
+        intersect: false
+      },
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        ],
+        xAxes: [
+          {
+            ticks: {
+              beginAtZero: true
+            }
+          }
+        ],
+        x: {
+          stacked: true
+        },
+        y: {
+          stacked: true
+        }
+      }
+    },
+    loaded: false,
+    showDetail: false,
+    detail: false,
+    loadingEdit: false
   }),
   created() {
     this.fetchCourseItems()
@@ -473,7 +732,6 @@ export default {
     },
     regions() {
       return Array.from(new Set(this.region))
-      //[...new Set([...this.region])]
     },
     courseErrors() {
       const errors = []
@@ -506,16 +764,76 @@ export default {
       fetchProfiles: 'profile/fetchProfiles',
       fetchUsersByCourse: 'course/getUsersByCourse'
     }),
+    checkStepOne() {
+      if (this.listClassroomUsers.length !== 0) {
+        this.e1 = 2
+      } else {
+        const message = 'Debe seleccionar un curso'
+        this.makeSnakResponse(message, Snackbar.WARNING.type)
+      }
+    },
+    makeSnakResponse(message, type) {
+      this.snackbar = true
+      this.type = type
+      this.message = message
+      this.loadingSave = false
+      this.loadingButton = false
+    },
+    responseSuccessMessage() {
+      this.makeSnakResponse(Snackbar.SUCCESS.message, Snackbar.SUCCESS.type)
+    },
+    responseErrorMessage() {
+      this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
+    },
     setEditClassroom() {
       this.editedItem.classroom = this.editClassroomModel
       this.editedItem.classroom_id = this.editClassroomModel.id
       this.$v.editClassroom.$touch()
     },
+    fillChartUsersByCourse() {
+      const property = 'classroomId'
+      const userByClassroom = groupBy(this.usersByCourse, property)
+
+      const labels = []
+      const data = []
+      this.listClassroomUsers = []
+      this.classrooms.forEach((classroom, index) => {
+        if (userByClassroom[classroom.id]) {
+          const arrayData = userByClassroom[classroom.id].length
+
+          //   const maxLength = Math.ceil(userByClassroom[classroom.id].length / 3)
+
+          this.listClassroomUsers.push({
+            classroom: classroom.description,
+            numberOfUser: userByClassroom[classroom.id].length,
+            users: userByClassroom[classroom.id]
+
+            // userByClassroom[classroom.id].slice(0, maxLength),
+            // userByClassroom[classroom.id].slice(maxLength, maxLength * 2),
+            // userByClassroom[classroom.id].slice(
+            //   maxLength * 2,
+            //   userByClassroom[classroom.id].length
+            // )
+          })
+
+          data.push(arrayData)
+
+          labels[index] = classroom.description
+        }
+      })
+
+      const dataset = {
+        backgroundColor: '#fb8c00', //fb8c00 006C8D
+        label: '# de alumnos por Aula',
+        data: data
+      }
+
+      this.chartDataBar.labels = labels
+      this.chartDataBar.datasets = [dataset]
+    },
     editItem(item) {
       this.editedIndex = this.filteredUserByCourse.indexOf(item)
-
       this.editedItem = Object.assign({}, item)
-
       this.editClassroomModel = this.editedItem.classroom
       this.profileModel = this.editedItem.profile
 
@@ -525,6 +843,7 @@ export default {
       this.$v.editClassroom.$touch()
       if (!this.$v.$error) {
         if (this.profileModel !== null) {
+          this.loadingEdit = true
           this.editedItem.profile = Object.assign({}, this.profileModel)
           this.editedItem.profile_id = this.profileModel.id
           this.editedItem.classroom_id = this.editClassroomModel.id
@@ -535,64 +854,78 @@ export default {
         if (success) {
           this.fetchCourseRegisteredUser()
           this.close()
-          this.colorSnackbar = this.colorSnackbarSuccess
-          this.snackbar = true
-          this.message = `Aula modificada exitosamente`
+          this.message = `Registro modificado exitosamente`
+          this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
+          this.loadingEdit = false
         } else {
-          this.colorSnackbar = this.colorSnackbarError
-          this.snackbar = true
-          this.message = `Ha ocurrido un error`
+          this.responseErrorMessage()
+          this.loadingEdit = false
         }
       }
     },
-    async getStudents() {
+    getStudents() {
       this.loadingButton = true
-      setTimeout(() => {
-        this.fetchUsersByCourse(this.courseModel.id)
-        this.fetchClassrooms()
-        this.e1 = 2
-        this.completeStepOne = true
-        this.rulesValueStepOne = true
+      setTimeout(async () => {
+        if (this.$v.courseModel.$invalid) {
+          const message = 'Debe seleccionar un curso'
+          this.makeSnakResponse(message, Snackbar.WARNING.type)
+        } else {
+          if (this.listClassroomUsers.length === 0) {
+            await this.fetchClassrooms()
+            const { success } = await this.fetchUsersByCourse(
+              this.courseModel.id
+            )
+            if (success) {
+              this.fillChartUsersByCourse()
+
+              this.completeStepOne = true
+              this.rulesValueStepOne = true
+              this.loaded = true
+            }
+          } else {
+            this.completeStepOne = true
+            this.rulesValueStepOne = true
+            this.loaded = true
+          }
+        }
         this.loadingButton = false
-        // this.isData = true
-        // this.$vuetify.goTo(300, this.options)
-      }, 2000)
+      }, 1000)
     },
     async makeClassroom() {
-      if (this.selected.length !== 0 && this.courseModel !== null)
+      if (this.selected.length !== 0 && this.classroomModel !== null) {
         this.overlay = true
-      await this.selected.forEachAsync(this.sendRequest)
+        await this.selected.forEachAsyncCustom(this.sendRequest)
+      } else {
+        this.message = `Debe seleccionar un aula`
+        this.makeSnakResponse(this.message, Snackbar.WARNING.type)
+      }
     },
     async sendRequest(courseUser, index) {
       await new Promise(resolve => setTimeout(() => resolve(), 100))
-
       let dataSend = Object.assign(courseUser, {
         ...{
           classroom_id: this.classroomModel.id,
           classroom: this.classroomModel
         }
       })
-
       const { success } = await this.editCourseRegisteredUser(dataSend)
 
       if (success) {
         this.currentSyncUser = `Agregando a ${courseUser.registeredUser.name} ${courseUser.registeredUser.last_name} al ${courseUser.classroom.description}`
+
+        this.indexCurrentSyncUser = `${index + 1} de ${this.selected.length}`
       }
 
       if (index === this.selected.length - 1) {
-        this.colorSnackbar = this.colorSnackbarSuccess
-        this.snackbar = true
         this.message = `Se ha conformado el ${this.classroomModel.description} con ${this.selected.length} alumnos`
+        this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
+        this.loaded = false
+        this.fillChartUsersByCourse()
 
-        this.classroomModel = null
-        this.regionModel = null
-        this.selected = []
-        this.rulesValueStepThree = true
-        this.completeStepThree = false
-        this.completeStepTwo = false
-
-        this.overlay = false
+        this.clear()
         this.e1 = 2
+        this.loaded = true
+        this.detail = true
       }
     },
     async downloadExcel() {
@@ -611,8 +944,6 @@ export default {
       link.setAttribute('download', 'file.xlsx')
       document.body.appendChild(link)
       link.click()
-
-      console.log(response)
     },
     close() {
       this.dialog = false
@@ -621,11 +952,19 @@ export default {
       }, 300)
     },
     clear() {
-      console.log(this.defaultItem)
       this.$v.$reset()
       this.editedItem = Object.assign({}, this.defaultItem)
       this.editedIndex = -1
       this.editClassroomModel = null
+      this.classroomModel = null
+      this.regionModel = null
+      this.selected = []
+      this.rulesValueStepThree = true
+      this.completeStepThree = false
+      this.completeStepTwo = false
+      this.indexCurrentSyncUser = ''
+      this.currentSyncUser = ''
+      this.overlay = false
     },
     clearFilter() {
       this.regionModel = null
@@ -635,11 +974,12 @@ export default {
       this.rulesValueStepTwo = true
 
       if (this.selected.length === 0) {
-        this.colorSnackbar = this.colorSnackbarError
         this.selectionHasError = true
         this.rulesValueStepTwo = false
-        this.snackbar = true
+
         this.message = `Debe seleccionar al menos un usuario`
+
+        this.makeSnakResponse(this.message, Snackbar.WARNING.type)
       }
 
       if (this.rulesValueStepTwo) {
@@ -657,4 +997,49 @@ export default {
 }
 </script>
 
-<style></style>
+<style scoped>
+.v-sheet--offset {
+  top: 10px;
+  position: relative;
+  z-index: 1;
+}
+.v-card--reveal {
+  top: -40px;
+  position: relative;
+  z-index: 1;
+}
+
+.first {
+  padding: 16px 0;
+  position: relative;
+}
+
+.margin-custom {
+  top: -7px;
+  position: relative;
+}
+
+.v-butron-position {
+  top: -40px;
+  position: relative;
+  z-index: 0;
+}
+
+.max-height-vertical {
+  height: 600px;
+}
+
+.max-height {
+  height: 300px;
+}
+
+.max-width {
+  max-width: 60%;
+}
+
+canvas {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+</style>
