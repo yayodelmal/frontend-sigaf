@@ -380,6 +380,7 @@ export default {
   created() {
     this.loading = true
     if (this.usersItems.length === 0) {
+      this.fetchRoleItems()
       this.fetchUserItems().then(() => {
         this.loading = false
       })
@@ -395,9 +396,9 @@ export default {
       removeItem: 'user/deleteUser',
       putItem: 'user/putUser'
     }),
-    getRoles() {
+    async getRoles() {
       if (this.rolesItems.length !== 0) {
-        this.fetchRoleItems()
+        await this.fetchRoleItems()
       }
       this.dialog = true
     },
