@@ -21,6 +21,15 @@ export default {
         courseRegisteredUser
       )
     },
+    DELETE_COURSE_REGISTERED_USER: (state, courseRegisteredUser) => {
+      console.log()
+      const editedIndex = state.courseRegisteredUsers.findIndex(
+        find => find.id === courseRegisteredUser.id
+      )
+
+      state.courseRegisteredUsers.splice(editedIndex, 1)
+    },
+
     POST_COURSE_REGISTERED_USER: (state, courseRegisteredUser) => {
       state.courseRegisteredUsers.push(courseRegisteredUser)
     }
@@ -100,6 +109,37 @@ export default {
           success: false,
           error: error,
           message: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    deleteCourseRegisteredUser: async ({ commit }, courseRegisteredUser) => {
+      try {
+        console.log(courseRegisteredUser)
+        const { status, data } = await axios.delete(
+          `${BASE_URL}s/${courseRegisteredUser.id}`
+        )
+        console.log(data)
+        if (status === 200) {
+          const { success, error, message } = data
+
+          if (success) {
+            commit('DELETE_COURSE_REGISTERED_USER', courseRegisteredUser)
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
         }
       }
     },

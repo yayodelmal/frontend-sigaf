@@ -76,7 +76,6 @@
                 <div class="spacer-chart">
                   <v-btn>Actualizar</v-btn>
                 </div>
-
                 <v-card
                   color="white"
                   class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
@@ -90,7 +89,6 @@
                   >
                   </doughnut-chart>
                 </v-card>
-
                 <div class="title font-weight-light margin-custom">
                   Estado Tickets
                 </div>
@@ -105,7 +103,6 @@
                 <div class="spacer-chart">
                   <v-btn>Actualizar</v-btn>
                 </div>
-
                 <v-card
                   class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
                   color="whiteS"
@@ -119,7 +116,6 @@
                   >
                   </bar-chart>
                 </v-card>
-
                 <div class="title font-weight-light margin-custom">
                   Estado Ticket por Operador
                 </div>
@@ -134,7 +130,6 @@
                 <div class="spacer-chart">
                   <v-btn>Actualizar</v-btn>
                 </div>
-
                 <v-card
                   class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
                   color="whiteS"
@@ -148,7 +143,6 @@
                   >
                   </doughnut-chart>
                 </v-card>
-
                 <div class="title font-weight-light margin-custom">
                   Prioridad Ticket
                 </div>

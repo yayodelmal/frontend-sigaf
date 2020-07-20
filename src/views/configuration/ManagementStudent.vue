@@ -407,7 +407,7 @@
                 <span>{{ item.status }}</span>
               </v-tooltip>
             </template>
-            <template v-slot:item.actions="{ item }">
+            <template v-slot:item.actions="{ item, index }">
               <v-tooltip color="blueS" bottom>
                 <template v-slot:activator="{ on }">
                   <v-btn icon text v-on="on">
@@ -431,7 +431,7 @@
               <v-tooltip color="blueS" bottom>
                 <template v-slot:activator="{ on }">
                   <v-btn icon text v-on="on">
-                    <v-icon @click.prevent="deleteItem(item)">
+                    <v-icon @click.prevent="deleteItem(item, index)">
                       mdi-delete
                     </v-icon>
                   </v-btn>
@@ -459,12 +459,19 @@
         Por favor espere. Esto puede tardar unos minutos
       </h3>
     </v-overlay>
-    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar>
+    <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
+    </sigaf-snackbar>
+    <confirm-dialog
+      icon="mdi-alert-circle"
+      color-icon="warning"
+      :dialog="dialogConfirm"
+      :cancel="close"
+      :accept="confirmDelete"
+    >
+      <template v-slot:content>
+        <h3 class="text-body-1">Eliminará un registro de forma permanente</h3>
+      </template>
+    </confirm-dialog>
   </base-card>
 </template>
 
@@ -477,7 +484,11 @@ import axios from '../../services/axios'
 
 import * as easings from 'vuetify/es5/services/goto/easing-patterns'
 
-Array.prototype.forEachAsync = function(fn) {
+import SigafSnackbar from '../../components/component/Snackbar'
+import { Snackbar } from '../../utils/constants'
+import ConfirmDialog from '../../components/component/ConfirmCard'
+
+Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
     (promise, n, index) => promise.then(() => fn(n, index)),
     Promise.resolve()
@@ -509,6 +520,10 @@ export default {
     email: { required, email },
     mobile: { required },
     rut: { required, rutFormated }
+  },
+  components: {
+    SigafSnackbar,
+    ConfirmDialog
   },
   data: () => ({
     headers: [
@@ -610,7 +625,10 @@ export default {
     opacity: 0.8,
     currentSyncUser: '',
     currentActivity: '',
-    indexCurrentSyncUser: ''
+    indexCurrentSyncUser: '',
+    type: '',
+    dialogConfirm: false,
+    deleteIndex: ''
   }),
   created() {
     this.loadingCourse = true
@@ -729,8 +747,21 @@ export default {
       fethActivitiesByUser:
         'courseRegisteredUser/getCourseRegisteredUserByUser',
       fetchActivities: 'activity/fetchActivities',
-      syncUserActivities: 'activity/getContributoryActivities'
+      syncUserActivities: 'activity/getContributoryActivities',
+      deleteCourseUser: 'courseRegisteredUser/deleteCourseRegisteredUser'
     }),
+    makeSnakResponse(message, type) {
+      this.snackbar = true
+      this.type = type
+      this.message = message
+      this.loadingSave = false
+    },
+    responseSuccessMessage() {
+      this.makeSnakResponse(Snackbar.SUCCESS.message, Snackbar.SUCCESS.type)
+    },
+    responseErrorMessage() {
+      this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
+    },
     getStatus(status) {
       if (status) return 'mdi-check'
       else return 'mdi-close'
@@ -746,17 +777,18 @@ export default {
         const { status } = await axios.get(URL)
 
         if (status === 204) {
-          this.snackbar = true
           this.message = 'El usuario no se encuentra registrado en moodle'
+
+          this.makeSnakResponse(this.message, Snackbar.WARNING.type)
           this.overlay = false
         } else if (status === 201) {
           setTimeout(async () => {
             try {
               const { success } = await this.fethActivitiesByUser(item)
               if (success) {
-                this.snackbar = true
                 this.message = `Sincronización exitosa ${item.registeredUser.name} ${item.registeredUser.last_name}`
 
+                this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
                 this.overlay = false
               }
             } catch (error) {
@@ -766,7 +798,8 @@ export default {
         } else if (status === 416) {
           this.snackbar = true
           this.message = 'RUT no válido'
-          this.overlay = false
+
+          this.makeSnakResponse(this.message, Snackbar.WARNING.type)
         }
       }
     },
@@ -791,8 +824,9 @@ export default {
       await new Promise(resolve => setTimeout(() => resolve(), 100))
       const { success } = await this.fethActivitiesByUser(userCourse)
       if (success) {
-        this.snackbar = true
         this.message = `Sincronización exitosa ${userCourse.registeredUser.name} ${userCourse.registeredUser.last_name}`
+
+        this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
       }
       if (index === this.selected.length - 1) {
         this.overlay = false
@@ -833,21 +867,17 @@ export default {
 
         this.indexCurrentSyncUser = `${index + 1}/${this.usersByCourse.length}`
 
-        filterActivity.forEachAsync(this.showSyncActivities)
+        filterActivity.forEachAsyncCustom(this.showSyncActivities)
       }
 
       if (index === this.usersByCourse.length - 1) {
         this.overlay = false
       }
-
-      console.log(userCourse)
-
-      console.log(JSON.stringify(arrayActivities))
     },
     async syncActivities() {
       this.overlay = true
       if (this.selected.length === 0) {
-        this.usersByCourse.forEachAsync(this.syncContributeActivities)
+        this.usersByCourse.forEachAsyncCustom(this.syncContributeActivities)
       } else {
         // this.selected.forEachAsync(this.syncSelectedUsers)
       }
@@ -858,11 +888,13 @@ export default {
         const { status } = await axios.get(URL)
 
         if (status === 204) {
-          this.snackbar = true
           this.message = 'El usuario no se encuentra registrado en moodle'
+
+          this.makeSnakResponse(this.message, Snackbar.WARNING.type)
         } else if (status === 201) {
-          this.snackbar = true
           this.message = 'Sincronización exitosa'
+
+          this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
         }
       }
     },
@@ -879,8 +911,6 @@ export default {
 
             const { _data: registeredUser, success, message } = data
 
-            console.log('data => ', data)
-
             if (success) {
               const response = await axios.get(
                 `/api/v2/course-users/${registeredUser.id}/courses`
@@ -894,8 +924,9 @@ export default {
             } else {
               this.editedItem = new CourseRegisteredUser()
 
-              this.snackbar = true
               this.message = message
+
+              this.makeSnakResponse(this.message, Snackbar.WARNING.type)
             }
 
             this.searchRutLoading = false
@@ -930,22 +961,53 @@ export default {
         //this.$vuetify.goTo(this.target, this.options)
       }, 2000)
     },
-    editItem(item) {
+    editItem(item, index) {
       this.dialog = true
 
-      console.log(item)
       this.editedIndex = this.usersByCourse.findIndex(
         find => find.id === item.id
       )
 
       this.editedItem = Object.assign({}, item)
+
+      console.log('index', index)
     },
     deleteItem(item) {
       if (item.registeredUser.id_registered_moodle) {
         console.log('no puede eliminar')
       } else {
-        console.log('eliminado')
+        this.editedIndex = this.usersByCourse.indexOf(item)
+        this.editedItem = Object.assign({}, item)
+        this.dialogConfirm = true
       }
+    },
+    async confirmDelete() {
+      const { success } = await this.deleteCourseUser(this.editedItem)
+
+      if (success) {
+        const index = this.usersByCourse.findIndex(
+          courseUser => courseUser.id === this.editedItem.id
+        )
+        console.log(index)
+        this.usersByCourse.splice(index, 1)
+        this.responseSuccessMessage()
+      } else {
+        this.responseErrorMessage()
+      }
+      this.closeConfirmDelete()
+    },
+    closeConfirmDelete() {
+      this.dialogConfirm = false
+      setTimeout(() => {
+        this.clear()
+      }, 300)
+    },
+    close() {
+      this.dialog = false
+      this.dialogConfirm = false
+      setTimeout(() => {
+        this.clear()
+      }, 300)
     },
     async save() {
       if (this.editedIndex > -1) {
@@ -968,14 +1030,12 @@ export default {
           phone_school: this.editedItem.registeredUser.phone_school
         }
 
-        const { message, success } = await this.postRegisteredUser(dataSend)
+        const { success } = await this.postRegisteredUser(dataSend)
 
         if (success) {
-          this.snackbar = true
-          this.message = this.successMessage
+          this.responseSuccessMessage()
         } else {
-          this.snackbar = true
-          this.message = message
+          this.responseErrorMessage()
         }
       }
 
@@ -1027,12 +1087,6 @@ export default {
         this.step++
         this.finalSave = true
       }
-    },
-    close() {
-      this.dialog = false
-      setTimeout(() => {
-        this.clear()
-      }, 300)
     },
     clear() {
       this.$v.$reset()

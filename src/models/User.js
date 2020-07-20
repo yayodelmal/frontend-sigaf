@@ -5,9 +5,9 @@ export default class User {
     name = '',
     phone = '',
     mobile = '',
-    email = 'sa@sigaf.com',
+    email = '',
     role = null,
-    password = 'sigaf',
+    password = '',
     isFirstLogin = '',
     role_id = ''
   ) {
