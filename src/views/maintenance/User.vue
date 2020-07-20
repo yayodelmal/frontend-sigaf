@@ -1,10 +1,37 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Usuario">
+    <base-card
+      color="blueS"
+      class="px-5 py-3"
+      icon="mdi-hammer-wrench"
+      title="Usuarios"
+    >
+      <div v-if="loading">
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-heading"
+        ></v-skeleton-loader>
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-tbody"
+        ></v-skeleton-loader>
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-tfoot"
+        ></v-skeleton-loader>
+      </div>
       <v-data-table
+        v-else
         :headers="headers"
         :items="usersItems"
-        class="elevation-1 grayS--text"
+        :search="search"
+        class="elevation-1"
         :loading="loading"
         loading-text="Cargando... por favor espere"
       >
@@ -16,115 +43,29 @@
           ></v-progress-linear>
         </template>
         <template v-slot:top>
-          <v-toolbar flat color="white">
+          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
+            <v-text-field
+              v-model="search"
+              color="blueS"
+              clearable
+              flat
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+              label="Buscar"
+            ></v-text-field>
             <v-spacer></v-spacer>
-            <v-dialog v-model="dialog" max-width="700" persistent>
-              <template v-slot:activator="{ on }">
-                <base-button
-                  icon="mdi-plus-circle"
-                  v-on="on"
-                  label="Crear usuario"
-                ></base-button>
-              </template>
-              <v-form>
-                <v-card>
-                  <v-card-title>
-                    <span class="headline">{{ formTitle }}</span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="6">
-                          <base-textfield
-                            label="RUT"
-                            v-model="editedItem.rut"
-                            @input="$v.rut.$touch()"
-                            @blur="$v.rut.$touch()"
-                            :error-messages="rutErrors"
-                          ></base-textfield>
-                        </v-col>
-                        <v-col cols="6">
-                          <base-textfield
-                            label="Nombre"
-                            v-model="editedItem.name"
-                            @blur="$v.name.$touch()"
-                            @input="$v.name.$touch()"
-                            :error-messages="nameErrors"
-                          ></base-textfield>
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="6">
-                          <base-textfield
-                            label="Teléfono"
-                            v-model="editedItem.phone"
-                            @blur="$v.phone.$touch()"
-                            @input="$v.phone.$touch()"
-                            :error-messages="phoneErrors"
-                          ></base-textfield>
-                        </v-col>
-                        <v-col cols="6">
-                          <base-textfield
-                            label="Celular"
-                            v-model="editedItem.mobile"
-                            @blur="$v.mobile.$touch()"
-                            @input="$v.mobile.$touch()"
-                            :error-messages="mobileErrors"
-                          ></base-textfield>
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="6">
-                          <base-textfield
-                            label="Correo electrónico"
-                            v-model="editedItem.email"
-                            @blur="$v.email.$touch()"
-                            @input="$v.email.$touch()"
-                            :error-messages="emailErrors"
-                          ></base-textfield>
-                        </v-col>
-                        <v-col cols="6">
-                          <base-autocomplete
-                            label="Rol"
-                            v-model="editedItem.role"
-                            :items="rolesItems"
-                            item-value="id"
-                            item-text="description"
-                            return-object
-                            @blur="$v.role.$touch()"
-                            @change="$v.role.$touch()"
-                            :error-messages="roleErrors"
-                          ></base-autocomplete>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-
-                  <v-divider></v-divider>
-
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <base-button
-                      icon="mdi-check-circle"
-                      label="Guardar"
-                      @click="save"
-                    >
-                    </base-button>
-                    <v-btn text color="grayS" @click="close">
-                      <v-icon size="30" left>mdi-close-circle</v-icon>
-                      Cancelar
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-form>
-            </v-dialog>
+            <v-btn depressed large color="blueS" @click="getRoles()">
+              <v-icon class="mr-2" size="25">mdi-plus</v-icon>
+              Crear usuario
+            </v-btn>
           </v-toolbar>
         </template>
         <template v-slot:item.actions="{ item }">
           <v-tooltip color="blueS" bottom>
             <template v-slot:activator="{ on }">
               <v-btn icon text v-on="on">
-                <v-icon @click.prevent="editItem(item)">
+                <v-icon @click="editItem(item)">
                   mdi-pencil
                 </v-icon>
               </v-btn>
@@ -134,7 +75,7 @@
           <v-tooltip color="blueS" bottom>
             <template v-slot:activator="{ on }">
               <v-btn icon text v-on="on">
-                <v-icon @click.prevent="deleteItem(item)">
+                <v-icon @click="deleteItem(item)">
                   mdi-delete
                 </v-icon>
               </v-btn>
@@ -144,12 +85,115 @@
         </template>
       </v-data-table>
     </base-card>
-    <v-snackbar :color="colorSnackbar" v-model="snackbar" :timeout="timeout">
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar>
+    <v-dialog v-model="dialog" max-width="700" persistent>
+      <v-form>
+        <v-card :loading="loadingSave">
+          <template v-slot:progress>
+            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
+          </template>
+          <v-toolbar dark color="blueS darken-1">
+            <v-toolbar-title>
+              {{ formTitle }}
+            </v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-row>
+              <v-col cols="6">
+                <base-textfield
+                  label="RUT"
+                  v-model="editedItem.rut"
+                  @input="$v.rut.$touch()"
+                  @blur="$v.rut.$touch()"
+                  :error-messages="rutErrors"
+                ></base-textfield>
+              </v-col>
+              <v-col cols="6">
+                <base-textfield
+                  label="Nombre"
+                  v-model="editedItem.name"
+                  @blur="$v.name.$touch()"
+                  @input="$v.name.$touch()"
+                  :error-messages="nameErrors"
+                ></base-textfield>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                <base-textfield
+                  label="Teléfono"
+                  v-model="editedItem.phone"
+                  @blur="$v.phone.$touch()"
+                  @input="$v.phone.$touch()"
+                  :error-messages="phoneErrors"
+                ></base-textfield>
+              </v-col>
+              <v-col cols="6">
+                <base-textfield
+                  label="Celular"
+                  v-model="editedItem.mobile"
+                  @blur="$v.mobile.$touch()"
+                  @input="$v.mobile.$touch()"
+                  :error-messages="mobileErrors"
+                ></base-textfield>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                <base-textfield
+                  label="Correo electrónico"
+                  v-model="editedItem.email"
+                  @blur="$v.email.$touch()"
+                  @input="$v.email.$touch()"
+                  :error-messages="emailErrors"
+                ></base-textfield>
+              </v-col>
+              <v-col cols="6">
+                <base-autocomplete
+                  label="Rol"
+                  v-model="editedItem.role"
+                  :items="rolesItems"
+                  item-value="id"
+                  item-text="description"
+                  return-object
+                  @blur="$v.role.$touch()"
+                  @change="$v.role.$touch()"
+                  :error-messages="roleErrors"
+                ></base-autocomplete>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="close">
+              CANCELAR
+            </v-btn>
+            <v-btn
+              :loading="loading"
+              color="blueS"
+              dark
+              depressed
+              @click="save"
+            >
+              ACEPTAR
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-form>
+    </v-dialog>
+    <snackbar-component v-model="snackbar" :type="type" :message="message">
+    </snackbar-component>
+    <confirm-dialog
+      icon="mdi-alert-circle"
+      color-icon="warning"
+      :dialog="dialogConfirm"
+      :cancel="close"
+      :accept="confirmDelete"
+    >
+      <template v-slot:content>
+        <h3 class="text-body-1">Eliminará un registro de forma permanente</h3>
+      </template>
+    </confirm-dialog>
   </div>
 </template>
 
@@ -158,6 +202,11 @@ import User from '../../models/User'
 import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength, email } from 'vuelidate/lib/validators'
 import { mapGetters, mapActions } from 'vuex'
+
+import SnackbarComponent from '../../components/component/Snackbar'
+import { Snackbar } from '../../utils/constants'
+import ConfirmDialog from '../../components/component/ConfirmCard'
+
 export default {
   mixins: [validationMixin],
   validations: {
@@ -172,7 +221,6 @@ export default {
       maxLength: maxLength(200)
     },
     phone: {
-      required,
       minLength: minLength(10),
       maxLength: maxLength(12)
     },
@@ -191,36 +239,57 @@ export default {
       required
     }
   },
+  components: {
+    SnackbarComponent,
+    ConfirmDialog
+  },
   data: () => ({
     headers: [
-      { text: 'RUT', value: 'rut', class: 'redS--text' },
-      { text: 'Nombre', value: 'name', class: 'redS--text' },
-      { text: 'Celular', value: 'mobile', class: 'redS--text' },
-      { text: 'Correo electrónico', value: 'email', class: 'redS--text' },
+      {
+        text: 'RUT',
+        value: 'rut',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
+        text: 'Nombre',
+        value: 'name',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
+        text: 'Celular',
+        value: 'mobile',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
+        text: 'Correo electrónico',
+        value: 'email',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
       {
         text: 'Rol',
         value: 'role.description',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: 'redS--text',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
     loading: false,
     dialog: false,
     snackbar: false,
-    timeout: 4000,
     editedIndex: -1,
     editedItem: new User(),
     defaultItem: new User(),
-    message: null,
-    successMessage: 'Operación realizada con éxito.',
-    errorMEssage: 'Ha ocurrido un error.',
-    roleModel: null,
-    colorSnackbar: 'blueS'
+    message: '',
+    colorSnackbar: 'blueS',
+    type: '',
+    loadingSave: false,
+    dialogConfirm: false,
+    search: '',
+    transition: 'scale-transition'
   }),
   computed: {
     ...mapGetters({
@@ -231,42 +300,42 @@ export default {
       const errors = []
 
       if (!this.$v.rut.$dirty) return errors
-      !this.$v.rut.required && errors.push('RUT es obligatorio.')
+      !this.$v.rut.required && errors.push('Es obligatorio.')
       !this.$v.rut.minLength &&
-        errors.push('RUT debe contener al menos 11 caracteres.')
+        errors.push('Debe contener al menos 11 caracteres.')
       !this.$v.rut.maxLength &&
-        errors.push('RUT debe contener máximo 12 caracteres.')
+        errors.push('Debe contener máximo 12 caracteres.')
       return errors
     },
     nameErrors() {
       const errors = []
 
       if (!this.$v.name.$dirty) return errors
-      !this.$v.name.required && errors.push('Nombre es obligatorio.')
+      !this.$v.name.required && errors.push('Es obligatorio.')
       !this.$v.name.minLength &&
-        errors.push('Nombre debe contener al menos 10 caracteres.')
+        errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.name.maxLength &&
-        errors.push('Nombre debe contener máximo 200 caracteres.')
+        errors.push('Debe contener máximo 200 caracteres.')
       return errors
     },
     phoneErrors() {
       const errors = []
       if (!this.$v.phone.$dirty) return errors
       !this.$v.phone.minLength &&
-        errors.push('Teléfono debe contener al menos 10 caracteres.')
+        errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.phone.maxLength &&
-        errors.push('Teléfono debe contener máximo 12 caracteres.')
+        errors.push('Debe contener máximo 12 caracteres.')
       return errors
     },
     mobileErrors() {
       const errors = []
 
       if (!this.$v.mobile.$dirty) return errors
-      !this.$v.mobile.required && errors.push('Celular es obligatorio.')
+      !this.$v.mobile.required && errors.push('Es obligatorio.')
       !this.$v.mobile.minLength &&
-        errors.push('Celular debe contener al menos 10 caracteres.')
+        errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.mobile.maxLength &&
-        errors.push('Celular debe contener máximo 12 caracteres.')
+        errors.push('Debe contener máximo 12 caracteres.')
       return errors
     },
     emailErrors() {
@@ -283,7 +352,7 @@ export default {
     roleErrors() {
       const errors = []
       if (!this.$v.role.$dirty) return errors
-      !this.$v.role.required && errors.push('Rol es obligatorio.')
+      !this.$v.role.required && errors.push('Es obligatorio.')
       return errors
     },
     rut() {
@@ -309,87 +378,99 @@ export default {
     }
   },
   created() {
-    this.fetchRoleItems()
-    this.fetchUserItems()
+    this.loading = true
+    if (this.usersItems.length === 0) {
+      this.fetchUserItems().then(() => {
+        this.loading = false
+      })
+    } else {
+      this.loading = false
+    }
   },
   methods: {
     ...mapActions({
       fetchUserItems: 'user/fetchUsers',
-      postItem: 'user/postUser',
       fetchRoleItems: 'role/fetchRoles',
+      postItem: 'user/postUser',
       removeItem: 'user/deleteUser',
       putItem: 'user/putUser'
     }),
+    getRoles() {
+      if (this.rolesItems.length !== 0) {
+        this.fetchRoleItems()
+      }
+      this.dialog = true
+    },
+    makeSnakResponse(message, type) {
+      this.snackbar = true
+      this.type = type
+      this.message = message
+      this.loadingSave = false
+    },
+    responseSuccessMessage() {
+      this.makeSnakResponse(Snackbar.SUCCESS.message, Snackbar.SUCCESS.type)
+    },
+    responseErrorMessage() {
+      this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
+    },
     async save() {
-      //agregamos las propiedades faltantes al objecto user
-      Object.defineProperties(this.editedItem, {
-        isFirstLogin: {
-          value: 0,
-          writable: false,
-          enumerable: true
-        },
-        role_id: {
-          value: this.editedItem.role.id,
-          writable: false,
-          enumerable: true
-        },
-        password: {
-          value: 'sigaf',
-          writable: false,
-          enumerable: true
-        }
-      })
-
       this.$v.$touch()
 
-      let response
-      if (!this.$v.$invalid) {
+      if (!this.$v.$error) {
+        this.loadingSave = true
+        this.editedItem.password = 'sigaf'
+        this.editedItem.isFirstLogin = 0
+        this.editedItem.role_id = this.editedItem.role.id
+
+        let response
         if (this.editedIndex > -1) {
           response = await this.putItem(this.editedItem)
         } else {
           response = await this.postItem(this.editedItem)
         }
         if (response.success) {
-          this.colorSnackbar = 'success'
-          this.message = this.successMessage
-          this.snackbar = true
-
+          this.responseSuccessMessage()
           this.close()
         } else {
           const keys = Object.keys(response.message)
           const hasEmail = 'email'
 
           if (keys.includes(hasEmail)) {
-            this.colorSnackbar = 'warning'
-            this.message = response.message.email
-            this.snackbar = true
+            this.makeSnakResponse(response.message.email, Snackbar.WARNING.type)
           } else {
-            this.colorSnackbar = 'error'
-            this.message = this.errorMEssage
-            this.snackbar = true
+            this.responseErrorMessage()
           }
         }
       }
     },
     editItem(user) {
+      this.getRoles()
       this.editedItem = Object.assign({}, user)
       this.editedIndex = this.usersItems.findIndex(
         findUser => findUser.id === user.id
       )
-      this.dialog = true
     },
-    async deleteItem(user) {
-      const { success } = this.removeItem(user)
+    deleteItem(user) {
+      this.editedIndex = this.usersItems.indexOf(user)
+      this.editedItem = Object.assign({}, user)
+      this.dialogConfirm = true
+    },
+    async confirmDelete() {
+      const { success } = await this.removeItem(this.editedItem)
 
       if (success) {
-        this.colorSnackbar = 'success'
-        this.message = this.successMessage
-        this.snackbar = true
+        this.responseSuccessMessage()
       } else {
-        this.colorSnackbar = 'error'
-        this.message = this.errorMEssage
-        this.snackbar = true
+        this.responseErrorMessage()
       }
+
+      this.closeConfirmDelete()
+    },
+    closeConfirmDelete() {
+      this.dialogConfirm = false
+      setTimeout(() => {
+        this.clear()
+      }, 300)
     },
     close() {
       this.dialog = false

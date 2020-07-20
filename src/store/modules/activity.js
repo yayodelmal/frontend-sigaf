@@ -16,12 +16,11 @@ export default {
       state.activities.push(activity)
     },
     PUT_ACTIVITY: (state, activity) => {
-      console.log('mutated', activity)
-      const editedIndex = state.activities.findIndex(
-        find => find.properties.id === activity.properties.id
-      )
+      const editedIndex = state.activities.findIndex(find => {
+        return find.properties.id === activity.properties.id
+      })
 
-      Object.assign(state.activities[editedIndex], activity)
+      state.activities[editedIndex] = activity
     },
     DELETE_ACTIVITY: (state, activity) => {
       const editedIndex = state.activities.findIndex(
@@ -107,6 +106,8 @@ export default {
 
         if (status === 200) {
           const { _data, success, error, message } = data
+
+          console.log(data)
 
           if (success) {
             commit('PUT_ACTIVITY', _data)

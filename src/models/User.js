@@ -1,16 +1,15 @@
-import Role from './Role'
-
 export default class User {
   constructor(
-    id,
-    rut,
-    name,
-    phone,
-    mobile,
+    id = '',
+    rut = '',
+    name = '',
+    phone = '',
+    mobile = '',
     email = 'sa@sigaf.com',
-    role = new Role(),
+    role = null,
     password = 'sigaf',
-    isFirstLogin
+    isFirstLogin = '',
+    role_id = ''
   ) {
     this.id = id
     this.rut = rut
@@ -21,5 +20,6 @@ export default class User {
     this.role = role
     this.password = password
     this.isFirstLogin = isFirstLogin
+    this.role_id = role_id
   }
 }
