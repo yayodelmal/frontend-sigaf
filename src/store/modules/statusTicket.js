@@ -112,8 +112,6 @@ export default {
       try {
         const { data } = await axios.post(BASE_URL, statusTicket)
 
-        console.log(statusTicket)
-
         const { _data, success, error, message } = data
 
         if (success) {

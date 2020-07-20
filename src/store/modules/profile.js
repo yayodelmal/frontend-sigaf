@@ -65,8 +65,6 @@ export default {
       try {
         const { data } = await axios.post(BASE_URL, profile)
 
-        console.log(profile)
-
         const { _data, success, error, message } = data
 
         if (success) {

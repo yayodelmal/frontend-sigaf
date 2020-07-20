@@ -3,7 +3,7 @@
     <base-card
       color="blueS"
       class="px-5 py-3"
-      icon="mdi-cog"
+      icon="mdi-hammer-wrench"
       title="Categoría de curso"
     >
       <div v-if="loading">
@@ -31,6 +31,7 @@
         v-else
         :headers="headers"
         :items="categoriesItems"
+        :items-per-page="5"
         :loading="loading"
         class="elevation-1"
         loading-text="Cargando... por favor espere"
@@ -55,83 +56,10 @@
               label="Buscar"
             ></v-text-field>
             <v-spacer></v-spacer>
-            <v-dialog v-model="dialog" max-width="500px" persistent>
-              <template v-slot:activator="{ on }">
-                <v-btn depressed large color="blueS" v-on="on">
-                  <v-icon class="mr-2" size="25">mdi-plus</v-icon>
-                  Crear categoría
-                </v-btn>
-              </template>
-              <v-form>
-                <v-card :loading="loadingSave">
-                  <template v-slot:progress>
-                    <v-progress-linear
-                      color="blueS"
-                      indeterminate
-                    ></v-progress-linear>
-                  </template>
-                  <v-toolbar dark color="blueS darken-1">
-                    <v-toolbar-title>
-                      {{ formTitle }}
-                    </v-toolbar-title>
-                  </v-toolbar>
-                  <v-card-text>
-                    <v-row>
-                      <v-col cols="12">
-                        <base-textfield
-                          v-model="editedItem.description"
-                          label="Nombre"
-                          @input="$v.description.$touch()"
-                          @blur="$v.description.$touch()"
-                          :error-messages="descriptionErrors"
-                        ></base-textfield>
-                      </v-col>
-                    </v-row>
-                    <v-row>
-                      <v-col cols="8">
-                        <base-autocomplete
-                          v-model="editedItem.platform"
-                          :items="platformsItems"
-                          label="Plataforma"
-                          item-value="id"
-                          item-text="description"
-                          return-object
-                          @change="$v.platform.$touch()"
-                          @blur="$v.platform.$touch()"
-                          :error-messages="platformErrors"
-                        >
-                        </base-autocomplete>
-                      </v-col>
-                      <v-col cols="4">
-                        <base-textfield
-                          v-model="editedItem.idCategoryMoodle"
-                          label="Id Moodle"
-                          @input="$v.idMoodle.$touch()"
-                          @blur="$v.idMoodle.$touch()"
-                          :error-messages="idMoodleErrors"
-                        ></base-textfield>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                  <v-divider></v-divider>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn text @click="close()">
-                      CANCELAR
-                    </v-btn>
-                    <v-btn
-                      :loading="loading"
-                      color="blueS"
-                      dark
-                      depressed
-                      @click="save()"
-                    >
-                      ACEPTAR
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-form>
-            </v-dialog>
+            <v-btn depressed large color="blueS" @click="createCategory">
+              <v-icon class="mr-2" size="25">mdi-plus</v-icon>
+              Crear Categoría
+            </v-btn>
           </v-toolbar>
         </template>
         <template v-slot:item.actions="{ item }">
@@ -158,6 +86,73 @@
         </template>
       </v-data-table>
     </base-card>
+    <v-dialog v-model="dialog" max-width="500px" persistent>
+      <v-form>
+        <v-card :loading="loadingSave">
+          <template v-slot:progress>
+            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
+          </template>
+          <v-toolbar dark color="blueS darken-1">
+            <v-toolbar-title>
+              {{ formTitle }}
+            </v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <base-textfield
+                  v-model="editedItem.description"
+                  label="Nombre"
+                  @input="$v.description.$touch()"
+                  @blur="$v.description.$touch()"
+                  :error-messages="descriptionErrors"
+                ></base-textfield>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="8">
+                <base-autocomplete
+                  v-model="editedItem.platform"
+                  :items="platformsItems"
+                  label="Plataforma"
+                  item-value="id"
+                  item-text="description"
+                  return-object
+                  @change="$v.platform.$touch()"
+                  @blur="$v.platform.$touch()"
+                  :error-messages="platformErrors"
+                ></base-autocomplete>
+              </v-col>
+              <v-col cols="4">
+                <base-textfield
+                  v-model="editedItem.idCategoryMoodle"
+                  label="Id Moodle"
+                  @input="$v.idMoodle.$touch()"
+                  @blur="$v.idMoodle.$touch()"
+                  :error-messages="idMoodleErrors"
+                ></base-textfield>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="close()">
+              CANCELAR
+            </v-btn>
+            <v-btn
+              :loading="loading"
+              color="blueS"
+              dark
+              depressed
+              @click="save()"
+            >
+              ACEPTAR
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-form>
+    </v-dialog>
     <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
     </sigaf-snackbar>
     <confirm-dialog
@@ -200,7 +195,7 @@ export default {
   validations: {
     description: {
       required,
-      minLength: minLength(5),
+      minLength: minLength(7),
       maxLength: maxLength(150)
     },
     platform: {
@@ -259,11 +254,11 @@ export default {
       const errors = []
 
       if (!this.$v.description.$dirty) return errors
-      !this.$v.description.required && errors.push('El nombre es obligatorio.')
+      !this.$v.description.required && errors.push('Es obligatorio.')
       !this.$v.description.minLength &&
-        errors.push('El nombre debe contener al menos 5 carácteres')
+        errors.push('Debe contener al menos 7 caracteres.')
       !this.$v.description.maxLength &&
-        errors.push('El nombre debe contener máximo 25 carácteres')
+        errors.push('Debe contener máximo 25 caracteres.')
       return errors
     },
     platformErrors() {
@@ -298,10 +293,14 @@ export default {
       return this.editedItem.idCategoryMoodle
     }
   },
-  created() {
+  async created() {
     this.loading = true
-    this.fetchCategoryItems()
-    this.fetchPlatformItems().then(() => (this.loading = false))
+    if (this.categoriesItems.length === 0) {
+      const { success } = await this.fetchCategoryItems()
+      this.loading = !success
+    } else {
+      this.loading = false
+    }
   },
   methods: {
     ...mapActions({
@@ -311,6 +310,15 @@ export default {
       removeItem: 'category/deleteCategory',
       fetchPlatformItems: 'platform/fetchPlatforms'
     }),
+    createCategory() {
+      this.getPlatforms()
+      this.dialog = true
+    },
+    getPlatforms() {
+      if (this.platformsItems.length === 0) {
+        this.fetchPlatformItems()
+      }
+    },
     makeSnakResponse(message, type) {
       this.snackbar = true
       this.type = type
@@ -324,6 +332,7 @@ export default {
       this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
     },
     editItem(item) {
+      this.getPlatforms()
       this.editedIndex = this.categoriesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)

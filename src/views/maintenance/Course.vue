@@ -1,10 +1,38 @@
 <template>
   <div>
-    <base-card color="blueS" class="px-5 py-3" title="Curso">
+    <base-card
+      color="blueS"
+      class="px-5 py-3"
+      icon="mdi-hammer-wrench"
+      title="Curso"
+    >
+      <div v-if="loading">
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-heading"
+        ></v-skeleton-loader>
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-tbody"
+        ></v-skeleton-loader>
+        <v-skeleton-loader
+          :loading="loading"
+          :transition="transition"
+          class="mx-auto"
+          type="table-tfoot"
+        ></v-skeleton-loader>
+      </div>
       <v-data-table
+        :search="search"
+        v-else
         :headers="headers"
         :items="coursesItems"
-        class="elevation-1 grayS--text"
+        :items-per-page="5"
+        class="elevation-1"
         :loading="loading"
         loading-text="Cargando... por favor espere"
       >
@@ -16,79 +44,22 @@
           ></v-progress-linear>
         </template>
         <template v-slot:top>
-          <v-toolbar flat color="white">
+          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
+            <v-text-field
+              v-model="search"
+              color="blueS"
+              clearable
+              flat
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+              label="Buscar"
+            ></v-text-field>
             <v-spacer></v-spacer>
-            <v-dialog v-model="dialog" max-width="500px" persistent>
-              <template v-slot:activator="{ on }">
-                <base-button
-                  icon="mdi-plus-circle"
-                  v-on="on"
-                  label="Crear curso"
-                ></base-button>
-              </template>
-              <v-form>
-                <v-card>
-                  <v-card-title>
-                    <span class="headline">{{ formTitle }}</span>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-container>
-                      <v-row>
-                        <v-col cols="12">
-                          <base-textfield
-                            v-model="editedItem.description"
-                            label="Nombre"
-                            required
-                            clearable
-                            @input="$v.description.$touch()"
-                            @blur="$v.description.$touch()"
-                            :error-messages="descriptionErrors"
-                          ></base-textfield>
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col cols="8">
-                          <base-autocomplete
-                            v-model="categoryModel"
-                            :items="categoriesItems"
-                            label="Categoría"
-                            item-value="id"
-                            item-text="description"
-                            return-object
-                            @change="setCategory($event)"
-                            @blur="$v.categoryModel.$touch()"
-                            :error-messages="categoryErrors"
-                          ></base-autocomplete>
-                        </v-col>
-                        <v-col cols="4">
-                          <base-textfield
-                            v-model="editedItem.idCourseMoodle"
-                            label="Id Moodle"
-                            required
-                            clearable
-                            @input="$v.idMoodle.$touch()"
-                            @blur="$v.idMoodle.$touch()"
-                            :error-messages="idMoodleErrors"
-                          ></base-textfield>
-                        </v-col>
-                      </v-row>
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <base-button
-                      icon="mdi-check-circle"
-                      label="Guardar"
-                      @click="save"
-                    ></base-button>
-                    <v-btn text color="grayS" @click="close">
-                      <v-icon size="30" left>mdi-close-circle</v-icon>
-                      Cancelar</v-btn
-                    >
-                  </v-card-actions>
-                </v-card>
-              </v-form>
-            </v-dialog>
+            <v-btn depressed large color="blueS" @click="createCourse">
+              <v-icon class="mr-2" size="25">mdi-plus</v-icon>
+              Crear Curso
+            </v-btn>
           </v-toolbar>
         </template>
         <template v-slot:item.actions="{ item }">
@@ -115,35 +86,88 @@
         </template>
       </v-data-table>
     </base-card>
-    <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar>
-    <v-dialog v-model="dialogConfirm" persistent max-width="350">
-      <base-card
-        class="pt-12"
-        color="redS"
-        icon="mdi-hand-left"
-        title="¡Atención!"
-      >
-        <v-divider></v-divider>
-        <v-card-text>Eliminará un registro de forma permanente</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <base-button
-            icon="mdi-check-circle"
-            label="Aceptar"
-            @click.prevent="confirmDelete"
-          ></base-button>
-          <v-btn text color="grayS" @click="close">
-            <v-icon size="30" left>mdi-close-circle</v-icon>
-            Cancelar</v-btn
-          >
-        </v-card-actions>
-      </base-card>
+    <v-dialog v-model="dialog" max-width="500px" persistent>
+      <v-form>
+        <v-card :loading="loadingSave">
+          <template v-slot:progress>
+            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
+          </template>
+          <v-toolbar dark color="blueS darken-1">
+            <v-toolbar-title>
+              {{ formTitle }}
+            </v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <base-textfield
+                  v-model="editedItem.description"
+                  label="Nombre"
+                  @input="$v.description.$touch()"
+                  @blur="$v.description.$touch()"
+                  :error-messages="descriptionErrors"
+                ></base-textfield>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="8">
+                <base-autocomplete
+                  v-model="editedItem.category"
+                  :items="categoriesItems"
+                  label="Categoría"
+                  item-value="id"
+                  item-text="description"
+                  return-object
+                  @change="$v.category.$touch()"
+                  @blur="$v.category.$touch()"
+                  :error-messages="categoryErrors"
+                ></base-autocomplete>
+              </v-col>
+              <v-col cols="4">
+                <base-textfield
+                  v-model="editedItem.idCourseMoodle"
+                  label="Id Moodle"
+                  required
+                  clearable
+                  @input="$v.idMoodle.$touch()"
+                  @blur="$v.idMoodle.$touch()"
+                  :error-messages="idMoodleErrors"
+                ></base-textfield>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="close()">
+              CANCELAR
+            </v-btn>
+            <v-btn
+              :loading="loading"
+              color="blueS"
+              dark
+              depressed
+              @click="save()"
+            >
+              ACEPTAR
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-form>
     </v-dialog>
+    <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
+    </sigaf-snackbar>
+    <confirm-dialog
+      icon="mdi-alert-circle"
+      color-icon="warning"
+      :dialog="dialogConfirm"
+      :cancel="close"
+      :accept="confirmDelete"
+    >
+      <template v-slot:content>
+        <h3 class="text-body-1">Eliminará un registro de forma permanente</h3>
+      </template>
+    </confirm-dialog>
   </div>
 </template>
 
@@ -159,16 +183,24 @@ import {
   maxValue
 } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+import SigafSnackbar from '../../components/component/Snackbar'
+import { Snackbar } from '../../utils/constants'
+import ConfirmDialog from '../../components/component/ConfirmCard'
 
 export default {
+  inject: ['theme'],
   mixins: [validationMixin],
+  components: {
+    SigafSnackbar,
+    ConfirmDialog
+  },
   validations: {
     description: {
       required,
       minLength: minLength(10),
       maxLength: maxLength(150)
     },
-    categoryModel: {
+    category: {
       required
     },
     idMoodle: {
@@ -181,18 +213,25 @@ export default {
     dialog: false,
     dialogConfirm: false,
     headers: [
-      { text: '#', value: 'id', class: 'redS--text' },
-      { text: 'Nombre', value: 'description', class: 'redS--text' },
-      { text: 'ID moodle', value: 'idCourseMoodle', class: 'redS--text' },
+      {
+        text: 'Nombre',
+        value: 'description',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
+        text: 'ID moodle',
+        value: 'idCourseMoodle',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
       {
         text: 'Categoría',
         value: 'category.properties.description',
-        class: 'redS--text'
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: 'redS--text',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -200,12 +239,13 @@ export default {
     editedItem: new Course(),
     defaultItem: new Course(),
     message: '',
-    successMessage: 'Operación realizada con éxito.',
-    errorMEssage: 'Ha ocurrido un error.',
     snackbar: false,
-    timeout: 3000,
+    type: '',
     loading: false,
-    categoryModel: null
+    transition: 'scale-transition',
+    loadingSave: false,
+    snakResponse: null,
+    search: ''
   }),
   computed: {
     ...mapGetters({
@@ -216,18 +256,18 @@ export default {
       const errors = []
 
       if (!this.$v.description.$dirty) return errors
-      !this.$v.description.required && errors.push('El nombre es obligatorio.')
+      !this.$v.description.required && errors.push('Es obligatorio.')
       !this.$v.description.minLength &&
-        errors.push('El nombre debe contener al menos 10 carácteres')
+        errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.description.maxLength &&
-        errors.push('El nombre debe contener máximo 100 carácteres')
+        errors.push('Debe contener máximo 100 caracteres.')
       return errors
     },
     categoryErrors() {
       const errors = []
 
-      if (!this.$v.categoryModel.$dirty) return errors
-      !this.$v.categoryModel.required && errors.push('Es obligatorio.')
+      if (!this.$v.category.$dirty) return errors
+      !this.$v.category.required && errors.push('Es obligatorio.')
 
       return errors
     },
@@ -248,13 +288,21 @@ export default {
     description() {
       return this.editedItem.description
     },
+    category() {
+      return this.editedItem.category
+    },
     idMoodle() {
       return this.editedItem.idCourseMoodle
     }
   },
-  created() {
-    this.fetchDataCourses()
-    this.fetchDataCategories()
+  async created() {
+    this.loading = true
+    if (this.coursesItems.length === 0) {
+      const { success } = await this.fetchCourseItems()
+      this.loading = !success
+    } else {
+      this.loading = false
+    }
   },
   methods: {
     ...mapActions({
@@ -264,37 +312,36 @@ export default {
       removeItem: 'course/deleteCourse',
       fetchCategoryItems: 'category/fetchCategories'
     }),
-    setCategory(value) {
-      this.editedItem.category = value
-      this.$v.categoryModel.$touch()
+    createCourse() {
+      this.getCategories()
+      this.dialog = true
+    },
+    getCategories() {
+      if (this.categoriesItems.length === 0) {
+        this.fetchCategoryItems()
+      }
+    },
+    makeSnakResponse(message, type) {
+      this.snackbar = true
+      this.type = type
+      this.message = message
+      this.loadingSave = false
+    },
+    responseSuccessMessage() {
+      this.makeSnakResponse(Snackbar.SUCCESS.message, Snackbar.SUCCESS.type)
+    },
+    responseErrorMessage() {
+      this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
     },
     editItem(item) {
+      this.getCategories()
       this.editedIndex = this.coursesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
 
-      this.categoryModel = item.category.properties
+      this.editedItem.category = Object.assign({}, item.category.properties)
 
       this.dialog = true
-    },
-    async fetchDataCourses() {
-      this.loading = true
-      const { success, message } = await this.fetchCourseItems()
-      if (!success) {
-        this.snackbar = true
-        this.message = message
-      }
-      this.loading = false
-    },
-    async fetchDataCategories() {
-      this.loading = true
-      const { success, message } = await this.fetchCategoryItems()
-      console.log()
-      if (!success) {
-        this.snackbar = true
-        this.message = message
-      }
-      this.loading = false
     },
     deleteItem(item) {
       this.editedIndex = this.coursesItems.indexOf(item)
@@ -302,14 +349,12 @@ export default {
       this.dialogConfirm = true
     },
     async confirmDelete() {
-      const { success, message } = await this.removeItem(this.editedItem)
+      const { success } = await this.removeItem(this.editedItem)
 
       if (success) {
-        this.snackbar = true
-        this.message = this.successMessage
+        this.responseSuccessMessage()
       } else {
-        this.snackbar = true
-        this.message = message
+        this.responseErrorMessage()
       }
       this.closeConfirmDelete()
     },
@@ -322,34 +367,25 @@ export default {
     async save() {
       this.$v.$touch()
       if (!this.$v.$error) {
+        this.loadingSave = true
+        let dataStore = Object.assign(this.editedItem, {
+          category_id: this.editedItem.category.id,
+          id_course_moodle: this.editedItem.idCourseMoodle,
+          status: 1
+        })
         if (this.editedIndex > -1) {
-          let dataStore = Object.assign(this.editedItem, {
-            category_id: this.editedItem.category.properties.id,
-            id_course_moodle: this.editedItem.idCourseMoodle,
-            status: 1
-          })
-          const { success, message } = await this.putItem(dataStore)
+          const { success } = await this.putItem(dataStore)
           if (success) {
-            this.snackbar = true
-            this.message = this.successMessage
+            this.responseSuccessMessage()
           } else {
-            this.snackbar = true
-            this.message = message
+            this.responseErrorMessage()
           }
         } else {
-          let dataStore = Object.assign(this.editedItem, {
-            category_id: this.editedItem.category.id,
-            id_course_moodle: this.editedItem.idCourseMoodle,
-            status: 1
-          })
-
-          const { success, message } = await this.postItem(dataStore)
+          const { success } = await this.postItem(dataStore)
           if (success) {
-            this.snackbar = true
-            this.message = this.successMessage
+            this.responseSuccessMessage()
           } else {
-            this.snackbar = true
-            this.message = message
+            this.responseErrorMessage()
           }
         }
         this.close()
@@ -365,11 +401,8 @@ export default {
     clear() {
       this.$v.$reset()
       this.editedItem = Object.assign({}, this.defaultItem)
-      this.categoryModel = null
       this.editedIndex = -1
     }
   }
 }
 </script>
-
-<style scoped></style>

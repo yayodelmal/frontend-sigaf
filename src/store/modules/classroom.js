@@ -64,8 +64,6 @@ export default {
       try {
         const { data } = await axios.post(BASE_URL, classroom)
 
-        console.log(classroom)
-
         const { _data, success, error, message } = data
 
         if (success) {

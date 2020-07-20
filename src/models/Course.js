@@ -1,11 +1,9 @@
-import Category from './Category'
-
 export default class Course {
   constructor(
     id = '',
     description = '',
     idCourseMoodle = '',
-    category = new Category(),
+    category = null,
     status = ''
   ) {
     this.id = id
