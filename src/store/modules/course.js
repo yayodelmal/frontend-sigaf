@@ -37,8 +37,6 @@ export default {
         return find.properties.id === user.properties.id
       })
 
-      console.log('editedIndex', editedIndex)
-
       Object.assign(state.usersByCourse[editedIndex], user)
     },
 
@@ -150,7 +148,6 @@ export default {
           const { success, error, message } = data
 
           if (success) {
-            console.log(data._data)
             commit(
               'SET_COURSES_BY_CATEGORY',
               data._data.relationships.collections.data
@@ -177,8 +174,6 @@ export default {
     postCourse: async ({ commit }, course) => {
       try {
         const { data } = await axios.post('/api/v2/courses/post', course)
-
-        console.log(course)
 
         const { _data, success, error, message } = data
 
@@ -261,7 +256,6 @@ export default {
           `${BASE_URL}/${courseId}/registered-users`
         )
 
-        console.log(data)
         const { _data, success, error, message } = data
 
         if (success) {

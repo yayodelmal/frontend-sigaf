@@ -82,7 +82,6 @@ export default {
           const { success, error, message } = data
 
           if (success) {
-            console.log(data._data)
             commit(
               'SET_CATEGORIES_BY_PLATFORM',
               data._data.relationships.collections.description
@@ -109,8 +108,6 @@ export default {
     postCategory: async ({ commit }, category) => {
       try {
         const { data } = await axios.post('/api/v2/categories/post', category)
-
-        console.log(category)
 
         const { _data, success, error, message } = data
 
