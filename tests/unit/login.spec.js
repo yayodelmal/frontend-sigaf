@@ -1,35 +1,19 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
-import Login from '@/views/Login.vue'
-import Navbar from '@/components/my/Navbar'
+import { shallowMount } from '@vue/test-utils'
+import '../../src/plugins/base'
+import Vue from 'vue'
 import Vuetify from 'vuetify'
 
-const localVue = createLocalVue()
+import Login from '@/views/Login.vue'
 
-describe('Login.vue', () => {
+Vue.use(Vuetify)
+
+describe('Renders', () => {
   let wrapper
-  let vuetify
+
   beforeEach(() => {
-    vuetify = new Vuetify()
-
-    wrapper = shallowMount(Login, {
-      localVue,
-      vuetify
-    })
+    wrapper = shallowMount(Login)
   })
-  it('renders a vue instance', () => {
-    expect(shallowMount(Login).isVueInstance()).toBe(true)
+  it('renders a Login view', () => {
+    expect(wrapper.isVueInstance()).toBe(true)
   })
-
-  it('has an base-card', () => {
-    expect(wrapper.contains('base-card')).toBe(true)
-  })
-  it('check if child NavBar exists', () => {
-    expect(wrapper.contains(Navbar)).toBe(true)
-  })
-  it('has an v-form', () => {
-    expect(wrapper.contains('v-form')).toBe(true)
-  })
-  // it('has an base-card', () => {
-  //   expect(wrapper.contains('base-card')).toBe(true)
-  // })
 })

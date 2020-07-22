@@ -142,140 +142,157 @@
                                   </v-row>
                                 </form>
                                 <div v-if="user !== null">
-                                  <v-col class="d-flex text-center">
-                                    <!-- <v-divider vertical></v-divider> -->
-                                    <v-hover
-                                      v-slot:default="{ hover }"
-                                      open-delay="200"
+                                  <v-row justify="center">
+                                    <v-col
+                                      class="d-flex text-center"
+                                      cols="12"
+                                      sm="8"
+                                      md="6"
+                                      lg="4"
+                                      xl="4"
                                     >
-                                      <v-card
-                                        class="pt-6 mx-auto rounded-t-xl"
-                                        flat
-                                        max-width="350"
-                                        :elevation="hover ? 16 : 0"
-                                        outlined
+                                      <!-- <v-divider vertical></v-divider> -->
+                                      <v-hover
+                                        v-slot:default="{ hover }"
+                                        open-delay="200"
                                       >
-                                        <v-card-text>
-                                          <span
-                                            class="headline font-weight-bold"
-                                          >
-                                            {{
-                                              user.classroom.description
-                                            }}</span
-                                          ><br />
-                                          <span class="text-caption">
-                                            Progreso:</span
-                                          ><br />
-                                          <v-avatar size="120">
-                                            <v-progress-circular
-                                              :rotate="-90"
-                                              :size="100"
-                                              :width="15"
-                                              :value="getValueProgress(user)"
-                                              color="blueS"
+                                        <v-card
+                                          class="pt-6 mx-auto rounded-t-xl"
+                                          flat
+                                          :elevation="hover ? 16 : 0"
+                                          outlined
+                                        >
+                                          <v-card-text>
+                                            <span
+                                              class="headline font-weight-bold"
                                             >
-                                              {{ getValueProgress(user) }}%
-                                            </v-progress-circular>
-                                          </v-avatar>
-                                          <h3 class="headline mb-2">
-                                            {{ user.registered_user.name }}
-                                          </h3>
-                                          <h3 class="mb-2">
-                                            {{ user.registered_user.last_name }}
-                                            {{
-                                              user.registered_user
-                                                .mother_last_name
-                                            }}
-                                          </h3>
-                                          <div class="blueS--text mb-2">
-                                            {{ user.registered_user.email }}
-                                          </div>
-                                          <div
-                                            class="redS--text subheading font-weight-bold"
-                                          >
-                                            {{ user.registered_user.mobile }}
-                                          </div>
-                                        </v-card-text>
-                                        <v-expand-transition>
-                                          <div
-                                            v-if="hover"
-                                            class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
-                                            style="height: 78%;"
-                                          >
-                                            <div class="d-flex flex-column">
-                                              <div
-                                                v-for="section in sectionFiltered"
-                                                :key="section.id"
-                                                class="d-flex flex-row"
+                                              {{
+                                                user.classroom.description
+                                              }}</span
+                                            ><br />
+                                            <span class="text-caption">
+                                              Progreso:</span
+                                            ><br />
+                                            <v-avatar size="120">
+                                              <v-progress-circular
+                                                :rotate="-90"
+                                                :size="100"
+                                                :width="15"
+                                                :value="getValueProgress(user)"
+                                                color="blueS"
                                               >
+                                                {{ getValueProgress(user) }}%
+                                              </v-progress-circular>
+                                            </v-avatar>
+                                            <h3 class="headline mb-2">
+                                              {{ user.registered_user.name }}
+                                            </h3>
+                                            <h3 class="mb-2">
+                                              {{
+                                                user.registered_user.last_name
+                                              }}
+                                              {{
+                                                user.registered_user
+                                                  .mother_last_name
+                                              }}
+                                            </h3>
+                                            <div class="blueS--text mb-2">
+                                              {{ user.registered_user.email }}
+                                            </div>
+                                            <div
+                                              class="redS--text subheading font-weight-bold"
+                                            >
+                                              {{ user.registered_user.mobile }}
+                                            </div>
+                                          </v-card-text>
+                                          <v-expand-transition>
+                                            <div
+                                              v-if="hover"
+                                              class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
+                                              style="height: 78%;"
+                                            >
+                                              <div class="d-flex flex-column">
                                                 <div
-                                                  class="px-3 py-2 title-section"
+                                                  v-for="section in sectionFiltered"
+                                                  :key="section.id"
+                                                  class="d-flex flex-row"
                                                 >
-                                                  <h6 class="text-overline">
-                                                    {{ section.description }}:
-                                                  </h6>
-                                                </div>
-                                                <div
-                                                  class="px-1 py-2"
-                                                  v-for="grade in getGrades(
-                                                    section,
-                                                    user.activities
-                                                  )"
-                                                  :key="grade.idActivityMoodle"
-                                                >
-                                                  <v-tooltip
-                                                    color="white"
-                                                    bottom
+                                                  <div
+                                                    class="px-3 py-2 title-section"
                                                   >
-                                                    <template
-                                                      v-slot:activator="{ on }"
+                                                    <h6 class="text-overline">
+                                                      {{ section.description }}:
+                                                    </h6>
+                                                  </div>
+                                                  <div
+                                                    class="px-1 py-2"
+                                                    v-for="grade in getGrades(
+                                                      section,
+                                                      user.activities
+                                                    )"
+                                                    :key="
+                                                      grade.idActivityMoodle
+                                                    "
+                                                  >
+                                                    <v-tooltip
+                                                      color="white"
+                                                      bottom
                                                     >
-                                                      <h4 v-on="on">
-                                                        <kbd>{{
-                                                          grade.qualificationMoodle
-                                                        }}</kbd>
-                                                      </h4>
-                                                    </template>
-                                                    <span
-                                                      class="blueS--text darken-2"
-                                                      >{{
-                                                        grade.description
-                                                      }}</span
-                                                    >
-                                                  </v-tooltip>
+                                                      <template
+                                                        v-slot:activator="{
+                                                          on
+                                                        }"
+                                                      >
+                                                        <h4 v-on="on">
+                                                          <kbd>{{
+                                                            grade.qualificationMoodle
+                                                          }}</kbd>
+                                                        </h4>
+                                                      </template>
+                                                      <span
+                                                        class="blueS--text darken-2"
+                                                        >{{
+                                                          grade.description
+                                                        }}</span
+                                                      >
+                                                    </v-tooltip>
+                                                  </div>
                                                 </div>
                                               </div>
                                             </div>
-                                          </div>
-                                        </v-expand-transition>
-                                        <v-divider></v-divider>
-                                        <v-row class="text-center">
-                                          <v-col cols="6" class="mx-auto">
-                                            <v-card
-                                              :color="getColorState(user.state)"
-                                              flat
-                                              dark
-                                              class="py-1"
-                                              ><span>{{
-                                                user.state
-                                                  ? 'RENUNCIADO'
-                                                  : 'ACTIVO'
-                                              }}</span></v-card
-                                            >
-                                          </v-col>
+                                          </v-expand-transition>
+                                          <v-divider></v-divider>
+                                          <v-row class="text-center">
+                                            <v-col cols="6" class="mx-auto">
+                                              <v-card
+                                                :color="
+                                                  getColorState(user.state)
+                                                "
+                                                flat
+                                                dark
+                                                class="py-1"
+                                                ><span>{{
+                                                  user.state
+                                                    ? 'RENUNCIADO'
+                                                    : 'ACTIVO'
+                                                }}</span></v-card
+                                              >
+                                            </v-col>
 
-                                          <v-col cols="12">
-                                            <span class="font-weight-bold">
-                                              Última conexión hace
-                                              {{
-                                                user.last_access_registered_moodle
-                                              }}</span
-                                            >
-                                          </v-col>
-                                        </v-row>
-                                      </v-card>
-                                    </v-hover>
-                                  </v-col>
+                                            <v-col cols="12">
+                                              <span class="font-weight-bold">
+                                                Última conexión hace
+                                                {{
+                                                  user.last_access_registered_moodle
+                                                }}</span
+                                              >
+                                            </v-col>
+                                          </v-row>
+                                        </v-card>
+                                      </v-hover>
+                                    </v-col>
+                                  </v-row>
+
                                   <v-row>
                                     <v-spacer />
                                     <v-btn
@@ -1765,6 +1782,16 @@ export default {
               this.editedTicketIndex === -1
             ) {
               this.dialogSelectCourse = true
+            } else {
+              this.editedTicketItem.courseRegisteredUser = Object.assign(
+                {},
+                this.arrayCourseUserSelect[0]
+              )
+
+              this.user = Object.assign(
+                {},
+                this.mapUser(this.arrayCourseUserSelect[0])
+              )
             }
           } else {
             vm.snackbar = true

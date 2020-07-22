@@ -164,7 +164,6 @@ import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
 
 export default {
-  inject: ['theme'],
   mixins: [validationMixin],
   components: {
     SigafSnackbar,

@@ -245,8 +245,6 @@
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  inject: ['theme'],
-
   data: () => ({
     headers: [
       {
@@ -569,23 +567,6 @@ export default {
       }
       this.loading = false
     }
-    // async filterUsersByCategory() {
-    //   if (this.category !== null) {
-    //     await this.fetchCourseByCategory(this.category.courses.href)
-
-    //     const vm = this
-
-    //     this.courseByCategory.forEach(function(course) {
-    //       vm.courseRegisteredUserItems.forEach(courseUser => {
-    //         if (courseUser.course.id === course.properties.id) {
-    //           vm.usersRegisteredFiltered.push(courseUser)
-    //         }
-    //       })
-    //     })
-    //   } else {
-    //     this.userRegisteredFiltered = this.courseRegisteredUserItems
-    //   }
-    // }
   }
 }
 </script>
@@ -604,10 +585,4 @@ export default {
   width: 100px;
   text-align: left;
 }
-/* 
-.custom-class {
-  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
-    'Lucida Sans', Arial, sans-serif;
-  font-size: 1.2em;
-} */
 </style>

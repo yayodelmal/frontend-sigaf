@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Montar el componente Base Button 1`] = `
-<button type="button" class="mr-2 v-btn v-btn--flat v-btn--text theme--light v-size--default blueS--text"><span class="v-btn__content"><i aria-hidden="true" class="v-icon notranslate v-icon--left mdi mdi-alert-circle theme--light" style="font-size: 30px;"></i>
-  Error
-</span></button>
-`;

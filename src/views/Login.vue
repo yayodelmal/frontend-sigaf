@@ -157,6 +157,7 @@ import User from '../models/User'
 import { validationMixin } from 'vuelidate'
 import { required, email } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
+
 export default {
   components: {
     'nav-bar-component': Navbar

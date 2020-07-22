@@ -379,14 +379,11 @@ export default {
   },
   created() {
     this.loading = true
-    if (this.usersItems.length === 0) {
-      this.fetchRoleItems()
-      this.fetchUserItems().then(() => {
-        this.loading = false
-      })
-    } else {
+
+    this.fetchRoleItems()
+    this.fetchUserItems().then(() => {
       this.loading = false
-    }
+    })
   },
   methods: {
     ...mapActions({
