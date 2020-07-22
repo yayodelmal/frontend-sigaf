@@ -357,6 +357,7 @@ export default {
               `api/v2/sync/course/${course.properties.idCourseMoodle}/activities`
             )
             this.overlay = false
+            this.filterActivitiesByCategories()
           }
         })
       } else {
