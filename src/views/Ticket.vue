@@ -157,6 +157,7 @@
                                         open-delay="200"
                                       >
                                         <v-card
+                                          width="400"
                                           class="pt-6 mx-auto rounded-t-xl"
                                           flat
                                           :elevation="hover ? 16 : 0"
@@ -1006,14 +1007,14 @@
             :headers="headers"
             :search="search"
             :items="tickets"
-            :page.sync="page"
-            :items-per-page="itemsPerPage"
-            hide-default-footer
             class="elevation-1"
-            @page-count="pageCount = $event"
             :loading="loading"
             loading-text="Cargando... por favor espere"
             calculate-widths
+            disable-pagination
+            hide-default-footer
+            height="400"
+            fixed-header
           >
             <template
               v-slot:item.properties.id="{
@@ -1352,6 +1353,13 @@ export default {
           text: 'Hora cierre',
           align: 'center',
           value: 'properties.timeClosingDate',
+          class: 'redS--text'
+        },
+        {
+          text: 'Creador',
+          align: 'center',
+          width: 150,
+          value: 'properties.userCreated.name',
           class: 'redS--text'
         },
         {
@@ -2160,6 +2168,16 @@ export default {
       if (this.category !== null) {
         this.filterUsersByCategories()
       }
+    },
+    openTicket() {
+      this.loading = true
+
+      this.fetchItems().then(() => (this.loading = false))
+    },
+    closeTicket() {
+      this.loading = true
+
+      this.fetchItems().then(() => (this.loading = false))
     }
   },
   computed: {

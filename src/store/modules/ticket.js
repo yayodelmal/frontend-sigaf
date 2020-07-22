@@ -40,18 +40,18 @@ export default {
       return state.tickets.map(ticket => {
         if (rootState.auth.loginUser !== null) {
           if (ticket.relationships.numberOfElements === 0) {
-            if (ticket.properties.statusTicket.description === 'Cerrado') {
+            if (ticket.properties.statusTicket.description === 'Abierto') {
               if (
                 ticket.properties.userCreated.id === rootState.auth.loginUser.id
               ) {
                 return Object.assign(ticket, {
                   showDeleteButton: true,
-                  close: true
+                  close: false
                 })
               } else {
                 return Object.assign(ticket, {
                   showDeleteButton: false,
-                  close: true
+                  close: false
                 })
               }
             } else {
@@ -60,25 +60,25 @@ export default {
               ) {
                 return Object.assign(ticket, {
                   showDeleteButton: true,
-                  close: false
+                  close: true
                 })
               } else {
                 return Object.assign(ticket, {
                   showDeleteButton: false,
-                  close: false
+                  close: true
                 })
               }
             }
           } else {
-            if (ticket.properties.statusTicket.description === 'Cerrado') {
+            if (ticket.properties.statusTicket.description === 'Abierto') {
               return Object.assign(ticket, {
                 showDeleteButton: false,
-                close: true
+                close: false
               })
             } else {
               return Object.assign(ticket, {
                 showDeleteButton: false,
-                close: false
+                close: true
               })
             }
           }
