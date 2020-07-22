@@ -353,11 +353,15 @@ export default {
         this.overlay = true
         this.coursesByCategory.forEach(async course => {
           if (course.properties.idCourseMoodle) {
-            await axios.get(
+            const { data } = await axios.get(
               `api/v2/sync/course/${course.properties.idCourseMoodle}/activities`
             )
-            this.overlay = false
-            this.filterActivitiesByCategories()
+            if (data.success) {
+              await this.fetchActivityItems()
+              await this.filterActivitiesByCategories()
+
+              this.overlay = false
+            }
           }
         })
       } else {
@@ -396,7 +400,6 @@ export default {
         this.snackbar = true
         this.message = message
       }
-      this.loading = false
     },
     async fetchDataCourses() {
       this.loading = true
