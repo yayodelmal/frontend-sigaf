@@ -548,13 +548,13 @@ export default {
       {
         text: 'RUT',
         value: 'registeredUser.rut',
-        class: ['redS--text', 'text-md-h6'],
+        class: ['redS--text'],
         width: 120
       },
       {
         text: 'Nombre',
         value: 'registeredUser.name',
-        class: ['redS--text', 'text-md-h6'],
+        class: ['redS--text'],
         width: 150
       },
       {

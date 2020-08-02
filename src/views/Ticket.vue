@@ -1143,29 +1143,6 @@
           </h3>
         </template>
       </confirm-dialog>
-      <!-- <v-dialog v-model="dialogConfirm" persistent max-width="350">
-        <base-card
-          class="pt-12"
-          color="redS"
-          icon="mdi-hand-left"
-          title="¡Atención!"
-        >
-          <v-divider></v-divider>
-          <v-card-text>Eliminará un registro de forma permanente</v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <base-button
-              icon="mdi-check-circle"
-              label="Aceptar"
-              @click.prevent="confirmDelete"
-            ></base-button>
-            <v-btn text color="grayS" @click="close">
-              <v-icon size="30" left>mdi-close-circle</v-icon>
-              Cancelar</v-btn
-            >
-          </v-card-actions>
-        </base-card>
-      </v-dialog> -->
       <v-dialog v-model="dialogSelectCourse" max-width="400">
         <v-card>
           <v-card-title class="headline text-center"
@@ -1336,12 +1313,12 @@ export default {
           width: 150,
           class: 'redS--text'
         },
-        {
-          text: 'Hora creación',
-          align: 'center',
-          value: 'properties.timeCreatedAt',
-          class: 'redS--text'
-        },
+        // {
+        //   text: 'Hora creación',
+        //   align: 'center',
+        //   value: 'properties.timeCreatedAt',
+        //   class: 'redS--text'
+        // },
         {
           text: 'Fecha cierre',
           align: 'center',
@@ -1349,19 +1326,19 @@ export default {
           width: 150,
           class: 'redS--text'
         },
-        {
-          text: 'Hora cierre',
-          align: 'center',
-          value: 'properties.timeClosingDate',
-          class: 'redS--text'
-        },
-        {
-          text: 'Creador',
-          align: 'center',
-          width: 150,
-          value: 'properties.userCreated.name',
-          class: 'redS--text'
-        },
+        // {
+        //   text: 'Hora cierre',
+        //   align: 'center',
+        //   value: 'properties.timeClosingDate',
+        //   class: 'redS--text'
+        // },
+        // {
+        //   text: 'Creador',
+        //   align: 'center',
+        //   width: 150,
+        //   value: 'properties.userCreated.name',
+        //   class: 'redS--text'
+        // },
         {
           text: 'Operador',
           align: 'center',

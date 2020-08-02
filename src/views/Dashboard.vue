@@ -105,7 +105,7 @@
                 </div>
                 <v-card
                   class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                  color="whiteS"
+                  color="white"
                   :class="{ 'v-card--reveal': hover }"
                   width="95%"
                 >
@@ -132,7 +132,7 @@
                 </div>
                 <v-card
                   class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                  color="whiteS"
+                  color="white"
                   :class="{ 'v-card--reveal': hover }"
                   width="95%"
                 >
@@ -206,13 +206,25 @@ export default {
       datasets: [
         {
           label: '',
-          backgroundColor: ['#F9A825', '#F9A825'],
+          backgroundColor: [
+            '#F9A825',
+            '#F9A825',
+            '#F9A825',
+            '#F9A825',
+            '#F9A825'
+          ],
           stack: 'Stack 0',
           data: []
         },
         {
           label: '',
-          backgroundColor: ['#2E7D32', '#2E7D32'],
+          backgroundColor: [
+            '#2E7D32',
+            '#2E7D32',
+            '#2E7D32',
+            '#2E7D32',
+            '#2E7D32'
+          ],
           stack: 'Stack 0',
           data: []
         }
@@ -330,7 +342,7 @@ export default {
   position: relative;
 }
 .v-card--reveal {
-  top: -60px;
+  top: -30px;
   position: relative;
 }
 

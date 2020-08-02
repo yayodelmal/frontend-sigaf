@@ -43,6 +43,13 @@ export default {
         return false
       }
     },
+    isDeveloper(state) {
+      if (state.loginUser) {
+        return state.loginUser.role.description === 'Developer'
+      } else {
+        return false
+      }
+    },
     typeRole(state) {
       if (state.loginUser) {
         return state.loginUser.role

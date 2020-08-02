@@ -57,10 +57,10 @@
 
     <v-divider></v-divider>
 
-    <v-list v-if="isAdmin" dense nav shaped>
+    <v-list dense nav shaped>
       <v-list-group
-        v-for="link in links.secondary"
-        :key="link.name"
+        v-for="(link, index) in links.secondary"
+        :key="index"
         no-action
         :prepend-icon="link.icon"
         color
@@ -71,7 +71,7 @@
           </v-list-item>
         </template>
         <v-list-item
-          v-for="internalLink in link.links"
+          v-for="internalLink in getPrivilegesSecondaryLinks(index)"
           :key="internalLink.name"
           :to="internalLink.to"
           link
@@ -85,6 +85,7 @@
         </v-list-item>
       </v-list-group>
     </v-list>
+
     <template v-slot:append>
       <v-list nav>
         <v-list-item>
@@ -161,19 +162,19 @@ export default {
           name: 'Dashboard',
           icon: 'mdi-view-dashboard',
           to: { name: 'Dashboard' },
-          privileges: ['Administrador']
+          privileges: ['Administrador', 'Developer']
         },
         {
           name: 'Seguimiento',
           icon: 'mdi-google-classroom',
           to: { name: 'FollowUp' },
-          privileges: ['Administrador', 'Tutor', 'Operador']
+          privileges: ['Administrador', 'Tutor', 'Operador', 'Developer']
         },
         {
           name: 'Ticket',
           icon: 'mdi-ticket-account',
           to: { name: 'Ticket' },
-          privileges: ['Administrador', 'Operador']
+          privileges: ['Administrador', 'Operador', 'Developer']
         }
       ],
       secondary: [
@@ -183,72 +184,99 @@ export default {
           links: [
             {
               name: 'Aula',
-              to: { name: 'Classroom' }
+              to: { name: 'Classroom' },
+              privileges: ['Administrador', 'Developer']
             },
             {
               name: 'Estado ticket',
-              to: { name: 'StatusTicket' }
+              to: { name: 'StatusTicket' },
+              privileges: ['Developer']
             },
             {
               name: 'Estado final alumno',
-              to: { name: 'FinalStatus' }
+              to: { name: 'FinalStatus' },
+              privileges: ['Developer']
             },
             {
               name: 'Tipo ticket',
-              to: { name: 'TypeTicket' }
+              to: { name: 'TypeTicket' },
+              privileges: ['Developer']
             },
             {
               name: 'Motivo ticket',
-              to: { name: 'MotiveTicket' }
+              to: { name: 'MotiveTicket' },
+              privileges: ['Developer']
             },
             {
               name: 'Prioridad ticket',
-              to: { name: 'PriorityTicket' }
+              to: { name: 'PriorityTicket' },
+              privileges: ['Developer']
             },
             {
               name: 'Sección',
-              to: { name: 'Section' }
+              to: { name: 'Section' },
+              privileges: ['Administrador', 'Developer']
             },
             {
               name: 'Origen Ticket',
-              to: { name: 'SourceTicket' }
+              to: { name: 'SourceTicket' },
+              privileges: ['Developer']
             },
             {
               name: 'Intento Contacto',
-              to: { name: 'StatusDetailTicket' }
+              to: { name: 'StatusDetailTicket' },
+              privileges: ['Developer']
             },
             {
               name: 'Rol Usuario',
-              to: { name: 'Role' }
+              to: { name: 'Role' },
+              privileges: ['Developer']
             },
             {
               name: 'Perfil Plataforma',
-              to: { name: 'Profile' }
+              to: { name: 'Profile' },
+              privileges: ['Developer']
             },
             {
               name: 'Categoría',
-              to: { name: 'Category' }
+              to: { name: 'Category' },
+              privileges: ['Administrador', 'Developer']
             },
             {
               name: 'Curso',
-              to: { name: 'Course' }
+              to: { name: 'Course' },
+              privileges: ['Administrador', 'Developer']
             },
-            { name: 'Usuario', to: { name: 'User' } }
+            {
+              name: 'Usuario',
+              to: { name: 'User' },
+              privileges: ['Administrador', 'Developer']
+            }
           ]
         },
         {
           name: 'Configuración',
           icon: 'mdi-cog-outline',
           links: [
-            { name: 'Matrícula', to: { name: 'LoadStudents' } },
-            { name: 'Conformar aulas', to: { name: 'BuildClassrooms' } },
+            {
+              name: 'Matrícula',
+              to: { name: 'LoadStudents' },
+              privileges: ['Administrador', 'Developer']
+            },
+            {
+              name: 'Conformar aulas',
+              to: { name: 'BuildClassrooms' },
+              privileges: ['Administrador', 'Developer']
+            },
             {
               name: 'Actividades',
-              to: { name: 'Activity' }
+              to: { name: 'Activity' },
+              privileges: ['Administrador', 'Developer']
             },
             {
               name: 'Gestión estudiantes',
-              to: { name: 'ManagementStudent' }
+              to: { name: 'ManagementStudent' },
+              privileges: ['Administrador', 'Developer']
             }
           ]
         }
@@ -306,6 +334,7 @@ export default {
         link.privileges.includes(this.role.description)
       )
     },
+
     // drawerLocal: {
     //   get: function() {
     //     return this.drawer
@@ -346,6 +375,11 @@ export default {
       attempt: 'auth/attempt',
       logoutStore: 'auth/logout'
     }),
+    getPrivilegesSecondaryLinks(index) {
+      return this.links.secondary[index].links.filter(link =>
+        link.privileges.includes(this.role.description)
+      )
+    },
     closeDialog() {
       this.dialog = false
     },

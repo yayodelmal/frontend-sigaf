@@ -117,15 +117,16 @@
                   <!-- <v-divider vertical></v-divider> -->
                   <v-hover v-slot:default="{ hover }" open-delay="200">
                     <v-card
+                      color="grey lighten-4"
                       class="pt-6 mx-auto rounded-t-xl"
                       flat
-                      max-width="350"
+                      min-width="330"
                       :elevation="hover ? 16 : 0"
                       outlined
                     >
                       <v-card-text>
                         <span class="headline font-weight-bold">
-                          {{ user.classroom.description }}</span
+                          {{ user.classroom }}</span
                         ><br />
                         <span class="text-caption"> Progreso:</span><br />
                         <v-avatar size="120">
@@ -139,19 +140,22 @@
                             {{ getValueProgress(user) }}%
                           </v-progress-circular>
                         </v-avatar>
-                        <h3 class="headline mb-2">
+                        <h3 class="font-weight-bold mb-2">
+                          {{ user.registered_user.rut }}
+                        </h3>
+                        <h3 class="title mb-2">
                           {{ user.registered_user.name }}
                         </h3>
                         <h3 class="mb-2">
                           {{ user.registered_user.last_name }}
                           {{ user.registered_user.mother_last_name }}
                         </h3>
-                        <div class="blueS--text mb-2">
+                        <h3 class="blueS--text mb-2">
                           {{ user.registered_user.email }}
-                        </div>
-                        <div class="redS--text subheading font-weight-bold">
+                        </h3>
+                        <h3 class="redS--text subheading font-weight-bold">
                           {{ user.registered_user.mobile }}
-                        </div>
+                        </h3>
                       </v-card-text>
                       <v-expand-transition>
                         <div
@@ -537,7 +541,12 @@ export default {
               user['state'] = state
               user[
                 'fullname'
-              ] = `${user.registered_user.name} ${user.registered_user.last_name}`
+              ] = `${user.registered_user.name} ${user.registered_user.last_name} ${user.registered_user.mother_last_name}`
+
+              user['rut'] = `${user.registered_user.rut}`
+              user['mobile'] = `${user.registered_user.mobile}`
+              user['email'] = `${user.registered_user.email}`
+              user['classroom'] = `${user.classroom.description}`
               user['progress'] = accumulativeProgress
               user['activities'] = this.groupBy(activities, 'idSection')
               vm.usersRegisteredFiltered.push(user)
