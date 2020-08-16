@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <base-card
       color="blueS"
       class="px-5 py-3"

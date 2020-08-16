@@ -1,10 +1,10 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <base-card
       color="blueS"
       class="px-5 py-3"
       icon="mdi-google-classroom"
-      title="Seguimiento de alumnos"
+      title="Seguimiento de estudiantes"
     >
       <v-col cols="12">
         <v-toolbar dark color="blueS darken-1" class="mb-1">

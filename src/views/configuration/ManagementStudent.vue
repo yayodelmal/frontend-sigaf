@@ -41,7 +41,7 @@
         <base-button
           :disabled="courseModel === null"
           icon="mdi-package-down"
-          label="Obtener alumnos"
+          label="Obtener estudiantes"
           @click="getStudents"
           :loading="loadingButton"
         ></base-button>
@@ -75,260 +75,261 @@
             v-model="selected"
           >
             <template v-slot:top>
-              <v-toolbar flat color="white">
-                <v-row>
-                  <base-textfield
-                    label="Buscar"
-                    v-model="search"
-                    required
-                    clearable
-                  ></base-textfield>
-                  <v-spacer></v-spacer>
-                  <base-button
-                    icon="mdi-sync"
-                    label="usuarios"
-                    @click="syncUsers"
-                    :loading="loadingSync"
-                  ></base-button>
-                  <base-button
-                    icon="mdi-sync"
-                    label="Actividades"
-                    @click="syncActivities"
-                    :loading="loadingSynActivities"
-                  ></base-button>
-                  <v-dialog v-model="dialog" max-width="1000px" persistent>
-                    <v-form>
-                      <v-card>
-                        <v-card-title>
-                          <v-row>
-                            <span class="headline">{{ formTitle }}</span>
-                            <v-spacer />
-                            <v-btn icon text color="grayS" @click="cancell">
-                              <v-icon size="30">mdi-close</v-icon>
-                            </v-btn>
-                          </v-row>
-                        </v-card-title>
-                        <v-card-text>
-                          <v-card class="mx-auto">
-                            <v-card-title
-                              class="title font-weight-regular justify-space-between"
-                            >
-                              <span>{{ currentTitle }}</span>
-                              <v-avatar
-                                color="blueS"
-                                class="subheading white--text"
-                                size="24"
-                                v-text="step"
-                              ></v-avatar>
-                            </v-card-title>
+              <v-toolbar tile dark color="blueS darken-1" class="mb-1">
+                <v-text-field
+                  v-model="search"
+                  color="blueS"
+                  clearable
+                  flat
+                  solo-inverted
+                  hide-details
+                  prepend-inner-icon="mdi-magnify"
+                  label="Buscar"
+                ></v-text-field>
+                <v-spacer></v-spacer>
+                <v-btn
+                  depressed
+                  large
+                  color="blueS"
+                  @click="syncUsers"
+                  :loading="loadingSync"
+                >
+                  Usuarios
+                  <v-icon class="ml-2" size="25">mdi-sync</v-icon>
+                </v-btn>
+                <v-btn
+                  class="ml-2"
+                  depressed
+                  large
+                  color="blueS"
+                  @click="syncActivities"
+                  :loading="loadingSynActivities"
+                >
+                  Actividades
+                  <v-icon class="ml-2" size="25">mdi-sync</v-icon>
+                </v-btn>
+                <v-dialog v-model="dialog" max-width="1000px" persistent>
+                  <v-form>
+                    <v-card :loading="loadingSave">
+                      <template v-slot:progress>
+                        <v-progress-linear
+                          color="blueS"
+                          indeterminate
+                        ></v-progress-linear>
+                      </template>
+                      <v-card-title>
+                        <v-row>
+                          <span class="headline">{{ formTitle }}</span>
+                          <v-spacer />
+                          <v-btn icon text color="grayS" @click="cancell">
+                            <v-icon size="30">mdi-close</v-icon>
+                          </v-btn>
+                        </v-row>
+                      </v-card-title>
+                      <v-card-text>
+                        <v-card class="mx-auto">
+                          <v-card-title
+                            class="title font-weight-regular justify-space-between"
+                          >
+                            <span>{{ currentTitle }}</span>
+                            <v-avatar
+                              color="blueS"
+                              class="subheading white--text"
+                              size="24"
+                              v-text="step"
+                            ></v-avatar>
+                          </v-card-title>
 
-                            <v-window v-model="step">
-                              <v-window-item :value="1">
-                                <v-card-text>
-                                  <v-row justify="space-between">
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        v-model="editedItem.registeredUser.rut"
-                                        :readonly="editedIndex !== -1"
-                                        label="RUT*"
-                                        color="blueS"
-                                        :clearable="editedIndex === -1"
-                                        hint="Formato 12.345.678-9"
-                                        :loading="searchRutLoading"
-                                        @keypress.enter="searchUserByRut"
-                                        @blur="
-                                          searchUserByRut()
-                                          $v.rut.$touch()
-                                        "
-                                        @input="$v.rut.$touch()"
-                                        :error-messages="rutErrors"
-                                      >
-                                      </base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        label="Nombre*"
-                                        required
-                                        clearable
-                                        v-model="editedItem.registeredUser.name"
-                                        @input="$v.name.$touch()"
-                                        @blur="$v.name.$touch()"
-                                        :error-messages="nameErrors"
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        label="Apellido paterno*"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.last_name
-                                        "
-                                        @input="$v.lastName.$touch()"
-                                        @blur="$v.lastName.$touch()"
-                                        :error-messages="lastNameErrors"
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        label="Apellido materno*"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser
-                                            .mother_last_name
-                                        "
-                                        @input="$v.motherLastName.$touch()"
-                                        @blur="$v.motherLastName.$touch()"
-                                        :error-messages="motherLastNameErrors"
-                                      ></base-textfield>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row justify="space-between">
-                                    <v-col cols="12" sm="12" md="6" lg="6">
-                                      <base-textfield
-                                        label="Correo electrónico*"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.email
-                                        "
-                                        @input="$v.email.$touch()"
-                                        @blur="$v.email.$touch()"
-                                        :error-messages="emailErrors"
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        label="Teléfono fijo"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.phone
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        label="Teléfono movil*"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.mobile
-                                        "
-                                        @input="$v.mobile.$touch()"
-                                        @blur="$v.mobile.$touch()"
-                                        :error-messages="mobileErrors"
-                                      ></base-textfield>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row justify="space-between">
-                                    <v-col cols="12" sm="12" md="6" lg="6">
-                                      <base-textfield
-                                        label="Dirección"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.address
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        label="Ciudad"
-                                        required
-                                        clearable
-                                        v-model="editedItem.registeredUser.city"
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="3" lg="3">
-                                      <base-textfield
-                                        label="Región"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.region
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                  </v-row>
-                                  <span
-                                    class="caption grey--text text--darken-1"
-                                  >
-                                    Por favor complete la información del
-                                    usuario referente a sus datos personales
-                                  </span>
-                                  <span
-                                    class="caption grey--text text--darken-1"
-                                  >
-                                    (*) Requerido
-                                  </span>
-                                </v-card-text>
-                              </v-window-item>
-                              <v-window-item :value="2">
-                                <div class="pa-4">
-                                  <v-row justify="space-between">
-                                    <v-col cols="12" sm="12" md="4" lg="4">
-                                      <base-textfield
-                                        label="RBD"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.rbd_school
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="12" md="8" lg="8">
-                                      <base-textfield
-                                        label="Nombre"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.name_school
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row justify="space-between">
-                                    <v-col cols="12" sm="12" md="4" lg="4">
-                                      <base-textfield
-                                        label="Teléfono"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.phone_school
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="12" md="4" lg="4">
-                                      <base-textfield
-                                        label="Ciudad"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser.city_school
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                    <v-col cols="12" sm="12" md="4" lg="4">
-                                      <base-textfield
-                                        label="Región"
-                                        required
-                                        clearable
-                                        v-model="
-                                          editedItem.registeredUser
-                                            .region_school
-                                        "
-                                      ></base-textfield>
-                                    </v-col>
-                                  </v-row>
-                                  <span
-                                    class="caption grey--text text--darken-1"
-                                  >
-                                    Por favor complete la información del
-                                    usuario referente a su establecimiento
-                                  </span>
-                                  <!-- <v-img
+                          <v-window v-model="step">
+                            <v-window-item :value="1">
+                              <v-card-text>
+                                <v-row justify="space-between">
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <base-textfield
+                                      v-model="editedItem.registeredUser.rut"
+                                      :readonly="editedIndex !== -1"
+                                      label="RUT"
+                                      color="blueS"
+                                      :clearable="editedIndex === -1"
+                                      hint="Formato 12.345.678-9"
+                                      :loading="searchRutLoading"
+                                      @keypress.enter="searchUserByRut"
+                                      @blur="
+                                        searchUserByRut()
+                                        $v.rut.$touch()
+                                      "
+                                      @input="$v.rut.$touch()"
+                                      :error-messages="rutErrors"
+                                    >
+                                    </base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <base-textfield
+                                      label="Nombre"
+                                      required
+                                      clearable
+                                      v-model="editedItem.registeredUser.name"
+                                      @input="$v.name.$touch()"
+                                      @blur="$v.name.$touch()"
+                                      :error-messages="nameErrors"
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <base-textfield
+                                      label="Apellido paterno"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser.last_name
+                                      "
+                                      @input="$v.lastName.$touch()"
+                                      @blur="$v.lastName.$touch()"
+                                      :error-messages="lastNameErrors"
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <base-textfield
+                                      label="Apellido materno"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser
+                                          .mother_last_name
+                                      "
+                                      @input="$v.motherLastName.$touch()"
+                                      @blur="$v.motherLastName.$touch()"
+                                      :error-messages="motherLastNameErrors"
+                                    ></base-textfield>
+                                  </v-col>
+                                </v-row>
+                                <v-row justify="space-between">
+                                  <v-col cols="12" sm="12" md="6" lg="6">
+                                    <base-textfield
+                                      label="Correo electrónico"
+                                      required
+                                      clearable
+                                      v-model="editedItem.registeredUser.email"
+                                      @input="$v.email.$touch()"
+                                      @blur="$v.email.$touch()"
+                                      :error-messages="emailErrors"
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <base-textfield
+                                      label="Teléfono fijo"
+                                      required
+                                      clearable
+                                      v-model="editedItem.registeredUser.phone"
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <base-textfield
+                                      label="Teléfono móvil"
+                                      required
+                                      clearable
+                                      v-model="editedItem.registeredUser.mobile"
+                                    ></base-textfield>
+                                  </v-col>
+                                </v-row>
+                                <v-row justify="space-between">
+                                  <v-col cols="12" sm="12" md="6" lg="6">
+                                    <base-textfield
+                                      label="Dirección"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser.address
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <base-textfield
+                                      label="Ciudad"
+                                      required
+                                      clearable
+                                      v-model="editedItem.registeredUser.city"
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="3" lg="3">
+                                    <v-autocomplete
+                                      v-model="editedItem.registeredUser.region"
+                                      outlined
+                                      color="blueS"
+                                      dense
+                                      :items="regions"
+                                      item-text="description"
+                                      item-value="id"
+                                      label="Región"
+                                    ></v-autocomplete>
+                                  </v-col>
+                                </v-row>
+                                <span class="caption grey--text text--darken-1">
+                                  Complete la información del usuario referente
+                                  a sus datos personales
+                                </span>
+                              </v-card-text>
+                            </v-window-item>
+                            <v-window-item :value="2">
+                              <div class="pa-4">
+                                <v-row justify="space-between">
+                                  <v-col cols="12" sm="12" md="4" lg="4">
+                                    <base-textfield
+                                      label="RBD"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser.rbd_school
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="12" md="8" lg="8">
+                                    <base-textfield
+                                      label="Nombre"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser.name_school
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                </v-row>
+                                <v-row justify="space-between">
+                                  <v-col cols="12" sm="12" md="4" lg="4">
+                                    <base-textfield
+                                      label="Teléfono"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser.phone_school
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="12" md="4" lg="4">
+                                    <base-textfield
+                                      label="Ciudad"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser.city_school
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                  <v-col cols="12" sm="12" md="4" lg="4">
+                                    <base-textfield
+                                      label="Región"
+                                      required
+                                      clearable
+                                      v-model="
+                                        editedItem.registeredUser.region_school
+                                      "
+                                    ></base-textfield>
+                                  </v-col>
+                                </v-row>
+                                <span class="caption grey--text text--darken-1">
+                                  Por favor complete la información del usuario
+                                  referente a su establecimiento
+                                </span>
+                                <!-- <v-img
                                   class="mb-4"
                                   contain
                                   height="128"
@@ -340,47 +341,46 @@
                                 <span class="caption grey--text"
                                   >Thanks for signing up!</span
                                 > -->
-                                </div>
-                              </v-window-item>
-                            </v-window>
+                              </div>
+                            </v-window-item>
+                          </v-window>
 
-                            <v-divider></v-divider>
+                          <v-divider></v-divider>
 
-                            <v-card-actions>
-                              <v-btn
-                                :dark="step === 1"
-                                :disabled="step === 1"
-                                text
-                                @click="step--"
-                              >
-                                Volver
-                              </v-btn>
-                              <v-spacer></v-spacer>
-                              <v-btn
-                                v-if="step === 2"
-                                :disabled="!finalSave"
-                                color="blueS"
-                                :dark="finalSave"
-                                @click="save"
-                              >
-                                Guardar
-                              </v-btn>
-                              <v-btn
-                                v-else
-                                color="blueS"
-                                :dark="step !== 2"
-                                @click="checkStep"
-                              >
-                                Continuar
-                              </v-btn>
-                            </v-card-actions>
-                          </v-card>
-                        </v-card-text>
-                        <v-card-actions> </v-card-actions>
-                      </v-card>
-                    </v-form>
-                  </v-dialog>
-                </v-row>
+                          <v-card-actions>
+                            <v-btn
+                              :dark="step === 1"
+                              :disabled="step === 1"
+                              text
+                              @click="step--"
+                            >
+                              Volver
+                            </v-btn>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                              v-if="step === 2"
+                              :disabled="!finalSave"
+                              color="blueS"
+                              :dark="finalSave"
+                              @click="save"
+                            >
+                              Guardar
+                            </v-btn>
+                            <v-btn
+                              v-else
+                              color="blueS"
+                              :dark="step !== 2"
+                              @click="checkStep"
+                            >
+                              Continuar
+                            </v-btn>
+                          </v-card-actions>
+                        </v-card>
+                      </v-card-text>
+                      <v-card-actions> </v-card-actions>
+                    </v-card>
+                  </v-form>
+                </v-dialog>
               </v-toolbar>
             </template>
             <template v-slot:header.data-table-select="{ props, on }">
@@ -444,19 +444,17 @@
       </v-card>
     </v-expand-transition>
     <v-overlay :value="overlay" color="grayS" :opacity="opacity">
-      <h3 class="headline text-center mt-5">
-        Sincronizando {{ indexCurrentSyncUser }}
-      </h3>
       <div class="text-center">
         <v-progress-circular indeterminate size="64"> </v-progress-circular>
       </div>
-
+      <h3 class="headline text-center mt-5">
+        Sincronizando {{ indexCurrentSyncUser }}
+      </h3>
       <h3 class="headline text-center mt-3">{{ currentSyncUser }}</h3>
-
       <h3 class="text-subtitle-1 text-center mt-3">{{ currentActivity }}</h3>
       <v-spacer />
       <h3 class="text-body-2 text-center mt-16">
-        Por favor espere. Esto puede tardar unos minutos
+        Por favor espere, esto puede tardar unos minutos.
       </h3>
     </v-overlay>
     <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
@@ -518,7 +516,6 @@ export default {
     lastName: { required },
     motherLastName: { required },
     email: { required, email },
-    mobile: { required },
     rut: { required, rutFormated }
   },
   components: {
@@ -531,17 +528,11 @@ export default {
         text: 'Estado',
         value: 'status',
         class: 'redS--text',
-        width: 100
+        width: 50
       },
       {
         text: 'Aula',
         value: 'classroom.description',
-        class: 'redS--text',
-        width: 80
-      },
-      {
-        text: 'Ultima conexión',
-        value: 'lastAccessRegisteredMoodle',
         class: 'redS--text',
         width: 80
       },
@@ -570,18 +561,30 @@ export default {
         width: 180
       },
       {
-        text: 'Región',
-        value: 'registeredUser.region',
+        text: 'Rol',
+        value: 'profile.description',
         class: 'redS--text',
-        width: 180
+        width: 80
       },
       {
-        text: 'Ciudad',
-        value: 'registeredUser.city',
-        class: 'redS--text'
+        text: 'Ultima conexión',
+        value: 'lastAccessRegisteredMoodle',
+        class: 'redS--text',
+        width: 150
       },
+      // {
+      //   text: 'Región',
+      //   value: 'registeredUser.region',
+      //   class: 'redS--text',
+      //   width: 180
+      // },
+      // {
+      //   text: 'Ciudad',
+      //   value: 'registeredUser.city',
+      //   class: 'redS--text'
+      // },
       {
-        text: 'Acciones',
+        text: 'Opciones',
         value: 'actions',
         class: 'redS--text',
         sortable: false,
@@ -628,7 +631,8 @@ export default {
     indexCurrentSyncUser: '',
     type: '',
     dialogConfirm: false,
-    deleteIndex: ''
+    deleteIndex: '',
+    loadingSave: false
   }),
   created() {
     this.loadingCourse = true
@@ -649,7 +653,8 @@ export default {
       courseItems: 'course/courses',
       usersByCourse: 'course/usersByCourse',
       classrooms: 'classroom/classrooms',
-      activities: 'activity/activities'
+      activities: 'activity/activities',
+      regions: 'registeredUser/regions'
     }),
     options() {
       return {
@@ -693,12 +698,6 @@ export default {
       if (!this.$v.motherLastName.$dirty) return errors
       !this.$v.motherLastName.required &&
         errors.push('El apellido materno es requerido.')
-      return errors
-    },
-    mobileErrors() {
-      const errors = []
-      if (!this.$v.mobile.$dirty) return errors
-      !this.$v.mobile.required && errors.push('El teléfono movil es requerido.')
       return errors
     },
     rutErrors() {
@@ -865,13 +864,26 @@ export default {
       if (success) {
         this.currentSyncUser = `Actualizando actividades de ${userCourse.registeredUser.name} ${userCourse.registeredUser.last_name} del ${userCourse.classroom.description}`
 
-        this.indexCurrentSyncUser = `${index + 1}/${this.usersByCourse.length}`
+        if (this.selected.length === 0) {
+          this.indexCurrentSyncUser = `${index + 1} de ${
+            this.usersByCourse.length
+          }`
+        } else {
+          this.indexCurrentSyncUser = `${index + 1} de ${this.selected.length}`
+        }
 
         filterActivity.forEachAsyncCustom(this.showSyncActivities)
       }
 
-      if (index === this.usersByCourse.length - 1) {
-        this.overlay = false
+      if (this.selected.length === 0) {
+        if (index === this.usersByCourse.length - 1) {
+          this.overlay = false
+        }
+      } else {
+        if (index === this.selected.length - 1) {
+          this.overlay = false
+          this.selected = []
+        }
       }
     },
     async syncActivities() {
@@ -879,11 +891,12 @@ export default {
       if (this.selected.length === 0) {
         this.usersByCourse.forEachAsyncCustom(this.syncContributeActivities)
       } else {
-        // this.selected.forEachAsync(this.syncSelectedUsers)
+        this.selected.forEachAsyncCustom(this.syncContributeActivities)
       }
     },
     async syncUsers() {
       if (this.courseModel.idCourseMoodle) {
+        this.overlay = true
         const URL = `/api/v2/sync/course-users/${this.courseModel.idCourseMoodle}/users`
         const { status } = await axios.get(URL)
 
@@ -891,10 +904,14 @@ export default {
           this.message = 'El usuario no se encuentra registrado en moodle'
 
           this.makeSnakResponse(this.message, Snackbar.WARNING.type)
+          this.overlay = false
         } else if (status === 201) {
-          this.message = 'Sincronización exitosa'
+          this.fetchUsersByCourse(this.courseModel.id).then(() => {
+            this.message = 'Sincronización exitosa'
+            this.overlay = false
 
-          this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
+            this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
+          })
         }
       }
     },
@@ -954,12 +971,13 @@ export default {
     },
     getStudents() {
       this.loadingTable = true
-      this.fetchUsersByCourse(this.courseModel.id)
-      setTimeout(() => {
+      this.loadingButton = true
+      this.fetchUsersByCourse(this.courseModel.id).then(() => {
         this.isData = true
         this.loadingTable = false
-        //this.$vuetify.goTo(this.target, this.options)
-      }, 2000)
+        this.loadingButton = false
+        this.$vuetify.goTo(this.target, this.options)
+      })
     },
     editItem(item, index) {
       this.dialog = true
@@ -1011,6 +1029,7 @@ export default {
     },
     async save() {
       if (this.editedIndex > -1) {
+        this.loadingSave = true
         const dataSend = {
           id: this.editedItem.registeredUser.id,
           rut: this.editedItem.registeredUser.rut,
@@ -1037,6 +1056,8 @@ export default {
         } else {
           this.responseErrorMessage()
         }
+
+        this.loadingSave = false
       }
 
       this.close()
@@ -1075,11 +1096,6 @@ export default {
         if (!this.$v.email.required) {
           this.$v.email.$touch()
           this.completeStepOne = this.$v.email.required
-        }
-
-        if (!this.$v.mobile.required) {
-          this.$v.mobile.$touch()
-          this.completeStepOne = this.$v.mobile.required
         }
       }
 

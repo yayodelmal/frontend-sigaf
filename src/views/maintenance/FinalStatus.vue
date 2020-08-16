@@ -4,7 +4,7 @@
       color="blueS"
       class="px-5 py-3"
       icon="mdi-hammer-wrench"
-      title="Estado final de alumno"
+      title="Estado final de estudiantes"
     >
       <div v-if="loading">
         <v-skeleton-loader

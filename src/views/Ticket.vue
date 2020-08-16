@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <base-card
       color="blueS"
       class="px-5 py-3"
@@ -620,7 +620,7 @@
                   >
                     <template v-slot:activator="{ on }">
                       <base-button
-                        v-if="isAdmin"
+                        v-if="isAdmin || isDeveloper"
                         icon="mdi-plus-circle"
                         v-on="on"
                         label="Crear Ticket Masivo"
@@ -1758,29 +1758,37 @@ export default {
 
             this.arrayCourseUserSelect = this.courseRegisteredUserItems.filter(
               userCourse => {
-                return userCourse.registered_user.id === this.userCourse.id
+                return (
+                  userCourse.registered_user.id === this.userCourse.id &&
+                  userCourse.is_sincronized === 1
+                )
               }
             )
 
-            if (
-              this.arrayCourseUserSelect.length > 1 &&
-              this.editedTicketIndex === -1
-            ) {
-              this.dialogSelectCourse = true
+            if (this.arrayCourseUserSelect.length === 0) {
+              vm.snackbar = true
+              vm.message = 'El estudiantes no se encuentra registrado'
             } else {
-              this.editedTicketItem.courseRegisteredUser = Object.assign(
-                {},
-                this.arrayCourseUserSelect[0]
-              )
+              if (
+                this.arrayCourseUserSelect.length > 1 &&
+                this.editedTicketIndex === -1
+              ) {
+                this.dialogSelectCourse = true
+              } else {
+                this.editedTicketItem.courseRegisteredUser = Object.assign(
+                  {},
+                  this.arrayCourseUserSelect[0]
+                )
 
-              this.user = Object.assign(
-                {},
-                this.mapUser(this.arrayCourseUserSelect[0])
-              )
+                this.user = Object.assign(
+                  {},
+                  this.mapUser(this.arrayCourseUserSelect[0])
+                )
+              }
             }
           } else {
             vm.snackbar = true
-            vm.message = 'El alumno no se encuentra registrado'
+            vm.message = 'El estudiantes no se encuentra registrado'
           }
         }
         this.searchRutLoading = false
@@ -2176,8 +2184,18 @@ export default {
       ticketDetails: 'ticket/ticketDetailsByTicket',
       loggedUser: 'auth/user',
       isAdmin: 'auth/isAdmin',
-      sections: 'section/sections'
+      isDeveloper: 'auth/isDeveloper',
+      sections: 'section/sections',
+      ticketsByCourse: 'ticket/ticketsByCourse'
     }),
+
+    filteredTickets() {
+      if (this.category === null) {
+        return this.tickets
+      } else {
+        return this.ticketsByCourse[this.category.id]
+      }
+    },
     sectionFiltered() {
       return this.sections.filter(
         section =>
@@ -2333,7 +2351,7 @@ export default {
           })
           .filter(item => {
             if (vm.loggedUser) {
-              if (vm.isAdmin) {
+              if (vm.isAdmin || vm.isDeveloper) {
                 return true
               } else {
                 return item.properties.userAssigned.id === vm.loggedUser.id
@@ -2353,7 +2371,7 @@ export default {
           })
           .filter(item => {
             if (vm.loggedUser) {
-              if (vm.isAdmin) {
+              if (vm.isAdmin || vm.isDeveloper) {
                 return true
               } else {
                 return item.properties.userAssigned.id === vm.loggedUser.id

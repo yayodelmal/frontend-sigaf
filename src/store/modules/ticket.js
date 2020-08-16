@@ -87,6 +87,16 @@ export default {
         }
       })
     },
+    ticketsByCourse: state => {
+      return state.tickets.reduce((accumulator, object) => {
+        let key = object.properties.courseRegisteredUser.course.category_id
+        if (!accumulator[key]) {
+          accumulator[key] = []
+        }
+        accumulator[key].push(object)
+        return accumulator
+      }, {})
+    },
     ticket: state => {
       return state.ticket
     },

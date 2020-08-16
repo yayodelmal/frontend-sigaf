@@ -73,10 +73,7 @@
               hint="Formato 12.345.678-9"
               append-icon="mdi-magnify"
               :loading="searchRutLoading"
-              @blur="
-                searchUserByRut()
-                $v.rut.$touch()
-              "
+              @blur="$v.rut.$touch()"
               @input="$v.rut.$touch()"
               :error-messages="rutErrors"
               @click:append="searchUserByRut"
@@ -224,9 +221,6 @@
                         <base-textfield
                           label="Teléfono movil"
                           v-model="editedItem.registeredUser.mobile"
-                          @input="$v.mobile.$touch()"
-                          @blur="$v.mobile.$touch()"
-                          :error-messages="mobileErrors"
                         ></base-textfield>
                       </v-col>
                     </v-row>
@@ -236,9 +230,6 @@
                           label="Dirección"
                           required
                           v-model="editedItem.registeredUser.address"
-                          @input="$v.address.$touch()"
-                          @blur="$v.address.$touch()"
-                          :error-messages="addressErrors"
                         ></base-textfield>
                       </v-col>
                       <v-col cols="12" sm="6" md="3" lg="3">
@@ -249,14 +240,16 @@
                         ></base-textfield>
                       </v-col>
                       <v-col cols="12" sm="6" md="3" lg="3">
-                        <base-textfield
-                          label="Región"
-                          required
+                        <v-autocomplete
                           v-model="editedItem.registeredUser.region"
-                          @input="$v.region.$touch()"
-                          @blur="$v.region.$touch()"
-                          :error-messages="mobileErrors"
-                        ></base-textfield>
+                          outlined
+                          color="blueS"
+                          dense
+                          :items="regions"
+                          item-text="description"
+                          item-value="id"
+                          label="Región"
+                        ></v-autocomplete>
                       </v-col>
                     </v-row>
                     <span class="caption grey--text text--darken-1">
@@ -398,20 +391,14 @@ export default {
     lastName: { required },
     motherLastName: { required },
     email: { required, email },
-    mobile: { required },
-    region: { required },
     rut: { required, rutFormated },
-    address: { required },
     validationGroup: [
       'courseModelSingle',
       'name',
       'lastName',
       'motherLastName',
       'email',
-      'mobile',
-      'region',
-      'rut',
-      'address'
+      'rut'
     ]
   },
   components: {
@@ -454,7 +441,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      courseItems: 'course/courses'
+      courseItems: 'course/courses',
+      regions: 'registeredUser/regions'
     }),
     mask() {
       // const $this = this
@@ -526,12 +514,6 @@ export default {
       !this.$v.name.required && errors.push('Es obligatorio.')
       return errors
     },
-    regionErrors() {
-      const errors = []
-      if (!this.$v.region.$dirty) return errors
-      !this.$v.region.required && errors.push('Es obligatorio.')
-      return errors
-    },
     lastNameErrors() {
       const errors = []
       if (!this.$v.lastName.$dirty) return errors
@@ -542,18 +524,6 @@ export default {
       const errors = []
       if (!this.$v.motherLastName.$dirty) return errors
       !this.$v.motherLastName.required && errors.push('Es obligatorio.')
-      return errors
-    },
-    mobileErrors() {
-      const errors = []
-      if (!this.$v.mobile.$dirty) return errors
-      !this.$v.mobile.required && errors.push('Es obligatorio.')
-      return errors
-    },
-    addressErrors() {
-      const errors = []
-      if (!this.$v.address.$dirty) return errors
-      !this.$v.address.required && errors.push('Es obligatorio.')
       return errors
     },
     rutErrors() {
@@ -606,6 +576,13 @@ export default {
         default:
           return 'Información moodle'
       }
+    }
+  },
+  watch: {
+    courseModelSingle() {
+      this.editedItem = new CourseRegisteredUser()
+      this.finalSave = false
+      this.isCreatedUser = false
     }
   },
   methods: {
@@ -718,9 +695,7 @@ export default {
       this.close()
     },
     cancel() {
-      this.$v.$reset()
-      this.editedItem = new CourseRegisteredUser()
-      this.dialog = false
+      this.close()
     },
     isNumber(item) {
       return !isNaN(item)

@@ -105,7 +105,7 @@
                             class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
                             color="white"
                             :class="{ 'v-card--reveal': hover }"
-                            width="95%"
+                            width="97%"
                           >
                             <bar-chart
                               v-if="loaded"
@@ -117,7 +117,7 @@
                           </v-card>
                           <v-row justify="center">
                             <v-btn
-                              class="v-butron-position"
+                              class="mb-3"
                               @click="downloadExcel"
                               dark
                               depressed
@@ -162,7 +162,7 @@
                           </v-card>
                           <v-row justify="center">
                             <v-btn
-                              class="v-butron-position"
+                              class="mb-3"
                               @click="downloadExcel"
                               dark
                               depressed
@@ -188,7 +188,7 @@
                             color="white"
                             class="text-caption font-weigth-bold"
                             >{{ data.classroom }} ({{ data.numberOfUser }}
-                            alumnos)
+                            estudiantes)
                             <template v-slot:actions>
                               <v-icon color="blueS">$expand</v-icon>
                             </template>
@@ -617,7 +617,7 @@ export default {
     editClassroomModel: null,
     profileModel: null,
     searchStudent: '',
-    selectedFilter: [{ id: 1, description: 'Alumno' }],
+    selectedFilter: [{ id: 1, description: 'Estudiante' }],
     completeStepOne: false,
     completeStepTwo: false,
     completeStepThree: false,
@@ -679,6 +679,13 @@ export default {
   created() {
     this.fetchCourseItems()
     this.fetchProfiles()
+  },
+  watch: {
+    courseModel() {
+      this.listClassroomUsers = []
+      this.loaded = false
+      this.detail = false
+    }
   },
   computed: {
     ...mapGetters({
@@ -824,7 +831,7 @@ export default {
 
       const dataset = {
         backgroundColor: '#fb8c00', //fb8c00 006C8D
-        label: '# de alumnos por Aula',
+        label: '# de estudiantes por Aula',
         data: data
       }
 
@@ -917,7 +924,7 @@ export default {
       }
 
       if (index === this.selected.length - 1) {
-        this.message = `Se ha conformado el ${this.classroomModel.description} con ${this.selected.length} alumnos`
+        this.message = `Se ha conformado el ${this.classroomModel.description} con ${this.selected.length} estudiantes`
         this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
         this.loaded = false
         this.fillChartUsersByCourse()
@@ -999,12 +1006,12 @@ export default {
 
 <style scoped>
 .v-sheet--offset {
-  top: 10px;
+  top: -10px;
   position: relative;
   z-index: 1;
 }
 .v-card--reveal {
-  top: -40px;
+  top: -20px;
   position: relative;
   z-index: 1;
 }
@@ -1019,8 +1026,8 @@ export default {
   position: relative;
 }
 
-.v-butron-position {
-  top: -40px;
+.v-button-position {
+  top: 20px;
   position: relative;
   z-index: 0;
 }

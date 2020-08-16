@@ -159,7 +159,7 @@ export default {
     links: {
       main: [
         {
-          name: 'Dashboard',
+          name: 'Estadística',
           icon: 'mdi-view-dashboard',
           to: { name: 'Dashboard' },
           privileges: ['Administrador', 'Developer']
@@ -193,7 +193,7 @@ export default {
               privileges: ['Developer']
             },
             {
-              name: 'Estado final alumno',
+              name: 'Estado final estudiante',
               to: { name: 'FinalStatus' },
               privileges: ['Developer']
             },

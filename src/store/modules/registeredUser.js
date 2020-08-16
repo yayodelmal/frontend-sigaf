@@ -25,14 +25,80 @@ export default {
   getters: {
     registeredUsers: state => {
       return state.registeredUsers
+    },
+    regions: () => {
+      return [
+        {
+          id: 'Región de Arica y Parinacota',
+          description: 'Región de Arica y Parinacota'
+        },
+        {
+          id: 'Región de Tarapacá',
+          description: 'Región de Tarapacá'
+        },
+        {
+          id: 'Región de Antofagasta',
+          description: 'Región de Antofagasta'
+        },
+        {
+          id: 'Región de Atacama',
+          description: 'Región de Atacama'
+        },
+        {
+          id: 'Región de Coquimbo',
+          description: 'Región de Coquimbo'
+        },
+        {
+          id: 'Región de Valparaíso',
+          description: 'Región de Valparaíso'
+        },
+        {
+          id: 'Región Metropolitana de Santiago',
+          description: 'Región Metropolitana de Santiago'
+        },
+        {
+          id: "Región del Libertador General Bernardo O'Higgins",
+          description: "Región del Libertador General Bernardo O'Higgins"
+        },
+        {
+          id: 'Región del Maule',
+          description: 'Región del Maule'
+        },
+        {
+          id: 'Región de Ñuble',
+          description: 'Región de Ñuble'
+        },
+        {
+          id: 'Región del Biobío',
+          description: 'Región del Biobío'
+        },
+        {
+          id: 'Región de La Araucanía',
+          description: 'Región de La Araucanía'
+        },
+        {
+          id: 'Región de Los Ríos',
+          description: 'Región de Los Ríos'
+        },
+        {
+          id: 'Región de Los Lagos',
+          description: 'Región de Los Lagos'
+        },
+        {
+          id: 'Región de Aisén del G. Carlos Ibáñez del Campo',
+          description: 'Región de Aisén del G. Carlos Ibáñez del Campo'
+        },
+        {
+          id: 'Región de Magallanes y de la Antártica  Chilena',
+          description: 'Región de Magallanes y de la Antártica  Chilena'
+        }
+      ]
     }
   },
   actions: {
     fetchRegisteredUsers: async ({ commit }) => {
       try {
         const { data } = await axios.get(BASE_URL)
-
-        console.log(data)
 
         const { _data, success, error, message } = data
 
