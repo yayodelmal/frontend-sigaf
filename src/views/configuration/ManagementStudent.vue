@@ -20,32 +20,55 @@
     </div>
     <v-card v-else-if="!isData" flat outlined>
       <v-card-title>
-        Seleccione un curso:
+        Seleccione:
       </v-card-title>
       <v-card-text>
-        <base-autocomplete
-          v-model="courseModel"
-          :items="courseItems"
-          label="Curso"
-          item-value="id"
-          item-text="description"
-          return-object
-          @change="$v.courseModel.$touch()"
-          @blur="$v.courseModel.$touch()"
-          :error-messages="courseErrors"
-        >
-        </base-autocomplete>
+        <v-toolbar dark color="blueS darken-1" class="mb-1">
+          <v-select
+            v-model="category"
+            :items="categoryItems"
+            label="Categoría"
+            item-value="id"
+            item-text="description"
+            return-object
+            flat
+            color="blueS"
+            solo-inverted
+            hide-details
+            prepend-inner-icon="mdi-magnify"
+          ></v-select>
+          <v-spacer />
+          <v-select
+            class="mx-3"
+            v-model="courseModel"
+            :items="arrayCourseByCategory"
+            label="Curso"
+            item-value="id"
+            item-text="description"
+            return-object
+            flat
+            color="blueS"
+            solo-inverted
+            hide-details
+            prepend-inner-icon="mdi-magnify"
+            @change="$v.courseModel.$touch()"
+            @blur="$v.courseModel.$touch()"
+            :error-messages="courseErrors"
+          ></v-select>
+          <v-spacer />
+          <v-btn
+            :disabled="courseModel === null"
+            large
+            dark
+            depressed
+            color="blueS"
+            @click="getStudents"
+            :loading="loadingButton"
+          >
+            <v-icon size="25" class="mr-3">mdi-magnify</v-icon> Buscar
+          </v-btn>
+        </v-toolbar>
       </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <base-button
-          :disabled="courseModel === null"
-          icon="mdi-package-down"
-          label="Obtener estudiantes"
-          @click="getStudents"
-          :loading="loadingButton"
-        ></base-button>
-      </v-card-actions>
     </v-card>
     <v-card v-else flat outlined>
       <v-card-text>
@@ -600,6 +623,7 @@ export default {
     loadingButton: false,
     loadingTable: false,
     courseModel: null,
+    category: null,
     isData: false,
     dialog: false,
     editedIndex: -1,
@@ -642,19 +666,25 @@ export default {
       }
     })
     this.fetchActivities()
+    this.fetchDataCategoryItems()
   },
   watch: {
     courseModel() {
       this.isData = false
+    },
+    async category() {
+      await this.fetchCourseByCategory(this.category.courses.href)
     }
   },
   computed: {
     ...mapGetters({
       courseItems: 'course/courses',
       usersByCourse: 'course/usersByCourse',
+      coursesByCategory: 'course/coursesByCategory',
       classrooms: 'classroom/classrooms',
       activities: 'activity/activities',
-      regions: 'registeredUser/regions'
+      regions: 'registeredUser/regions',
+      categoryItems: 'category/categories'
     }),
     options() {
       return {
@@ -663,6 +693,16 @@ export default {
         easing: this.easing
       }
     },
+    arrayCourseByCategory() {
+      if (this.category !== null) {
+        return this.coursesByCategory.map(({ properties }) => {
+          return { id: properties.id, description: properties.description }
+        })
+      } else {
+        return []
+      }
+    },
+
     currentTitle() {
       switch (this.step) {
         case 1:
@@ -747,8 +787,19 @@ export default {
         'courseRegisteredUser/getCourseRegisteredUserByUser',
       fetchActivities: 'activity/fetchActivities',
       syncUserActivities: 'activity/getContributoryActivities',
-      deleteCourseUser: 'courseRegisteredUser/deleteCourseRegisteredUser'
+      deleteCourseUser: 'courseRegisteredUser/deleteCourseRegisteredUser',
+      fetchCategoryItems: 'category/fetchCategories',
+      fetchCourseByCategory: 'course/getCoursesByCategory'
     }),
+    async fetchDataCategoryItems() {
+      this.loading = true
+      const { success, message } = await this.fetchCategoryItems()
+      if (!success) {
+        this.snackbar = true
+        this.message = message
+      }
+      this.loading = false
+    },
     makeSnakResponse(message, type) {
       this.snackbar = true
       this.type = type

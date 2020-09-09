@@ -22,6 +22,27 @@
             prepend-inner-icon="mdi-filter-outline"
           >
           </v-select>
+          <v-spacer />
+          <v-select
+            class="mx-3"
+            v-model="selectedCourses"
+            :items="arrayCourseByCategory"
+            label="Curso"
+            item-value="id"
+            item-text="description"
+            color="blueS"
+            multiple
+            flat
+            solo-inverted
+            hide-details
+            return-object
+            prepend-inner-icon="mdi-filter-outline"
+          >
+          </v-select>
+          <v-spacer />
+          <v-btn large depressed color="blueS" @click="fetchUserByCourse">
+            Buscar
+          </v-btn>
         </v-toolbar>
       </v-col>
       <v-sheet color="white" class="px-3 pt-3 pb-3">
@@ -70,6 +91,17 @@
                 label="Buscar"
               ></v-text-field>
               <template v-if="$vuetify.breakpoint.mdAndUp">
+                <!-- <v-select
+                  v-model="sortByClassRoom"
+                  flat
+                  item-value="key"
+                  item-text="value"
+                  solo-inverted
+                  hide-details
+                  :items="keys"
+                  prepend-inner-icon="mdi-filter-outline"
+                  label="Filtrar por Aula"
+                ></v-select> -->
                 <v-spacer></v-spacer>
                 <v-select
                   v-model="sortBy"
@@ -302,6 +334,7 @@ export default {
     message: '',
     timeout: 3000,
     category: null,
+    selectedCourses: [],
     userCourse: {},
     user: {
       registered_user: {},
@@ -339,6 +372,17 @@ export default {
           section.description !== 'Renuncia'
       )
     },
+    arrayCourseByCategory() {
+      return this.courseByCategory.map(({ properties }) => {
+        return { id: properties.id, description: properties.description }
+      })
+    },
+
+    users() {
+      return this.usersRegisteredFiltered.filter(user => {
+        console.log(user)
+      })
+    },
     breackPoint() {
       return this.$vuetify.breakpoint.name
     },
@@ -373,8 +417,8 @@ export default {
     }
   },
   created() {
-    this.fetchDataCourseRegisteredUserItems()
-    this.fetchCourseItems()
+    // this.fetchDataCourseRegisteredUserItems()
+    //  this.fetchCourseItems()
     this.fetchDataCategoryItems()
     this.fetchSections()
 
@@ -406,10 +450,11 @@ export default {
           this.itemsPerPage = 6
       }
     },
-    category() {
-      this.loading = true
-      this.usersRegisteredFiltered = []
-      this.fetchUserByCourse()
+    async category() {
+      await this.fetchCourseByCategory(this.category.courses.href)
+      // this.loading = true
+      // this.usersRegisteredFiltered = []
+      //this.fetchUserByCourse()
     }
   },
   methods: {
@@ -454,18 +499,26 @@ export default {
       }
     },
     async fetchUserByCourse() {
-      if (this.category !== null) {
-        await this.fetchCourseByCategory(this.category.courses.href)
+      if (this.category !== null && this.selectedCourses.length !== 0) {
+        //await this.fetchCourseByCategory(this.category.courses.href)
 
-        this.mapActivityUser(this.courseByCategory)
+        //this.mapActivityUser(this.courseByCategory)
+
+        this.loading = true
+        this.usersRegisteredFiltered = []
+        this.mapActivityUserByCourse()
+      } else {
+        console.log('no cumple')
       }
     },
 
-    mapActivityUser(categories) {
+    mapActivityUserByCourse() {
       const vm = this
 
-      categories.forEach(async course => {
+      this.selectedCourses.forEach(async course => {
         const response = await vm.fetchCourseUserByCategory(course)
+
+        console.log(response)
 
         if (response) {
           response._data.forEach(user => {
@@ -550,14 +603,110 @@ export default {
               user['progress'] = accumulativeProgress
               user['activities'] = this.groupBy(activities, 'idSection')
               vm.usersRegisteredFiltered.push(user)
-
-              console.log(user)
             }
           })
           this.loading = false
         }
       })
     },
+
+    // mapActivityUser(categories) {
+    //   const vm = this
+
+    //   categories.forEach(async course => {
+    //     const response = await vm.fetchCourseUserByCategory(course)
+
+    //     if (response) {
+    //       response._data.forEach(user => {
+    //         if (user.activity_course_users.length !== 0) {
+    //           let state = 'ACTIVO'
+    //           let progress = 0
+    //           const activities = user.activity_course_users
+    //             .map(activity => {
+    //               if (activity) {
+    //                 if (
+    //                   activity.activity.section.description === 'Renuncia' &&
+    //                   activity.status_moodle === 'Finalizado'
+    //                 ) {
+    //                   state = 'Renunciado'.toUpperCase()
+    //                 }
+
+    //                 if (
+    //                   activity.activity.section.description === 'Renuncia' &&
+    //                   activity.status_moodle === 'En curso'
+    //                 ) {
+    //                   state = 'Renuncia en curso'.toUpperCase()
+    //                 }
+
+    //                 let checkQualificationMoodle = ['', '-']
+    //                 if (
+    //                   !checkQualificationMoodle.includes(
+    //                     activity.qualification_moodle
+    //                   ) &&
+    //                   activity.activity.weighing !== 0
+    //                 ) {
+    //                   progress++
+    //                 }
+
+    //                 return {
+    //                   qualificationMoodle: activity.qualification_moodle,
+    //                   statusMoodle: activity.status_moodle,
+    //                   description: activity.activity.description,
+    //                   idActivityMoodle: activity.activity.id_activity_moodle,
+    //                   idSection: activity.activity.section_id,
+    //                   section: activity.activity.section.description,
+    //                   type: activity.activity.type,
+    //                   weighing: activity.activity.weighing
+    //                 }
+    //               } else {
+    //                 return activity
+    //               }
+    //             })
+    //             .filter(activity => {
+    //               if (activity) {
+    //                 return activity.section !== 'Formativa'
+    //               }
+    //             })
+
+    //           const totalProgress = this.sections
+    //             .filter(section => {
+    //               const filterSection = [
+    //                 'Formativa',
+    //                 'Renuncia',
+    //                 'Inicio',
+    //                 'Cierre'
+    //               ]
+    //               return !filterSection.includes(section.description)
+    //             })
+    //             .reduce(
+    //               (accumulator, currentValue) =>
+    //                 accumulator + currentValue.numberActivities,
+    //               0
+    //             )
+
+    //           const accumulativeProgress = Number.parseFloat(
+    //             (progress / totalProgress) * 100
+    //           ).toFixed(0)
+    //           user['state'] = state
+    //           user[
+    //             'fullname'
+    //           ] = `${user.registered_user.name} ${user.registered_user.last_name} ${user.registered_user.mother_last_name}`
+
+    //           user['rut'] = `${user.registered_user.rut}`
+    //           user['mobile'] = `${user.registered_user.mobile}`
+    //           user['email'] = `${user.registered_user.email}`
+    //           user['classroom'] = `${user.classroom.description}`
+    //           user['progress'] = accumulativeProgress
+    //           user['activities'] = this.groupBy(activities, 'idSection')
+    //           vm.usersRegisteredFiltered.push(user)
+
+    //           console.log(user)
+    //         }
+    //       })
+    //       this.loading = false
+    //     }
+    //   })
+    // },
     async fetchDataCourseRegisteredUserItems() {
       this.loading = true
       const { success, message } = await this.fetchCourseRegisteredUserItems()

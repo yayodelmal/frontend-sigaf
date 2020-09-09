@@ -144,7 +144,6 @@ export default {
       }
     },
     getCourseRegisteredUserByUser: async (_, courseRegisteredUser) => {
-      console.log(courseRegisteredUser)
       const idUser = courseRegisteredUser.registeredUser.id
       const idCourse = courseRegisteredUser.course.id
 
@@ -169,11 +168,11 @@ export default {
       }
     },
 
-    getCourseRegisteredByCourse: async (_, { properties }) => {
-      const course = properties
+    getCourseRegisteredByCourse: async (_, course) => {
+      const id = course.id
 
       if (course.idCourseMoodle !== null) {
-        const URL = `${BASE_URL}/${course.id}/users`
+        const URL = `${BASE_URL}/${id}/users`
         try {
           const { data } = await axios.get(URL)
 

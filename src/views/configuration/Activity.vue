@@ -23,24 +23,51 @@
               color="blueS"
               solo-inverted
               hide-details
-              prepend-inner-icon="mdi-filter-outline"
-              :loading="loadingActivities"
+              prepend-inner-icon="mdi-magnify"
             ></v-select>
-
-            <template v-if="$vuetify.breakpoint.mdAndUp">
-              <v-spacer></v-spacer>
-              <v-text-field
-                v-model="search"
-                color="blueS"
-                clearable
-                flat
-                solo-inverted
-                hide-details
-                prepend-inner-icon="mdi-magnify"
-                label="Buscar"
-              ></v-text-field>
-            </template>
-            <template v-if="category !== null">
+            <v-spacer />
+            <v-select
+              class="mx-3"
+              v-model="course"
+              :items="arrayCourseByCategory"
+              label="Curso"
+              item-value="id"
+              item-text="description"
+              return-object
+              flat
+              color="blueS"
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+            ></v-select>
+            <v-btn
+              large
+              dark
+              depressed
+              color="blueS"
+              :loading="loadingActivities"
+              @click="findActivities"
+            >
+              <v-icon size="25" class="mr-3">mdi-magnify</v-icon> Buscar
+            </v-btn>
+          </v-toolbar>
+          <v-toolbar
+            v-if="showSearchBar"
+            dark
+            color="blueS darken-1"
+            class="mb-1"
+          >
+            <v-text-field
+              v-model="search"
+              color="blueS"
+              clearable
+              flat
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+              label="Buscar"
+            ></v-text-field>
+            <template v-if="course !== null">
               <v-spacer />
               <v-btn large dark depressed color="blueS" @click="syncActivities">
                 <v-icon size="25" class="mr-3">mdi-sync</v-icon> Actividades
@@ -251,18 +278,21 @@ export default {
     loading: false,
     activitiesFiltered: [],
     category: null,
+    course: null,
     sectionModel: null,
     search: '',
     loadingActivities: false,
     overlay: false,
     opacity: 0.8,
     type: '',
-    loadingSave: false
+    loadingSave: false,
+    showSearchBar: false
   }),
   watch: {
     category() {
       if (this.category !== null) {
-        this.filterActivitiesByCategories()
+        this.getCourses()
+        //this.filterActivitiesByCategories()
       }
     }
   },
@@ -274,6 +304,16 @@ export default {
       sectionItems: 'section/sections',
       categoryItems: 'category/categories'
     }),
+    arrayCourseByCategory() {
+      if (this.category !== null) {
+        return this.coursesByCategory.map(({ properties }) => {
+          return { id: properties.id, description: properties.description }
+        })
+      } else {
+        return []
+      }
+    },
+
     activitiesByCategory() {
       if (this.category === null) return []
 
@@ -341,13 +381,24 @@ export default {
       this.loadingSave = false
       this.loadingButton = false
     },
+    async findActivities() {
+      this.loadingActivities = true
+      if (this.course !== null) {
+        await this.fetchActivityItems()
+        await this.filterActivitiesByCategories()
+      }
+    },
     responseSuccessMessage() {
       this.makeSnakResponse(Snackbar.SUCCESS.message, Snackbar.SUCCESS.type)
     },
     responseErrorMessage() {
       this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
     },
-
+    async getCourses() {
+      if (this.category !== null) {
+        await this.fetchCourseByCategory(this.category.courses.href)
+      }
+    },
     syncActivities() {
       if (this.category !== null) {
         this.overlay = true
@@ -376,21 +427,18 @@ export default {
 
       this.dialog = true
     },
-    async filterActivitiesByCategories() {
-      this.loadingActivities = true
+    filterActivitiesByCategories() {
       this.activitiesFiltered = []
-      if (this.category !== null) {
-        await this.fetchCourseByCategory(this.category.courses.href)
+      if (this.course !== null) {
+        //  await this.fetchCourseByCategory(this.category.courses.href)
 
-        this.coursesByCategory.forEach(course => {
-          this.activitiesItems.forEach(activity => {
-            if (activity.course.id === course.properties.id) {
-              this.activitiesFiltered.push(activity)
-            }
-          })
+        this.activitiesItems.forEach(activity => {
+          if (activity.course.id === this.course.id) {
+            this.activitiesFiltered.push(activity)
+          }
         })
-
         this.loadingActivities = false
+        this.showSearchBar = true
       }
     },
     async fetchDataActivities() {
