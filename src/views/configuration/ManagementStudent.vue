@@ -696,7 +696,11 @@ export default {
     arrayCourseByCategory() {
       if (this.category !== null) {
         return this.coursesByCategory.map(({ properties }) => {
-          return { id: properties.id, description: properties.description }
+          return {
+            id: properties.id,
+            description: properties.description,
+            idCourseMoodle: properties.idCourseMoodle
+          }
         })
       } else {
         return []
@@ -964,6 +968,8 @@ export default {
             this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
           })
         }
+      } else {
+        console.log('none')
       }
     },
 
