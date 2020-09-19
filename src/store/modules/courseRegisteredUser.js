@@ -87,6 +87,36 @@ export default {
         }
       }
     },
+    putArrayCourseRegisteredUsers: async ({ commit }, payload) => {
+      try {
+        const { classroom_id } = payload
+        console.log(payload)
+
+        const { data, status } = await axios.put(
+          `/api/v2/course-registered-user/classroom/${classroom_id}/users`,
+          payload
+        )
+
+        if (status === 200) {
+          const { _data, success, message } = data
+
+          _data.forEach(user => {
+            user.classroom = payload.classroom
+            user.classroomId = payload.classroom_id
+
+            commit('course/PUT_USER_BY_COURSE_', user, { root: true })
+          })
+
+          return { success, message, data: _data }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
     postCourseRegisteredUser: async ({ commit }, courseRegisteredUser) => {
       try {
         const { data } = await axios.post(

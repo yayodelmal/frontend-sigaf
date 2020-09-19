@@ -39,6 +39,18 @@ export default {
 
       Object.assign(state.usersByCourse[editedIndex], user)
     },
+    PUT_USER_BY_COURSE_: (state, user) => {
+      let data = { properties: user }
+      const editedIndex = state.usersByCourse.findIndex(find => {
+        let data = { properties: user }
+
+        return find.properties.id === data.properties.id
+      })
+
+      console.log(editedIndex)
+
+      Object.assign(state.usersByCourse[editedIndex], data)
+    },
 
     DELETE_COURSE: (state, course) => {
       const editedIndex = state.courses.findIndex(

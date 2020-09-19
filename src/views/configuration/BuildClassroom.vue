@@ -411,10 +411,24 @@
                     label="Aula"
                   ></v-select>
                   <v-spacer></v-spacer>
-                  <v-btn depressed large color="blueS" @click="makeClassroom">
+                  <v-btn
+                    depressed
+                    large
+                    color="blueS"
+                    @click="makeMassiveClassroom"
+                  >
                     Conformar aula
                     <v-icon class="ml-2" size="25">mdi-check-circle</v-icon>
                   </v-btn>
+                  <!-- <v-btn
+                    depressed
+                    large
+                    color="blueS"
+                    @click="makeMassiveClassroom"
+                  >
+                    Conformar aula test
+                    <v-icon class="ml-2" size="25">mdi-check-circle</v-icon>
+                  </v-btn> -->
                 </v-toolbar>
               </v-card-text>
 
@@ -769,7 +783,8 @@ export default {
       fetchClassrooms: 'classroom/fetchClassrooms',
       editCourseRegisteredUser: 'courseRegisteredUser/putCourseRegisteredUser',
       fetchProfiles: 'profile/fetchProfiles',
-      fetchUsersByCourse: 'course/getUsersByCourse'
+      fetchUsersByCourse: 'course/getUsersByCourse',
+      editMassiveClassroom: 'courseRegisteredUser/putArrayCourseRegisteredUsers'
     }),
     checkStepOne() {
       if (this.listClassroomUsers.length !== 0) {
@@ -798,6 +813,7 @@ export default {
       this.$v.editClassroom.$touch()
     },
     fillChartUsersByCourse() {
+      this.loaded = false
       const property = 'classroomId'
       const userByClassroom = groupBy(this.usersByCourse, property)
 
@@ -907,6 +923,34 @@ export default {
         this.makeSnakResponse(this.message, Snackbar.WARNING.type)
       }
     },
+
+    async makeMassiveClassroom() {
+      if (this.selected.length !== 0 && this.classroomModel !== null) {
+        this.overlay = true
+
+        const payload = {
+          courseRegisteredUsers: this.selected,
+          classroom_id: this.classroomModel.id,
+          classroom: this.classroomModel
+        }
+        const { success } = await this.editMassiveClassroom(payload)
+
+        if (success) {
+          this.message = `Se ha conformado el ${this.classroomModel.description} con ${this.selected.length} estudiantes`
+          this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
+          this.fillChartUsersByCourse()
+          // this.getStudents()
+
+          this.clear()
+          this.e1 = 2
+          //this.loaded = true
+          this.detail = true
+        }
+      } else {
+        this.message = `Debe seleccionar un aula`
+        this.makeSnakResponse(this.message, Snackbar.WARNING.type)
+      }
+    },
     async sendRequest(courseUser, index) {
       await new Promise(resolve => setTimeout(() => resolve(), 100))
       let dataSend = Object.assign(courseUser, {
@@ -999,6 +1043,7 @@ export default {
       this.selectionHasError = false
       this.rulesValueStepTwo = true
       this.e1 = 1
+      this.loaded = true
     }
   }
 }
