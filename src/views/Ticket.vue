@@ -1807,6 +1807,8 @@ export default {
 
         const { _data, statusCode, message } = data
 
+        console.log(_data)
+
         if (statusCode === 204) {
           vm.snackbar = true
           vm.message = message
@@ -1818,17 +1820,14 @@ export default {
             this.userCourse = _data
 
             this.arrayCourseUserSelect = this.courseRegisteredUserItems.filter(
-              userCourse => {
-                return (
-                  userCourse.registered_user.id === this.userCourse.id &&
-                  userCourse.is_sincronized === 1
-                )
-              }
+              userCourse =>
+                userCourse.registered_user.id === this.userCourse.id &&
+                userCourse.is_sincronized === 1
             )
 
             if (this.arrayCourseUserSelect.length === 0) {
               vm.snackbar = true
-              vm.message = 'El estudiantes no se encuentra registrado'
+              vm.message = 'El estudiante no se encuentra registrado'
             } else {
               if (
                 this.arrayCourseUserSelect.length > 1 &&
@@ -1849,7 +1848,7 @@ export default {
             }
           } else {
             vm.snackbar = true
-            vm.message = 'El estudiantes no se encuentra registrado'
+            vm.message = 'El estudiantes no se encuentra registrado v2'
           }
         }
         this.searchRutLoading = false
@@ -2194,7 +2193,7 @@ export default {
   created() {
     this.loading = true
     this.fetchSections()
-    //this.fetchCourseRegisteredUserItems()
+    this.fetchCourseRegisteredUserItems()
     this.fetchDataCourses()
     this.fetchDataCategories()
     //this.filterUsersByCategories()
