@@ -135,6 +135,14 @@ export default {
         return { success, error, message }
       }
     },
+
+    findTicketByCourse: async ({ commit }, course) => {
+      const response = await axios.get(
+        `${BASE_URL}/course-registered-users/course/${course.id}`
+      )
+      commit('SET_TICKETS', response.data._data.collections)
+      return response.data
+    },
     findTicket: async ({ commit }, ticket) => {
       const response = await axios.get(`${BASE_URL}/${ticket.id}`)
 

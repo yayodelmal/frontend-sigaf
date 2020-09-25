@@ -40,14 +40,18 @@ export default {
     }
   },
   actions: {
-    fetchCourseRegisteredUsers: async ({ commit }) => {
+    fetchCourseRegisteredUsers: async () => {
       try {
-        const { data } = await axios.get(BASE_URL)
+        const { data } = await axios.get(`${BASE_URL}`)
+
+        console.log('data', data)
 
         const { _data, success, error, message } = data
 
         if (success) {
-          commit('SET_COURSE_REGISTERED_USERS', _data)
+          //  commit('SET_COURSE_REGISTERED_USERS', _data)
+
+          console.log('data', _data)
         } else {
           console.log(error)
         }
@@ -220,6 +224,16 @@ export default {
           }
         }
       }
+    },
+
+    findCourseRegisteredUserByUserCourse: async (_, payload) => {
+      const { course, user } = payload
+
+      const URL = `${BASE_URL}/${user}/courses/${course}`
+
+      const { data } = await axios.get(URL)
+      console.log(data)
+      return data
     }
   }
 }

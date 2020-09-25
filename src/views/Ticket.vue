@@ -25,8 +25,7 @@
           <v-spacer />
           <v-select
             class="mx-3"
-            v-model="selectedCourses"
-            multiple
+            v-model="selectedCourse"
             :items="arrayCourseByCategory"
             label="Curso"
             item-value="id"
@@ -41,11 +40,11 @@
           </v-select>
           <v-spacer />
           <v-btn
-            :disabled="selectedCourses.length === 0"
+            :disabled="selectedCourse === null"
             large
             depressed
             color="blueS"
-            @click="findUsers"
+            @click="findTicketByCourse"
             :loading="loadingButton"
           >
             Buscar
@@ -698,8 +697,8 @@
                               <v-stepper-items>
                                 <v-stepper-content step="1">
                                   <v-row justify="center">
-                                    <v-col cols="12" sm="5" md="5" lg="4">
-                                      <base-autocomplete
+                                    <!--  <v-col cols="12" sm="5" md="5" lg="4">
+                                    <base-autocomplete
                                         v-model="categoryMassiveTicket"
                                         :items="selectedCourses"
                                         label="Curso"
@@ -719,7 +718,7 @@
                                         "
                                       >
                                       </base-autocomplete>
-                                    </v-col>
+                                    </v-col> -->
                                     <v-col cols="12" sm="4" md="4" lg="4">
                                       <v-autocomplete
                                         :items="classroomItems"
@@ -1491,7 +1490,7 @@ export default {
       currentTicket: '',
       indexCurrentSyncUser: '',
       opacity: 0.8,
-      selectedCourses: [],
+      selectedCourse: null,
       showTable: false,
       loadingButton: false
     }
@@ -1521,17 +1520,31 @@ export default {
       postDetailTicket: 'detailTicket/postDetailTicket',
       clearTicketDetail: 'ticket/clearDetailTickets',
       fetchSections: 'section/fetchSections',
-      fetchUsersByCourse: 'courseRegisteredUser/getCourseRegisteredByCourse'
+      fetchUsersByCourse: 'courseRegisteredUser/getCourseRegisteredByCourse',
+      fetchTicketsByCourse: 'ticket/findTicketByCourse',
+      findSpecificUserCourse:
+        'courseRegisteredUser/findCourseRegisteredUserByUserCourse'
     }),
 
+    async findTicketByCourse() {
+      this.loadingButton = true
+
+      const response = await this.fetchTicketsByCourse(this.selectedCourse)
+
+      console.log('response', response)
+      this.loadingButton = false
+      this.showTable = true
+    },
+
     async findUsers() {
-      const response = await this.fetchUsersByCourse(this.selectedCourses[0])
+      this.loadingButton = true
+      const response = await this.fetchUsersByCourse(this.selectedCourse)
 
       this.filterUsersByCategories(response._data)
 
       this.showTable = true
 
-      console.log(response)
+      this.loadingButton = false
     },
     getValueProgress(user) {
       return user.progress
@@ -1807,8 +1820,6 @@ export default {
 
         const { _data, statusCode, message } = data
 
-        console.log(_data)
-
         if (statusCode === 204) {
           vm.snackbar = true
           vm.message = message
@@ -1817,38 +1828,39 @@ export default {
           vm.message = message
         } else if (statusCode === 200) {
           if (_data !== null) {
-            this.userCourse = _data
+            const payload = {
+              course: this.selectedCourse.id,
+              user: _data.id
+            }
 
-            this.arrayCourseUserSelect = this.courseRegisteredUserItems.filter(
-              userCourse =>
-                userCourse.registered_user.id === this.userCourse.id &&
-                userCourse.is_sincronized === 1
-            )
+            const response = await this.findSpecificUserCourse(payload)
 
-            if (this.arrayCourseUserSelect.length === 0) {
+            console.log(response)
+
+            const userCreated = response._data
+
+            // this.arrayCourseUserSelect = this.courseRegisteredUserItems.filter(
+            //   userCourse =>
+            //     userCourse.registered_user.id === this.userCourse.id &&
+            //     userCourse.is_sincronized === 1
+            // )
+
+            console.log(userCreated)
+
+            if (userCreated.is_sincronized === 0) {
               vm.snackbar = true
               vm.message = 'El estudiante no se encuentra registrado'
             } else {
-              if (
-                this.arrayCourseUserSelect.length > 1 &&
-                this.editedTicketIndex === -1
-              ) {
-                this.dialogSelectCourse = true
-              } else {
-                this.editedTicketItem.courseRegisteredUser = Object.assign(
-                  {},
-                  this.arrayCourseUserSelect[0]
-                )
+              this.editedTicketItem.courseRegisteredUser = Object.assign(
+                {},
+                userCreated
+              )
 
-                this.user = Object.assign(
-                  {},
-                  this.mapUser(this.arrayCourseUserSelect[0])
-                )
-              }
+              this.user = Object.assign({}, this.mapUser(userCreated))
             }
           } else {
             vm.snackbar = true
-            vm.message = 'El estudiantes no se encuentra registrado v2'
+            vm.message = 'El estudiantes no se encuentra registrado'
           }
         }
         this.searchRutLoading = false
@@ -2193,7 +2205,7 @@ export default {
   created() {
     this.loading = true
     this.fetchSections()
-    this.fetchCourseRegisteredUserItems()
+    // this.fetchCourseRegisteredUserItems()
     this.fetchDataCourses()
     this.fetchDataCategories()
     //this.filterUsersByCategories()
