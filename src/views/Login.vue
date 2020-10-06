@@ -6,7 +6,7 @@
         <v-row justify="center">
           <v-col cols="12">
             <v-img
-              src="..\assets\iie_web@2x.png"
+              src="../assets/iie_web@2x.png"
               contain
               max-height="150"
             ></v-img>
