@@ -654,6 +654,10 @@
                             icon="mdi-plus-circle"
                             v-on="on"
                             label="Crear Ticket Masivo"
+                            @click="
+                              fetchActivities()
+                              findUsersByCourse()
+                            "
                           ></base-button>
                         </template>
                         <v-card>
@@ -696,7 +700,78 @@
                               </v-stepper-header>
                               <v-stepper-items>
                                 <v-stepper-content step="1">
+                                  <v-row>
+                                    <v-col cols="10">
+                                      <v-autocomplete
+                                        v-model="selectedActivities"
+                                        :items="filterActivities"
+                                        chips
+                                        color="blueS"
+                                        flat
+                                        solo-inverted
+                                        hide-details
+                                        return-object
+                                        label="Filtrar actividades pendientes"
+                                        item-text="description"
+                                        item-value="description"
+                                        multiple
+                                      >
+                                        <template v-slot:selection="data">
+                                          <v-chip
+                                            small
+                                            v-bind="data.attrs"
+                                            :input-value="data.selected"
+                                            close
+                                            @click="data.select"
+                                            @click:close="remove(data.item)"
+                                          >
+                                            {{ data.item.description }}
+                                          </v-chip>
+                                        </template>
+                                        <template v-slot:item="data">
+                                          <template>
+                                            <v-list-item-content>
+                                              <v-list-item-title
+                                                v-html="data.item.description"
+                                              >
+                                              </v-list-item-title>
+                                              <v-list-item-subtitle
+                                                v-html="
+                                                  data.item.section.description
+                                                "
+                                              ></v-list-item-subtitle>
+                                            </v-list-item-content>
+                                          </template>
+                                        </template>
+                                      </v-autocomplete>
+                                    </v-col>
+                                    <v-col cols="2">
+                                      <v-btn
+                                        large
+                                        color="blueS"
+                                        depressed
+                                        dark
+                                        @click="findUserByActivityFiltered"
+                                      >
+                                        Buscar
+                                        <v-icon class="ml-3"
+                                          >mdi-arrow-right-bold-circle</v-icon
+                                        >
+                                      </v-btn>
+                                    </v-col>
+                                  </v-row>
                                   <v-row justify="center">
+                                    <!-- <v-autocomplete
+                                      :items="filterActivities"
+                                      label="Filtrar Actividad"
+                                      item-text="description"
+                                      item-value="description"
+                                      return-object
+                                      v-model="activityItem"
+                                      @change="findUserByActivity()"
+                                      color="blueS"
+                                      outlined
+                                    ></v-autocomplete> -->
                                     <!--  <v-col cols="12" sm="5" md="5" lg="4">
                                     <base-autocomplete
                                         v-model="categoryMassiveTicket"
@@ -777,22 +852,41 @@
                                       ></v-text-field>
                                     </v-col>
                                   </v-row>
+                                  <v-card>
+                                    <div v-if="loadingUsers">
+                                      <v-skeleton-loader
+                                        :loading="loading"
+                                        :transition="transition"
+                                        class="mx-auto"
+                                        type="table-tbody"
+                                      ></v-skeleton-loader>
+                                      <v-skeleton-loader
+                                        :loading="loading"
+                                        :transition="transition"
+                                        class="mx-auto"
+                                        type="table-tfoot"
+                                      ></v-skeleton-loader>
+                                    </div>
 
-                                  <v-data-table
-                                    v-model="selected"
-                                    :headers="headersTicket"
-                                    :items="userRegisteredFiltered"
-                                    item-key="id"
-                                    show-select
-                                    class="elevation-1"
-                                    :search="searchMassiveTicket"
-                                    disable-pagination
-                                    hide-default-footer
-                                  >
-                                  </v-data-table>
+                                    <v-data-table
+                                      v-else
+                                      v-model="selected"
+                                      :headers="headersTicket"
+                                      :items="userRegisteredFiltered"
+                                      item-key="id"
+                                      show-select
+                                      class="elevation-1"
+                                      :search="searchMassiveTicket"
+                                      disable-pagination
+                                      hide-default-footer
+                                    >
+                                    </v-data-table>
+                                  </v-card>
+
                                   <v-row>
                                     <v-spacer />
                                     <v-btn
+                                      :disabled="loadingUsers"
                                       class="mt-3"
                                       color="blueS"
                                       depressed
@@ -1492,7 +1586,9 @@ export default {
       opacity: 0.8,
       selectedCourse: null,
       showTable: false,
-      loadingButton: false
+      loadingButton: false,
+      loadingUsers: false,
+      selectedActivities: []
     }
   },
   methods: {
@@ -1523,17 +1619,40 @@ export default {
       fetchUsersByCourse: 'courseRegisteredUser/getCourseRegisteredByCourse',
       fetchTicketsByCourse: 'ticket/findTicketByCourse',
       findSpecificUserCourse:
-        'courseRegisteredUser/findCourseRegisteredUserByUserCourse'
+        'courseRegisteredUser/findCourseRegisteredUserByUserCourse',
+      fetchActivities: 'activity/fetchActivities',
+      findUserByActivity:
+        'courseRegisteredUser/findCourseRegisteredUserByActivity'
     }),
 
+    remove(item) {
+      console.log(item.id)
+      console.log(this.selectedActivities)
+      const index = this.selectedActivities.findIndex(
+        activity => item.id === activity.id
+      )
+
+      console.log(index)
+      if (index >= 0) this.selectedActivities.splice(index, 1)
+    },
+    findUserByActivityFiltered() {
+      console.log(this.selectedActivities)
+    },
     async findTicketByCourse() {
       this.loadingButton = true
 
-      const response = await this.fetchTicketsByCourse(this.selectedCourse)
+      await this.fetchTicketsByCourse(this.selectedCourse)
 
-      console.log('response', response)
       this.loadingButton = false
+      this.loading = false
       this.showTable = true
+    },
+
+    async findUsersByCourse() {
+      this.loadingUsers = true
+      await this.fetchUsersByCourse(this.selectedCourse)
+      this.filterUsersByCategoriesTicket()
+      this.loadingUsers = false
     },
 
     async findUsers() {
@@ -1634,7 +1753,6 @@ export default {
           this.$v.observation.$touch()
           this.$v.statusDetail.$touch()
         } else {
-          console.log('branch false')
           let dataStoreTicket = {
             course_registered_user_id: this.user.id,
             type_ticket_id: this.type.id,
@@ -1704,7 +1822,8 @@ export default {
               }
             }
           }
-          this.fetchItems()
+          //this.fetchItems()
+          this.findTicketByCourse()
           this.clearTicket()
         }
       }
@@ -1750,27 +1869,20 @@ export default {
     },
     async filterUsersByCategoriesTicket() {
       this.userRegisteredFiltered = []
-      if (this.categoryMassiveTicket !== null) {
-        const vm = this
-        this.selectedCourses.forEach(course => {
-          if (vm.classrooms.length === 0) {
-            vm.courseRegisteredUserItems.forEach(userCourse => {
-              if (userCourse.course.id === course.id) {
-                vm.userRegisteredFiltered.push(userCourse)
-              }
-            })
-          } else {
-            this.courseRegisteredUserItems.forEach(userCourse => {
-              this.classrooms.forEach(classroom => {
-                if (
-                  userCourse.course.id === course.id &&
-                  userCourse.classroom.description === classroom.description
-                ) {
-                  this.userRegisteredFiltered.push(userCourse)
-                }
-              })
-            })
-          }
+
+      const vm = this
+
+      if (vm.classrooms.length === 0) {
+        vm.courseRegisteredUserItems.forEach(userCourse => {
+          vm.userRegisteredFiltered.push(userCourse)
+        })
+      } else {
+        this.courseRegisteredUserItems.forEach(userCourse => {
+          this.classrooms.forEach(classroom => {
+            if (userCourse.classroom.description === classroom.description) {
+              this.userRegisteredFiltered.push(userCourse)
+            }
+          })
         })
       }
     },
@@ -1835,8 +1947,6 @@ export default {
 
             const response = await this.findSpecificUserCourse(payload)
 
-            console.log(response)
-
             const userCreated = response._data
 
             // this.arrayCourseUserSelect = this.courseRegisteredUserItems.filter(
@@ -1844,8 +1954,6 @@ export default {
             //     userCourse.registered_user.id === this.userCourse.id &&
             //     userCourse.is_sincronized === 1
             // )
-
-            console.log(userCreated)
 
             if (userCreated.is_sincronized === 0) {
               vm.snackbar = true
@@ -2098,11 +2206,6 @@ export default {
     checkStepOne() {
       this.rulesValueStepOne = true
 
-      if (!this.$v.categoryMassiveTicket.required) {
-        this.$v.categoryMassiveTicket.$touch()
-        this.rulesValueStepOne = this.$v.categoryMassiveTicket.required
-      }
-
       if (this.selected.length === 0 && this.rulesValueStepOne) {
         this.snackbar = true
         this.message = 'Debe seleccionar al menos un destinatario'
@@ -2218,7 +2321,7 @@ export default {
     this.fetchClassroom()
     this.fetchStatusDetailTicket()
     this.fetchDetailTicket()
-    this.fetchItems().then(() => (this.loading = false))
+    //   this.fetchItems().then(() => (this.loading = false))
     this.loadingButton = false
   },
   watch: {
@@ -2228,15 +2331,23 @@ export default {
       //   this.filterUsersByCategories()
       // }
     },
-    openTicket() {
+    async openTicket() {
       this.loading = true
 
-      this.fetchItems().then(() => (this.loading = false))
+      // this.fetchItems().then(() => (this.loading = false))
+
+      await this.findTicketByCourse()
+
+      this.loading = false
     },
-    closeTicket() {
+    async closeTicket() {
       this.loading = true
 
-      this.fetchItems().then(() => (this.loading = false))
+      // this.fetchItems().then(() => (this.loading = false))
+
+      await this.findTicketByCourse()
+
+      this.loading = false
     },
     courseRegisteredUserItems() {
       if (this.courseRegisteredUserItems.length === 0) {
@@ -2268,8 +2379,15 @@ export default {
       isDeveloper: 'auth/isDeveloper',
       sections: 'section/sections',
       ticketsByCourse: 'ticket/ticketsByCourse',
-      courseByCategory: 'course/coursesByCategory'
+      courseByCategory: 'course/coursesByCategory',
+      activityItems: 'activity/activities'
     }),
+    filterActivities() {
+      return this.activityItems.filter(
+        activity =>
+          activity.weighing > 0 && this.selectedCourse.id === activity.course.id
+      )
+    },
     arrayCourseByCategory() {
       return this.courseByCategory.map(({ properties }) => {
         return { id: properties.id, description: properties.description }
