@@ -40,7 +40,7 @@ export default {
     }
   },
   actions: {
-    fetchCourseRegisteredUsers: async () => {
+    fetchCourseRegisteredUsers: async ({ commit }) => {
       try {
         const { data } = await axios.get(`${BASE_URL}`)
 
@@ -49,7 +49,7 @@ export default {
         const { _data, success, error, message } = data
 
         if (success) {
-          //  commit('SET_COURSE_REGISTERED_USERS', _data)
+          commit('SET_COURSE_REGISTERED_USERS', _data)
 
           console.log('data', _data)
         } else {
@@ -202,7 +202,7 @@ export default {
       }
     },
 
-    getCourseRegisteredByCourse: async (_, course) => {
+    getCourseRegisteredByCourse: async ({ commit }, course) => {
       const id = course.id
 
       if (course.idCourseMoodle !== null) {
@@ -211,6 +211,7 @@ export default {
           const { data } = await axios.get(URL)
 
           if (data.success) {
+            commit('SET_COURSE_REGISTERED_USERS', data._data)
             return data
           } else {
             console.log(data.error)
@@ -234,6 +235,9 @@ export default {
       const { data } = await axios.get(URL)
       console.log(data)
       return data
+    },
+    findCourseRegisteredUserByActivity: async (_, IdActivity) => {
+      console.log(IdActivity)
     }
   }
 }
