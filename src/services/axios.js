@@ -2,7 +2,7 @@ import axios from 'axios'
 
 let http = axios.create({
   baseURL: `http://sigaf.iie.cl/backend-sigaf/public`,
-  //baseURL: `http://localhost:8002/`,
+  //baseURL: `http://localhost:8000/`,
   headers: {
     'Content-Type': 'application/json; charset=UTF-8',
     Accept: 'application/json',

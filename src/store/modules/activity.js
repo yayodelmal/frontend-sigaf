@@ -202,6 +202,21 @@ export default {
       } catch (error) {
         console.log(error.message)
       }
+    },
+    findUserByPendingActivity: async (_, payload) => {
+      try {
+        const URL = `${BASE_URL}/${payload.ids}/course-registered-users/${payload.course}`
+
+        const { data } = await axios.get(URL)
+
+        console.log('data', data)
+
+        const { success } = data
+
+        return { success, data}
+      } catch (error) {
+        console.log(error.message)
+      }
     }
   }
 }

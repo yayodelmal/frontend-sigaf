@@ -13,17 +13,6 @@ store.subscribe(mutation => {
       } else {
         axios.defaults.headers.common['Authorization'] = null
         localStorage.removeItem('access_token')
-        localStorage.removeItem('role')
-      }
-      break
-
-    case 'auth/SET_LOGIN_USER':
-      if (mutation.payload) {
-        console.log('role => ', mutation.payload.properties.role.description)
-        localStorage.setItem(
-          'role',
-          mutation.payload.properties.role.description
-        )
       }
       break
   }

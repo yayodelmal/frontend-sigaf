@@ -701,7 +701,7 @@
                               <v-stepper-items>
                                 <v-stepper-content step="1">
                                   <v-row>
-                                    <v-col cols="10">
+                                    <v-col cols="8">
                                       <v-autocomplete
                                         v-model="selectedActivities"
                                         :items="filterActivities"
@@ -744,6 +744,15 @@
                                           </template>
                                         </template>
                                       </v-autocomplete>
+                                    </v-col>
+                                    <v-col cols="2">
+                                      <v-switch
+                                      class="ml-5 mb-3"
+                                        label="Nunca"
+                                        color="blueS"
+                                        v-model="never"
+                                        hide-details
+                                      ></v-switch>
                                     </v-col>
                                     <v-col cols="2">
                                       <v-btn
@@ -872,7 +881,7 @@
                                       v-else
                                       v-model="selected"
                                       :headers="headersTicket"
-                                      :items="userRegisteredFiltered"
+                                      :items="filterUsers"
                                       item-key="id"
                                       show-select
                                       class="elevation-1"
@@ -1416,15 +1425,26 @@ export default {
         {
           text: 'RUT',
           width: 120,
-          value:
-            'properties.courseRegisteredUser.registered_user.rut_registered_moodle',
+          value: 'properties.courseRegisteredUser.registered_user.rut',
           class: 'redS--text'
         },
         {
-          text: 'Nombre participante',
+          text: 'Nombre',
+          width: 250,
+          value: 'properties.courseRegisteredUser.registered_user.name',
+          class: 'redS--text'
+        },
+        {
+          text: 'Apellido paterno',
+          width: 250,
+          value: 'properties.courseRegisteredUser.registered_user.last_name',
+          class: 'redS--text'
+        },
+        {
+          text: 'Apellido Materno',
           width: 250,
           value:
-            'properties.courseRegisteredUser.registered_user.name_registered_moodle',
+            'properties.courseRegisteredUser.registered_user.mother_last_name',
           class: 'redS--text'
         },
         {
@@ -1505,12 +1525,22 @@ export default {
       headersTicket: [
         {
           text: 'RUT',
-          value: 'registered_user.rut_registered_moodle',
+          value: 'registered_user.rut',
           class: 'redS--text'
         },
         {
-          text: 'Nombre participante',
-          value: 'registered_user.name_registered_moodle',
+          text: 'Nombre',
+          value: 'registered_user.name',
+          class: 'redS--text'
+        },
+        {
+          text: 'Apellido paterno',
+          value: 'registered_user.last_name',
+          class: 'redS--text'
+        },
+        {
+          text: 'Apellido materno',
+          value: 'registered_user.mother_last_name',
           class: 'redS--text'
         },
         {
@@ -1588,7 +1618,8 @@ export default {
       showTable: false,
       loadingButton: false,
       loadingUsers: false,
-      selectedActivities: []
+      selectedActivities: [],
+      never: false
     }
   },
   methods: {
@@ -1622,7 +1653,8 @@ export default {
         'courseRegisteredUser/findCourseRegisteredUserByUserCourse',
       fetchActivities: 'activity/fetchActivities',
       findUserByActivity:
-        'courseRegisteredUser/findCourseRegisteredUserByActivity'
+        'courseRegisteredUser/findCourseRegisteredUserByActivity',
+      findUsersByPendingActivity: 'activity/findUserByPendingActivity'
     }),
 
     remove(item) {
@@ -1635,8 +1667,23 @@ export default {
       console.log(index)
       if (index >= 0) this.selectedActivities.splice(index, 1)
     },
-    findUserByActivityFiltered() {
-      console.log(this.selectedActivities)
+    async findUserByActivityFiltered() {
+
+      this.loadingUsers = true
+      const idMoodleActivity = this.selectedActivities.map(activity => {
+        return activity.idActivityMoodle
+      })
+
+      const payload = {
+        ids: JSON.stringify(idMoodleActivity),
+        course: this.selectedCourse.id
+      }
+
+      const { data } = await this.findUsersByPendingActivity(payload)
+
+      this.userRegisteredFiltered = data.usersWithPendingActivities
+
+      this.loadingUsers = false
     },
     async findTicketByCourse() {
       this.loadingButton = true
@@ -2382,6 +2429,37 @@ export default {
       courseByCategory: 'course/coursesByCategory',
       activityItems: 'activity/activities'
     }),
+
+    nameNever() {
+      if (this.never) {
+        return 'Agregar nunca'
+      } else {
+        return 'Eliminar nunca'
+      }
+    },
+    filterUsers() {
+      if (this.never) {
+        return this.userRegisteredFiltered.filter(user => {
+          const user_ = user.activity_course_users.filter(activity => {
+            return activity.activity.section.description === 'Renuncia'
+          })
+
+          if (user_.length === 0) {
+            return user.last_access_registered_moodle !== 'Nunca'
+          }
+        })
+      } else {
+        return this.userRegisteredFiltered.filter(user => {
+          const user_ = user.activity_course_users.filter(activity => {
+            return activity.activity.section.description === 'Renuncia'
+          })
+
+          if (user_.length === 0) {
+            return user
+          }
+        })
+      }
+    },
     filterActivities() {
       return this.activityItems.filter(
         activity =>
