@@ -747,7 +747,7 @@
                                     </v-col>
                                     <v-col cols="2">
                                       <v-switch
-                                      class="ml-5 mb-3"
+                                        class="ml-5 mb-3"
                                         label="Nunca"
                                         color="blueS"
                                         v-model="never"
@@ -1668,7 +1668,6 @@ export default {
       if (index >= 0) this.selectedActivities.splice(index, 1)
     },
     async findUserByActivityFiltered() {
-
       this.loadingUsers = true
       const idMoodleActivity = this.selectedActivities.map(activity => {
         return activity.idActivityMoodle
