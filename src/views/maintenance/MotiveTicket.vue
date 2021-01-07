@@ -6,26 +6,11 @@
       icon="mdi-hammer-wrench"
       title="Motivo de ticket"
     >
-      <div v-if="loading">
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-heading"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tbody"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tfoot"
-        ></v-skeleton-loader>
-      </div>
+      <sigaf-skeleton-loader
+        v-if="loading"
+        :transition="transition"
+        :loading="loading"
+      ></sigaf-skeleton-loader>
       <v-data-table
         :search="search"
         v-else
@@ -162,13 +147,15 @@ import { mapActions, mapGetters } from 'vuex'
 import SigafSnackbar from '../../components/component/Snackbar'
 import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
+import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
 
 export default {
   inject: ['theme'],
   mixins: [validationMixin],
   components: {
     SigafSnackbar,
-    ConfirmDialog
+    ConfirmDialog,
+    SigafSkeletonLoader
   },
   validations: {
     description: {
