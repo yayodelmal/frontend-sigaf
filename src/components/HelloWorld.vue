@@ -29,6 +29,9 @@
     <v-content>
       <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
+          <div class="my-2">
+            <v-btn v-on:click="postAlert" small color="primary">Primary</v-btn>
+          </div>
           <v-card>
             <v-card-title>
               Ticket
@@ -43,7 +46,7 @@
               calculate-widths
               dense
               :headers="headers"
-              :items="alerts"
+              :items="alertsDataTable"
               :search="search"
             ></v-data-table>
           </v-card>
@@ -58,12 +61,22 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'HelloWorld',
   data() {
     return {
-      test: {},
-      alerts: [],
+      test: {
+        id: 1,
+        description: 'una descripción',
+        commit: {
+          valor: 5,
+          unaFuncion: function(data) {
+            return data + ' soy una function'
+          }
+        }
+      },
+      tests: ['amarillo', 'azul', 'rojo'],
       headers: [
         {
           text: 'Alumno',
@@ -79,30 +92,23 @@ export default {
     }
   },
   created() {
-    this.$vuetify.theme.dark = true
-  },
-  mounted: function() {
     this.fetchAlerts()
   },
-  methods: {
-    async fetchAlerts() {
-      const data = await fetch('http://127.0.0.1:8002/api/alert')
-
-      const json = await data.json()
-
-      console.log(json)
-
-      json.data.forEach(alert => {
-        this.alerts.push({
+  computed: {
+    alertsDataTable() {
+      return this.alerts.map(formatData => {
+        return {
           alumno:
-            alert.ticket.course_registered_user.registered_user
+            formatData.ticket.course_registered_user.registered_user
               .name_registered_moodle,
-          curso: alert.ticket.course_registered_user.course.description
-        })
+          curso: formatData.ticket.course_registered_user.course.description
+        }
       })
-
-      console.log(this.alerts)
-    }
+    },
+    ...mapGetters(['alerts'])
+  },
+  methods: {
+    ...mapActions(['postAlert', 'fetchAlerts'])
   }
 }
 </script>
