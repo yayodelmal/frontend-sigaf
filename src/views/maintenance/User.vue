@@ -6,26 +6,11 @@
       icon="mdi-hammer-wrench"
       title="Usuarios"
     >
-      <div v-if="loading">
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-heading"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tbody"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tfoot"
-        ></v-skeleton-loader>
-      </div>
+      <sigaf-skeleton-loader
+        v-if="loading"
+        :transition="transition"
+        :loading="loading"
+      ></sigaf-skeleton-loader>
       <v-data-table
         v-else
         :headers="headers"
@@ -206,6 +191,7 @@ import { mapGetters, mapActions } from 'vuex'
 import SnackbarComponent from '../../components/component/Snackbar'
 import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
+import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
 
 export default {
   mixins: [validationMixin],
@@ -241,7 +227,8 @@ export default {
   },
   components: {
     SnackbarComponent,
-    ConfirmDialog
+    ConfirmDialog,
+    SigafSkeletonLoader
   },
   data: () => ({
     headers: [
