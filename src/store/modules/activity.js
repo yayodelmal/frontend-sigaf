@@ -213,7 +213,7 @@ export default {
 
         const { success } = data
 
-        return { success, data}
+        return { success, data }
       } catch (error) {
         console.log(error.message)
       }
