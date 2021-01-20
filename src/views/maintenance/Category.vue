@@ -19,8 +19,8 @@
         :loading="loading"
         :itemsPerPage="5"
         @createItem="createCategory"
-        @editItem="editItem($event)"
-        @deleteItem="deleteItem($event)"
+        @editItem="editItem"
+        @deleteItem="deleteItem"
       ></sigaf-datatable>
     </base-card>
     <v-dialog v-model="dialog" max-width="500px" persistent>
@@ -155,23 +155,19 @@ export default {
     headers: [
       {
         text: 'Nombre',
-        value: 'description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'description'
       },
       {
         text: 'ID moodle',
-        value: 'idCategoryMoodle',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'idCategoryMoodle'
       },
       {
         text: 'Plataforma',
-        value: 'platform.properties.description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'platform.properties.description'
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],

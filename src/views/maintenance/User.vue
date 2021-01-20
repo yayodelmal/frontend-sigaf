@@ -11,64 +11,17 @@
         :transition="transition"
         :loading="loading"
       ></sigaf-skeleton-loader>
-      <v-data-table
+      <sigaf-datatable
         v-else
-        :headers="headers"
         :items="usersItems"
-        :search="search"
-        class="elevation-1"
+        :headers="headers"
+        :buttonName="buttonName"
         :loading="loading"
-        loading-text="Cargando... por favor espere"
-      >
-        <template v-slot:progress>
-          <v-progress-linear
-            :height="3"
-            color="blueS"
-            indeterminate
-          ></v-progress-linear>
-        </template>
-        <template v-slot:top>
-          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
-            <v-text-field
-              v-model="search"
-              color="blueS"
-              clearable
-              flat
-              solo-inverted
-              hide-details
-              prepend-inner-icon="mdi-magnify"
-              label="Buscar"
-            ></v-text-field>
-            <v-spacer></v-spacer>
-            <v-btn depressed large color="blueS" @click="getRoles()">
-              <v-icon class="mr-2" size="25">mdi-plus</v-icon>
-              Crear usuario
-            </v-btn>
-          </v-toolbar>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click="editItem(item)">
-                  mdi-pencil
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Editar</span>
-          </v-tooltip>
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click="deleteItem(item)">
-                  mdi-delete
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Eliminar</span>
-          </v-tooltip>
-        </template>
-      </v-data-table>
+        :itemsPerPage="5"
+        @createItem="createUser"
+        @editItem="editItem"
+        @deleteItem="deleteItem"
+      ></sigaf-datatable>
     </base-card>
     <v-dialog v-model="dialog" max-width="700" persistent>
       <v-form>
@@ -192,6 +145,7 @@ import SnackbarComponent from '../../components/component/Snackbar'
 import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
 import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
+import SigafDatatable from '../../components/maintenance/SigafDatatable.vue'
 
 export default {
   mixins: [validationMixin],
@@ -228,39 +182,35 @@ export default {
   components: {
     SnackbarComponent,
     ConfirmDialog,
-    SigafSkeletonLoader
+    SigafSkeletonLoader,
+    SigafDatatable
   },
   data: () => ({
+    buttonName: 'Crear usuario',
     headers: [
       {
         text: 'RUT',
-        value: 'rut',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'rut'
       },
       {
         text: 'Nombre',
-        value: 'name',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'name'
       },
       {
         text: 'Celular',
-        value: 'mobile',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'mobile'
       },
       {
         text: 'Correo electrónico',
-        value: 'email',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'email'
       },
       {
         text: 'Rol',
-        value: 'role.description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'role.description'
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -380,11 +330,14 @@ export default {
       removeItem: 'user/deleteUser',
       putItem: 'user/putUser'
     }),
-    async getRoles() {
-      if (this.rolesItems.length !== 0) {
-        await this.fetchRoleItems()
-      }
+    createUser() {
+      this.getRoles()
       this.dialog = true
+    },
+    getRoles() {
+      if (this.rolesItems.length !== 0) {
+        this.fetchRoleItems()
+      }
     },
     makeSnakResponse(message, type) {
       this.snackbar = true

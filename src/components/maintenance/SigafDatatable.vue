@@ -62,16 +62,33 @@
 <script>
 export default {
   props: {
-    items: Array,
-    headers: Array,
+    items: {
+      type: Array,
+      required: true
+    },
+    headers: {
+      type: Array,
+      required: true
+    },
     itemsPerPage: Number,
     loading: Boolean,
     buttonName: String
+  },
+  mounted() {
+    this.initialize()
   },
   data: () => ({
     search: ''
   }),
   methods: {
+    initialize() {
+      const headerLength = this.headers.length
+      for (let index = 0; index < headerLength; index++) {
+        Object.assign(this.headers[index], {
+          class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        })
+      }
+    },
     createItem() {
       this.$emit('createItem')
     },
