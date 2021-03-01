@@ -66,6 +66,8 @@ export default {
           return {
             id: properties.id,
             description: properties.description,
+            email: properties.email,
+            password: properties.password,
             idCourseMoodle: properties.idCourseMoodle,
             category: properties.category,
             status: properties.status

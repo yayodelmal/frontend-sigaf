@@ -28,6 +28,7 @@
       :form-title="formTitle"
       :loading="loading"
       :loading-save="loadingSave"
+      :max-width="maxWidth"
       @close="close"
       @save="save"
     >
@@ -40,6 +41,24 @@
               @input="$v.description.$touch()"
               @blur="$v.description.$touch()"
               :error-messages="descriptionErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              v-model="editedItem.email"
+              label="Correo electrónico"
+              @input="$v.email.$touch()"
+              @blur="$v.email.$touch()"
+              :error-messages="emailErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              v-model="editedItem.password"
+              label="Contraseña"
+              @input="$v.password.$touch()"
+              @blur="$v.password.$touch()"
+              :error-messages="passwordErrors"
             ></base-textfield>
           </v-col>
         </v-row>
@@ -96,7 +115,8 @@ import {
   maxLength,
   numeric,
   minValue,
-  maxValue
+  maxValue,
+  email
 } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 import SigafSnackbar from '../../components/component/Snackbar'
@@ -122,6 +142,13 @@ export default {
       minLength: minLength(10),
       maxLength: maxLength(150)
     },
+    email: {
+      required,
+      email
+    },
+    password: {
+      required
+    },
     category: {
       required
     },
@@ -135,10 +162,19 @@ export default {
     dialog: false,
     dialogConfirm: false,
     buttonName: 'Crear curso',
+    maxWidth: '700px',
     headers: [
       {
         text: 'Nombre',
         value: 'description'
+      },
+      {
+        text: 'Correo electrónico',
+        value: 'email'
+      },
+      {
+        text: 'Contraseña',
+        value: 'password'
       },
       {
         text: 'ID moodle',
@@ -182,6 +218,23 @@ export default {
         errors.push('Debe contener máximo 100 caracteres.')
       return errors
     },
+    emailErrors() {
+      const errors = []
+
+      if (!this.$v.email.$dirty) return errors
+      !this.$v.email.required && errors.push('Es obligatorio.')
+      !this.$v.email.email && errors.push('Correo electrónico inválido.')
+
+      return errors
+    },
+    passwordErrors() {
+      const errors = []
+
+      if (!this.$v.password.$dirty) return errors
+      !this.$v.password.required && errors.push('Es obligatorio.')
+
+      return errors
+    },
     categoryErrors() {
       const errors = []
 
@@ -206,6 +259,12 @@ export default {
     },
     description() {
       return this.editedItem.description
+    },
+    email() {
+      return this.editedItem.email
+    },
+    password() {
+      return this.editedItem.password
     },
     category() {
       return this.editedItem.category

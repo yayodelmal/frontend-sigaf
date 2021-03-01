@@ -262,7 +262,7 @@ export default {
       const errors = []
       if (!this.$v.email.$dirty) return errors
       !this.$v.email.required && errors.push('Es obligatorio.')
-      !this.$v.email.email && errors.push('Email inválido.')
+      !this.$v.email.email && errors.push('Correo electrónico inválido.')
       !this.$v.email.minLength &&
         errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.email.maxLength &&
