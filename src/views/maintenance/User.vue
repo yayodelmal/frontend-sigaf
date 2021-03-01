@@ -4,7 +4,7 @@
       color="blueS"
       class="px-5 py-3"
       icon="mdi-hammer-wrench"
-      title="Usuarios"
+      title="Usuario"
     >
       <sigaf-skeleton-loader
         v-if="loading"
@@ -15,110 +15,90 @@
         v-else
         :items="usersItems"
         :headers="headers"
-        :buttonName="buttonName"
+        :button-name="buttonName"
         :loading="loading"
-        :itemsPerPage="5"
+        :items-per-page="5"
         @createItem="createUser"
         @editItem="editItem"
         @deleteItem="deleteItem"
       ></sigaf-datatable>
     </base-card>
-    <v-dialog v-model="dialog" max-width="700" persistent>
-      <v-form>
-        <v-card :loading="loadingSave">
-          <template v-slot:progress>
-            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
-          </template>
-          <v-toolbar dark color="blueS darken-1">
-            <v-toolbar-title>
-              {{ formTitle }}
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="6">
-                <base-textfield
-                  label="RUT"
-                  v-model="editedItem.rut"
-                  @input="$v.rut.$touch()"
-                  @blur="$v.rut.$touch()"
-                  :error-messages="rutErrors"
-                ></base-textfield>
-              </v-col>
-              <v-col cols="6">
-                <base-textfield
-                  label="Nombre"
-                  v-model="editedItem.name"
-                  @blur="$v.name.$touch()"
-                  @input="$v.name.$touch()"
-                  :error-messages="nameErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                <base-textfield
-                  label="Teléfono"
-                  v-model="editedItem.phone"
-                  @blur="$v.phone.$touch()"
-                  @input="$v.phone.$touch()"
-                  :error-messages="phoneErrors"
-                ></base-textfield>
-              </v-col>
-              <v-col cols="6">
-                <base-textfield
-                  label="Celular"
-                  v-model="editedItem.mobile"
-                  @blur="$v.mobile.$touch()"
-                  @input="$v.mobile.$touch()"
-                  :error-messages="mobileErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                <base-textfield
-                  label="Correo electrónico"
-                  v-model="editedItem.email"
-                  @blur="$v.email.$touch()"
-                  @input="$v.email.$touch()"
-                  :error-messages="emailErrors"
-                ></base-textfield>
-              </v-col>
-              <v-col cols="6">
-                <base-autocomplete
-                  label="Rol"
-                  v-model="editedItem.role"
-                  :items="rolesItems"
-                  item-value="id"
-                  item-text="description"
-                  return-object
-                  @blur="$v.role.$touch()"
-                  @change="$v.role.$touch()"
-                  :error-messages="roleErrors"
-                ></base-autocomplete>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="close">
-              CANCELAR
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="blueS"
-              dark
-              depressed
-              @click="save"
-            >
-              ACEPTAR
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
-    </v-dialog>
+    <sigaf-dialog
+      :dialog="dialog"
+      :form-title="formTitle"
+      :loading="loading"
+      :loading-save="loadingSave"
+      :max-width="maxWidth"
+      @close="close"
+      @save="save"
+    >
+      <template v-slot:default>
+        <v-row>
+          <v-col cols="6">
+            <base-textfield
+              label="RUT"
+              v-model="editedItem.rut"
+              @input="$v.rut.$touch()"
+              @blur="$v.rut.$touch()"
+              :error-messages="rutErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              label="Nombre"
+              v-model="editedItem.name"
+              @blur="$v.name.$touch()"
+              @input="$v.name.$touch()"
+              :error-messages="nameErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="6">
+            <base-textfield
+              label="Teléfono"
+              v-model="editedItem.phone"
+              @blur="$v.phone.$touch()"
+              @input="$v.phone.$touch()"
+              :error-messages="phoneErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              label="Celular"
+              v-model="editedItem.mobile"
+              @blur="$v.mobile.$touch()"
+              @input="$v.mobile.$touch()"
+              :error-messages="mobileErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="6">
+            <base-textfield
+              label="Correo electrónico"
+              v-model="editedItem.email"
+              @blur="$v.email.$touch()"
+              @input="$v.email.$touch()"
+              :error-messages="emailErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-autocomplete
+              label="Rol"
+              v-model="editedItem.role"
+              :items="rolesItems"
+              item-value="id"
+              item-text="description"
+              return-object
+              @blur="$v.role.$touch()"
+              @change="$v.role.$touch()"
+              :error-messages="roleErrors"
+            ></base-autocomplete>
+          </v-col>
+        </v-row>
+      </template>
+    </sigaf-dialog>
     <snackbar-component v-model="snackbar" :type="type" :message="message">
     </snackbar-component>
     <confirm-dialog
@@ -146,6 +126,7 @@ import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
 import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
 import SigafDatatable from '../../components/maintenance/SigafDatatable.vue'
+import SigafDialog from '../../components/maintenance/SigafDialog.vue'
 
 export default {
   mixins: [validationMixin],
@@ -183,10 +164,12 @@ export default {
     SnackbarComponent,
     ConfirmDialog,
     SigafSkeletonLoader,
-    SigafDatatable
+    SigafDatatable,
+    SigafDialog
   },
   data: () => ({
     buttonName: 'Crear usuario',
+    maxWidth: '700px',
     headers: [
       {
         text: 'RUT',

@@ -4,7 +4,7 @@
       color="blueS"
       class="px-5 py-3"
       icon="mdi-hammer-wrench"
-      title="Secciones"
+      title="Sección"
     >
       <sigaf-skeleton-loader
         v-if="loading"
@@ -15,56 +15,36 @@
         v-else
         :items="items"
         :headers="headers"
-        :buttonName="buttonName"
+        :button-name="buttonName"
         :loading="loading"
-        :itemsPerPage="5"
+        :items-per-page="5"
         @createItem="createItem"
         @editItem="editItem"
         @deleteItem="deleteItem"
       ></sigaf-datatable>
     </base-card>
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-form>
-        <v-card :loading="loadingSave">
-          <template v-slot:progress>
-            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
-          </template>
-          <v-toolbar dark color="blueS darken-1">
-            <v-toolbar-title>
-              {{ formTitle }}
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <base-textfield
-                  v-model="editedItem.description"
-                  label="Nombre"
-                  @input="$v.description.$touch()"
-                  @blur="$v.description.$touch()"
-                  :error-messages="descriptionErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="close()">
-              CANCELAR
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="blueS"
-              dark
-              depressed
-              @click="save()"
-            >
-              ACEPTAR
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
-    </v-dialog>
+    <sigaf-dialog
+      :dialog="dialog"
+      :form-title="formTitle"
+      :loading="loading"
+      :loading-save="loadingSave"
+      @close="close"
+      @save="save"
+    >
+      <template v-slot:default>
+        <v-row>
+          <v-col cols="12">
+            <base-textfield
+              v-model="editedItem.description"
+              label="Nombre"
+              @input="$v.description.$touch()"
+              @blur="$v.description.$touch()"
+              :error-messages="descriptionErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+      </template>
+    </sigaf-dialog>
     <sigaf-snackbar
       v-model="snackbar"
       :type="type"
@@ -96,6 +76,7 @@ import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
 import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
 import SigafDatatable from '../../components/maintenance/SigafDatatable.vue'
+import SigafDialog from '../../components/maintenance/SigafDialog.vue'
 
 export default {
   inject: ['theme'],
@@ -104,7 +85,8 @@ export default {
     SigafSnackbar,
     ConfirmDialog,
     SigafSkeletonLoader,
-    SigafDatatable
+    SigafDatatable,
+    SigafDialog
   },
   validations: {
     description: {

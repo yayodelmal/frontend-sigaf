@@ -15,83 +15,62 @@
         v-else
         :items="coursesItems"
         :headers="headers"
-        :buttonName="buttonName"
+        :button-name="buttonName"
         :loading="loading"
-        :itemsPerPage="5"
+        :items-per-page="5"
         @createItem="createCourse"
         @editItem="editItem"
         @deleteItem="deleteItem"
       ></sigaf-datatable>
     </base-card>
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-form>
-        <v-card :loading="loadingSave">
-          <template v-slot:progress>
-            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
-          </template>
-          <v-toolbar dark color="blueS darken-1">
-            <v-toolbar-title>
-              {{ formTitle }}
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <base-textfield
-                  v-model="editedItem.description"
-                  label="Nombre"
-                  @input="$v.description.$touch()"
-                  @blur="$v.description.$touch()"
-                  :error-messages="descriptionErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="8">
-                <base-autocomplete
-                  v-model="editedItem.category"
-                  :items="categoriesItems"
-                  label="Categoría"
-                  item-value="id"
-                  item-text="description"
-                  return-object
-                  @change="$v.category.$touch()"
-                  @blur="$v.category.$touch()"
-                  :error-messages="categoryErrors"
-                ></base-autocomplete>
-              </v-col>
-              <v-col cols="4">
-                <base-textfield
-                  v-model="editedItem.idCourseMoodle"
-                  label="Id Moodle"
-                  required
-                  clearable
-                  @input="$v.idMoodle.$touch()"
-                  @blur="$v.idMoodle.$touch()"
-                  :error-messages="idMoodleErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="close()">
-              CANCELAR
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="blueS"
-              dark
-              depressed
-              @click="save()"
-            >
-              ACEPTAR
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
-    </v-dialog>
+    <sigaf-dialog
+      :dialog="dialog"
+      :form-title="formTitle"
+      :loading="loading"
+      :loading-save="loadingSave"
+      @close="close"
+      @save="save"
+    >
+      <template v-slot:default>
+        <v-row>
+          <v-col cols="12">
+            <base-textfield
+              v-model="editedItem.description"
+              label="Nombre"
+              @input="$v.description.$touch()"
+              @blur="$v.description.$touch()"
+              :error-messages="descriptionErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="8">
+            <base-autocomplete
+              v-model="editedItem.category"
+              :items="categoriesItems"
+              label="Categoría"
+              item-value="id"
+              item-text="description"
+              return-object
+              @change="$v.category.$touch()"
+              @blur="$v.category.$touch()"
+              :error-messages="categoryErrors"
+            ></base-autocomplete>
+          </v-col>
+          <v-col cols="4">
+            <base-textfield
+              v-model="editedItem.idCourseMoodle"
+              label="Id Moodle"
+              required
+              clearable
+              @input="$v.idMoodle.$touch()"
+              @blur="$v.idMoodle.$touch()"
+              :error-messages="idMoodleErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+      </template>
+    </sigaf-dialog>
     <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
     </sigaf-snackbar>
     <confirm-dialog
@@ -125,6 +104,7 @@ import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
 import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
 import SigafDatatable from '../../components/maintenance/SigafDatatable.vue'
+import SigafDialog from '../../components/maintenance/SigafDialog.vue'
 
 export default {
   inject: ['theme'],
@@ -133,7 +113,8 @@ export default {
     SigafSnackbar,
     ConfirmDialog,
     SigafSkeletonLoader,
-    SigafDatatable
+    SigafDatatable,
+    SigafDialog
   },
   validations: {
     description: {
@@ -153,7 +134,7 @@ export default {
   data: () => ({
     dialog: false,
     dialogConfirm: false,
-    buttonName: 'Crear aula',
+    buttonName: 'Crear curso',
     headers: [
       {
         text: 'Nombre',
