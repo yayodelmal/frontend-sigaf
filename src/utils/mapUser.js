@@ -1,41 +1,6 @@
-export const Snackbar = {
-  SUCCESS: {
-    type: 'success',
-    message: 'Operación realizada con éxito.'
-  },
-  ERROR: {
-    type: 'error',
-    message: 'Ha ocurrido un error.'
-  },
-  INFO: 'info',
-  WARNING: {
-    type: 'warning'
-  }
-}
+import { groupBy } from './constants'
 
-export const Message = {
-  SUCCESS: 'Operación realizada con éxito.',
-  ERROR: 'Ha ocurrido un error. Contacte al administrador'
-}
-
-export function groupBy(objectArray, property) {
-  return objectArray.reduce(function(accumulator, object) {
-    let key = object[property]
-    if (!accumulator[key]) {
-      accumulator[key] = []
-    }
-    accumulator[key].push(object)
-    return accumulator
-  }, {})
-}
-
-export const currentDate = new Date()
-  .toLocaleString('es-ES', { timeZone: 'America/Santiago' })
-  .substr(0, 9)
-
-export const setTimer = ms => new Promise(res => setTimeout(res, ms))
-
-export const mapUser = (user, sections) => {
+export function mapUser(user, sections) {
   if (user.activity_course_users.length !== 0) {
     let state = 'ACTIVO'
     let progress = 0

@@ -24,8 +24,6 @@ export default {
     fetchDetailTickets: async ({ commit }) => {
       const response = await axios.get(BASE_URL)
 
-      console.log(response)
-
       const { _data, success, error, message } = response.data
 
       if (success) {
@@ -38,11 +36,32 @@ export default {
         return { success, error, message }
       }
     },
+
+    postMassiveDetailTicket: async (_, detailTicket) => {
+      try {
+        const { data } = await axios.post(
+          '/api/v2/ticket-details/multiple',
+          detailTicket
+        )
+
+        const { _data, success, error } = data
+
+        if (success) {
+          return { _data, success }
+        } else {
+          console.log(error)
+        }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
     postDetailTicket: async ({ commit }, detailTicket) => {
       try {
         const { data } = await axios.post(BASE_URL, detailTicket)
-
-        console.log(detailTicket)
 
         const { _data, success, error, message } = data
 

@@ -5,11 +5,15 @@ const BASE_URL = '/api/v2/registered-users'
 export default {
   namespaced: true,
   state: {
-    registeredUsers: []
+    registeredUsers: [],
+    registeredUser: null
   },
   mutations: {
     SET_REGISTERED_USERS: (state, registeredUsers) => {
       state.registeredUsers = registeredUsers
+    },
+    SET_REGISTERED_USER: (state, registeredUser) => {
+      state.registeredUser = registeredUser
     },
     POST_REGISTERED_USER: (state, registeredUser) => {
       state.registeredUsers.push(registeredUser)
@@ -96,6 +100,28 @@ export default {
     }
   },
   actions: {
+    findRegisteredUserByRut: async ({ commit }, payload) => {
+      try {
+        const { data } = await axios.get(`/api/v2/registered-user/${payload}`)
+
+        const { _data, success, error } = data
+
+        if (success) {
+          commit('SET_REGISTERED_USER', _data)
+        } else {
+          console.log(error)
+        }
+
+        return data
+      } catch (error) {
+        const { data } = error.response
+        console.log(error)
+        return {
+          success: data.success,
+          message: data.message
+        }
+      }
+    },
     fetchRegisteredUsers: async ({ commit }) => {
       try {
         const { data } = await axios.get(BASE_URL)
