@@ -75,124 +75,14 @@
               type="table-tfoot"
             ></v-skeleton-loader>
           </div>
-          <v-data-table
+          <s-table-ticket
             v-else
-            :headers="headers"
-            :search="search"
-            :items="tickets"
-            class="elevation-1"
             :loading="loading"
-            loading-text="Cargando... por favor espere"
-            calculate-widths
-            disable-pagination
-            hide-default-footer
-            height="400"
-            fixed-header
-          >
-            <template
-              v-slot:item.properties.id="{
-                item
-              }"
-            >
-              {{ showPosition(item) }}
-            </template>
-            <template
-              v-slot:item.properties.courseRegisteredUser.registered_user.rut_registered_moodle="{
-                item
-              }"
-            >
-              {{
-                item.properties.courseRegisteredUser.registered_user.rut_registered_moodle.toUpperCase()
-              }}
-            </template>
-            <template
-              v-slot:item.properties.courseRegisteredUser.registered_user.name_registered_moodle="{
-                item
-              }"
-            >
-              <v-tooltip color="blueS" bottom>
-                <template v-slot:activator="{ on }">
-                  <v-label v-on="on">
-                    {{
-                      item.properties.courseRegisteredUser.registered_user.name_registered_moodle.toUpperCase()
-                    }}</v-label
-                  >
-                </template>
-                <span>{{
-                  item.properties.courseRegisteredUser.course.description
-                }}</span>
-              </v-tooltip>
-            </template>
-            <template v-slot:item.properties.typeTicket.description="{ item }">
-              <v-tooltip color="blueS" bottom>
-                <template v-slot:activator="{ on }">
-                  <v-icon v-on="on">{{
-                    getTypeTicket(item.properties.typeTicket.description)
-                  }}</v-icon>
-                </template>
-                <span>{{ item.properties.typeTicket.description }}</span>
-              </v-tooltip>
-            </template>
-            <template
-              v-slot:item.properties.statusTicket.description="{ item }"
-            >
-              <v-tooltip color="blueS" bottom>
-                <template v-slot:activator="{ on }">
-                  <v-icon v-on="on">{{
-                    getStatusTicket(item.properties.statusTicket.description)
-                  }}</v-icon>
-                </template>
-                <span>{{ item.properties.statusTicket.description }}</span>
-              </v-tooltip>
-            </template>
-            <template
-              v-slot:item.properties.priorityTicket.description="{ item }"
-            >
-              <v-chip
-                small
-                :color="getColor(item.properties.priorityTicket.description)"
-                dark
-                label
-                >{{
-                  item.properties.priorityTicket.description.toUpperCase()
-                }}</v-chip
-              >
-            </template>
-            <template v-slot:item.actions="{ item }">
-              <v-tooltip color="blueS" bottom>
-                <template v-slot:activator="{ on }">
-                  <v-icon
-                    v-on="on"
-                    class="mr-2"
-                    @click.prevent="editItem(item)"
-                  >
-                    {{ showIconSearch(item) }}
-                  </v-icon>
-                </template>
-                <span>{{ showTooltipSearch(item) }}</span>
-              </v-tooltip>
-              <v-tooltip color="blueS" bottom>
-                <template v-slot:activator="{ on }">
-                  <v-icon
-                    v-if="item.showDeleteButton"
-                    v-on="on"
-                    @click.prevent="deleteItem(item)"
-                  >
-                    mdi-delete
-                  </v-icon>
-                </template>
-                <span>Eliminar ticket</span>
-              </v-tooltip>
-            </template>
-          </v-data-table>
+            :tickets="tickets"
+            :search="search"
+            @editTicket="editItem"
+          />
         </v-card-text>
-        <v-card-actions>
-          <v-pagination
-            color="redS"
-            v-model="page"
-            :length="pageCount"
-          ></v-pagination>
-        </v-card-actions>
       </v-card>
 
       <sigaf-create-single-ticket
@@ -292,16 +182,13 @@
         <v-progress-circular indeterminate size="64"> </v-progress-circular>
       </div>
       <h3 class="headline text-center mt-5">
-        Generando ticket {{ indexCurrentSyncUser }}
+        Generando tickets...
       </h3>
-      <h3 class="headline text-center mt-3">{{ currentTicket }}</h3>
     </v-overlay>
   </v-container>
 </template>
 
 <script>
-import { validationMixin } from 'vuelidate'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 import axios from '../services/axios'
@@ -312,6 +199,7 @@ import SigafCategoryCourseToolbar from '../components/utility/SigafCategoryCours
 import SigafCreateSingleTicket from '@/components/ticket/single/SigafCreateSingleTicket.vue'
 import SigafEditSingleTicket from '@/components/ticket/single/SigafEditSingleTicket.vue'
 import SigafCreateMultipleTicket from '@/components/ticket/multiple/SigafCreateMultipleTicket.vue'
+import STableTicket from '../components/ticket/STableTicket.vue'
 
 Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
@@ -322,38 +210,13 @@ Array.prototype.forEachAsyncCustom = function(fn) {
 
 export default {
   inject: ['theme'],
-  mixins: [validationMixin],
   components: {
     ConfirmDialog,
     SigafCategoryCourseToolbar,
     SigafCreateSingleTicket,
     SigafEditSingleTicket,
-    SigafCreateMultipleTicket
-  },
-  validations: {
-    category: {
-      required
-    },
-    categoryMassiveTicket: {
-      required
-    },
-    priority: {
-      required
-    },
-    status: {
-      required
-    },
-    operator: {
-      required
-    },
-    statusDetail: {
-      required
-    },
-    observation: {
-      minLength: minLength(0),
-      maxLength: maxLength(150),
-      required
-    }
+    SigafCreateMultipleTicket,
+    STableTicket
   },
   data() {
     return {
@@ -361,160 +224,8 @@ export default {
       singleEditModal: false,
       multipleCreateModal: false,
       showMultipleCreateModal: false,
-      completeStepOne: false,
-      completeStepTwo: false,
-      completeStepThree: false,
-      rulesValueStepOne: true,
-      rulesValueStepTwo: true,
-      rulesValueStepThree: true,
-      page: 1,
-      pageCount: 0,
-      itemsPerPage: 10,
       search: '',
       loading: false,
-      searchRutLoading: false,
-      searchMassiveTicket: '',
-      headers: [
-        {
-          text: '#',
-          align: 'center',
-          sortable: false,
-          width: 50,
-          value: 'properties.id',
-          class: 'redS--text'
-        },
-        {
-          text: 'RUT',
-          width: 120,
-          value: 'properties.courseRegisteredUser.registered_user.rut',
-          class: 'redS--text'
-        },
-        {
-          text: 'Nombre',
-          width: 250,
-          value: 'properties.courseRegisteredUser.registered_user.name',
-          class: 'redS--text'
-        },
-        {
-          text: 'Apellido paterno',
-          width: 250,
-          value: 'properties.courseRegisteredUser.registered_user.last_name',
-          class: 'redS--text'
-        },
-        {
-          text: 'Apellido Materno',
-          width: 250,
-          value:
-            'properties.courseRegisteredUser.registered_user.mother_last_name',
-          class: 'redS--text'
-        },
-        {
-          text: 'Tipo',
-          value: 'properties.typeTicket.description',
-          class: 'redS--text'
-        },
-        {
-          text: 'Estado',
-          value: 'properties.statusTicket.description',
-          class: 'redS--text'
-        },
-        {
-          text: 'Prioridad',
-          value: 'properties.priorityTicket.description',
-          class: 'redS--text'
-        },
-        {
-          text: 'Intentos',
-          align: 'center',
-          value: 'relationships.numberOfElements',
-          class: 'redS--text'
-        },
-        {
-          text: 'Antigüedad (días)',
-          align: 'center',
-          value: 'properties.ageTicket',
-          class: 'redS--text'
-        },
-        {
-          text: 'Fecha creación',
-          align: 'center',
-          value: 'properties.createdAt',
-          width: 150,
-          class: 'redS--text'
-        },
-        // {
-        //   text: 'Hora creación',
-        //   align: 'center',
-        //   value: 'properties.timeCreatedAt',
-        //   class: 'redS--text'
-        // },
-        {
-          text: 'Fecha cierre',
-          align: 'center',
-          value: 'properties.closingDate',
-          width: 150,
-          class: 'redS--text'
-        },
-        // {
-        //   text: 'Hora cierre',
-        //   align: 'center',
-        //   value: 'properties.timeClosingDate',
-        //   class: 'redS--text'
-        // },
-        // {
-        //   text: 'Creador',
-        //   align: 'center',
-        //   width: 150,
-        //   value: 'properties.userCreated.name',
-        //   class: 'redS--text'
-        // },
-        {
-          text: 'Operador',
-          align: 'center',
-          width: 150,
-          value: 'properties.userAssigned.name',
-          class: 'redS--text'
-        },
-        {
-          text: 'Opciones',
-          value: 'actions',
-          sortable: false,
-          width: 90,
-          class: 'redS--text'
-        }
-      ],
-      headersTicket: [
-        {
-          text: 'RUT',
-          value: 'registered_user.rut',
-          class: 'redS--text'
-        },
-        {
-          text: 'Nombre',
-          value: 'registered_user.name',
-          class: 'redS--text'
-        },
-        {
-          text: 'Apellido paterno',
-          value: 'registered_user.last_name',
-          class: 'redS--text'
-        },
-        {
-          text: 'Apellido materno',
-          value: 'registered_user.mother_last_name',
-          class: 'redS--text'
-        },
-        {
-          text: 'Aula',
-          value: 'classroom.description',
-          class: 'redS--text'
-        },
-        {
-          text: 'Última conexión',
-          value: 'last_access_registered_moodle',
-          class: 'redS--text'
-        }
-      ],
       courses: [],
       course: {
         id: 0
@@ -536,15 +247,8 @@ export default {
       dialogMassive: false,
       singleSelect: false,
       selected: [],
-      dateSingle: new Date().toISOString().substr(0, 10),
-      dateMassive: new Date().toISOString().substr(0, 10),
       menu: false,
       user: null,
-      rut: '17.057.394-3',
-      rutACTIVO: '17.057.394-3',
-      rutRenunciado: '12.122.260-4',
-      e1: 1,
-      em1: 1,
       message: '',
       successMessage: 'Operación realizada con éxito.',
       errorMEssage: 'Ha ocurrido un error.',
@@ -561,17 +265,11 @@ export default {
       openTicket: true,
       closeTicket: false,
       showStatusDetailTicket: true,
-      showObservation: true,
-      observationMassive: '',
       dialogSelectCourse: false,
       arrayCourseUserSelect: [],
       currentCourseUser: {},
       ticketClose: false,
-      checkCloseStatus: false,
-      transition: 'scale-transition',
       overlay: false,
-      currentTicket: '',
-      indexCurrentSyncUser: '',
       opacity: 0.8,
       selectedCourse: null,
       showTable: false,
@@ -585,17 +283,12 @@ export default {
       showSingleEditModal: false,
       showSingleCreateModal: false,
       overlayCreateMultipleTicket: false,
-      overlayMessageCreateMultipleTicket: ''
+      overlayMessageCreateMultipleTicket: '',
+      transition: 'scale-transition'
     }
   },
   methods: {
     ...mapActions({
-      fetchMotiveTicket: 'motiveTicket/fetchMotiveTickets',
-      fetchPriorityTicket: 'priorityTicket/fetchPriorityTickets',
-      fetchSourceTicket: 'sourceTicket/fetchSourceTickets',
-      fetchTypeTicket: 'typeTicket/fetchTypeTickets',
-      fetchUser: 'user/fetchUsers',
-      fetchStatusTicket: 'statusTicket/fetchStatusTickets',
       fetchClassroom: 'classroom/fetchClassrooms',
       fetchStatusDetailTicket: 'statusDetailTicket/fetchStatusDetailTickets',
       fetchDetailTicket: 'detailTicket/fetchDetailTickets',
@@ -605,13 +298,9 @@ export default {
       fetchCategoryItems: 'category/fetchCategories',
       fetchCourseRegisteredUserItems:
         'courseRegisteredUser/fetchCourseRegisteredUsers',
-      postTicket: 'ticket/postTicket',
-      putTicket: 'ticket/putTicket',
       removeItem: 'ticket/deleteTicket',
       findTicket: 'ticket/findTicket',
       fetchTicketDetails: 'ticket/fetchTicketDetails',
-      postDetailTicket: 'detailTicket/postDetailTicket',
-      clearTicketDetail: 'ticket/clearDetailTickets',
       fetchSections: 'section/fetchSections',
       fetchUsersByCourse: 'courseRegisteredUser/getCourseRegisteredByCourse',
       fetchTicketsByCourse: 'ticket/findTicketByCourse',
@@ -681,196 +370,13 @@ export default {
       this.loadingUsers = false
     },
 
-    async findUsers() {
-      this.loadingButton = true
-      const response = await this.fetchUsersByCourse(this.selectedCourse)
-
-      this.filterUsersByCategories(response._data)
-
-      this.showTable = true
-
-      this.loadingButton = false
-    },
-    getValueProgress(user) {
-      return user.progress
-    },
-    getColorState(state) {
-      if (state) return 'redS darken-1'
-      return 'blueS darken-1'
-    },
-    getGrades(section, activities) {
-      if (activities && section) {
-        return activities[section.id].filter(activity => {
-          return activity.qualificationMoodle !== '-'
-        })
-      }
-    },
-    showIconSearch(item) {
-      return item.close ? 'mdi-email-search' : 'mdi-chat-plus'
-    },
-    showTooltipSearch(item) {
-      return item.close ? 'Ver ticket' : 'Agregar contacto'
-    },
-    setPriority(value) {
-      this.editedTicketItem.prioriryTicket = value
-      this.$v.priority.$touch()
-    },
-    setStatus(value) {
-      this.editedTicketItem.statusTicket = value
-      this.$v.status.$touch()
-    },
-    setOperator(value) {
-      this.editedTicketItem.operatorTicket = value
-      this.$v.operator.$touch()
-    },
-    setStatusDetail(value) {
-      this.editedDetailTicketItem.statusDeailTicket = value
-      this.$v.statusDetail.$touch()
-    },
-    async saveTicket() {
-      this.rulesValueStepThree = true
-
-      if (!this.$v.status.required) {
-        this.$v.status.$touch()
-        this.rulesValueStepThree = this.$v.status.required
-      }
-
-      if (this.editedTicketIndex > -1) {
-        if (!this.$v.statusDetail.required) {
-          this.$v.statusDetail.$touch()
-          this.rulesValueStepThree = this.$v.statusDetail.required
-        }
-
-        if (!this.$v.observation.required) {
-          this.$v.observation.$touch()
-          this.rulesValueStepThree = this.$v.observation.required
-        }
-
-        if (!this.$v.observation.maxLength) {
-          this.$v.observation.$touch()
-          this.rulesValueStepThree = this.$v.observation.maxLength
-        }
-      }
-
-      if (this.rulesValueStepThree) {
-        this.completeStepThree = true
-
-        if (
-          this.status.description === 'Cerrado' &&
-          this.observation === '' &&
-          this.statusDetail === null
-        ) {
-          this.snackbar = true
-          this.message =
-            'Debe seleccionar un intento de contacto y agregar una observación'
-          this.checkCloseStatus = false
-          this.$v.observation.$touch()
-          this.$v.statusDetail.$touch()
-        } else {
-          let dataStoreTicket = {
-            course_registered_user_id: this.user.id,
-            type_ticket_id: this.type.id,
-            source_ticket_id: this.source.id,
-            status_ticket_id: this.status.id,
-            priority_ticket_id: this.priority.id,
-            motive_ticket_id: this.motive.id,
-            user_create_id: this.userLog.id,
-            user_assigned_id: this.operator.id
-          }
-
-          if (this.status.description === 'Cerrado') {
-            let arrayDate = new Date().toISOString().substr(0, 10)
-
-            dataStoreTicket = Object.assign(dataStoreTicket, {
-              closing_date: arrayDate
-            })
-          }
-
-          if (this.editedTicketIndex > -1) {
-            dataStoreTicket = Object.assign(dataStoreTicket, {
-              id: this.editedTicketItem.id
-            })
-
-            const { success } = await this.putTicket(dataStoreTicket)
-
-            if (success) {
-              const dataDetailTicket = {
-                comment: this.observation,
-                ticket_id: this.editedTicketItem.id,
-                status_detail_ticket_id: this.statusDetail.id,
-                user_created_id: this.userLog.id
-              }
-              const { success, message } = await this.postDetailTicket(
-                dataDetailTicket
-              )
-              if (success) {
-                this.snackbar = true
-                this.message = this.successMessage
-              } else {
-                this.snackbar = true
-                this.message = message
-              }
-            }
-          } else {
-            const { success } = await this.postTicket(dataStoreTicket)
-            if (success) {
-              if (this.statusDetail) {
-                const dataDetailTicket = {
-                  comment: this.observation,
-                  ticket_id: this.savedTicket.properties.id,
-                  status_detail_ticket_id: this.statusDetail.id,
-                  user_created_id: this.userLog.id
-                }
-
-                const { success, message } = await this.postDetailTicket(
-                  dataDetailTicket
-                )
-
-                if (success) {
-                  this.snackbar = true
-                  this.message = this.successMessage
-                } else {
-                  this.snackbar = true
-                  this.message = message
-                }
-              }
-            }
-          }
-          //this.fetchItems()
-          this.findTicketByCourse()
-          this.clearTicket()
-        }
-      }
-    },
-    async editItem(item) {
-      const ticket = item.properties
-      const response = await this.findLogEditingTicketByTicket(ticket.id)
-      if (response.statusCode === 204) {
-        const res = await this.findTicket(ticket)
-        const version = res._data.properties.version
-
-        if (version !== ticket.version) {
-          this.PUT_TICKET(res._data)
-        }
-        await this.postLogEditingTicket({
-          ticket_id: ticket.id,
-          user_id: this.loggedUser.id
-        })
-
-        const url = item.relationships.links.href
-
-        const { _data } = await this.findTicketDetailByTicket(url)
-
-        this.showSingleEditModal = true
-
-        if (_data) {
-          setTimeout(() => {
-            this.editedTicketDetails = _data.relationships.collection.data
-            this.editedTicketItem = item
-            this.singleEditModal = true
-          }, 200)
-        }
-      }
+    editItem(item) {
+      this.showSingleEditModal = item.showSingleEditModal
+      setTimeout(() => {
+        this.editedTicketDetails = item.editedTicketDetails
+        this.editedTicketItem = item.editedTicketItem
+        this.singleEditModal = item.singleEditModal
+      }, 200)
     },
     async handleCreateMultipleTickets() {
       this.overlayCreateMultipleTicket = true
@@ -891,25 +397,7 @@ export default {
         })
       }
     },
-    async filterUsersByCategoriesTicket() {
-      this.userRegisteredFiltered = []
 
-      const vm = this
-
-      if (vm.classrooms.length === 0) {
-        vm.courseRegisteredUserItems.forEach(userCourse => {
-          vm.userRegisteredFiltered.push(userCourse)
-        })
-      } else {
-        this.courseRegisteredUserItems.forEach(userCourse => {
-          this.classrooms.forEach(classroom => {
-            if (userCourse.classroom.description === classroom.description) {
-              this.userRegisteredFiltered.push(userCourse)
-            }
-          })
-        })
-      }
-    },
     async fetchDataCourses() {
       const { success, message } = await this.fetchCourseItems()
       if (!success) {
@@ -925,166 +413,6 @@ export default {
         this.snackbar = true
         this.message = message
       }
-    },
-    getColor(priority) {
-      if (priority === 'Alta') return 'red'
-      else if (priority === 'Media') return 'orange'
-      else return 'green'
-    },
-    getTypeTicket(type) {
-      if (type === 'Correo electrónico') return 'mdi-email'
-      else if (type === 'Contacto telefónico') return 'mdi-phone'
-      else return 'error'
-    },
-    getStatusTicket(status) {
-      if (status === 'Abierto') return 'mdi-lock-open-outline'
-      else if (status === 'Cerrado') return 'mdi-lock'
-      else return 'error'
-    },
-    getDay(date) {
-      const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
-      let i = new Date(date).getDay(date)
-      return daysOfWeek[i]
-    },
-    async fetchUserByRut() {
-      this.searchRutLoading = true
-      this.clearTicketDetail()
-
-      const vm = this
-      setTimeout(async () => {
-        const { data } = await axios.get(`/api/v2/registered-user/${this.rut}`)
-
-        const { _data, statusCode, message } = data
-
-        if (statusCode === 204) {
-          vm.snackbar = true
-          vm.message = message
-        } else if (statusCode === 406) {
-          vm.snackbar = true
-          vm.message = message
-        } else if (statusCode === 200) {
-          if (_data !== null) {
-            const payload = {
-              course: this.selectedCourse.id,
-              user: _data.id
-            }
-
-            const response = await this.findSpecificUserCourse(payload)
-
-            const userCreated = response._data
-
-            // this.arrayCourseUserSelect = this.courseRegisteredUserItems.filter(
-            //   userCourse =>
-            //     userCourse.registered_user.id === this.userCourse.id &&
-            //     userCourse.is_sincronized === 1
-            // )
-
-            if (userCreated.is_sincronized === 0) {
-              vm.snackbar = true
-              vm.message = 'El estudiante no se encuentra registrado'
-            } else {
-              this.editedTicketItem.courseRegisteredUser = Object.assign(
-                {},
-                userCreated
-              )
-
-              this.user = Object.assign({}, this.mapUser(userCreated))
-            }
-          } else {
-            vm.snackbar = true
-            vm.message = 'El estudiantes no se encuentra registrado'
-          }
-        }
-        this.searchRutLoading = false
-      }, 1000)
-    },
-    mapUser(user) {
-      if (user.activity_course_users.length !== 0) {
-        let state
-        let progress = 0
-        const activities = user.activity_course_users
-          .map(activity => {
-            if (activity) {
-              if (
-                activity.activity.section.description === 'Renuncia' &&
-                activity.status_moodle === 'Finalizado'
-              ) {
-                state = true
-              } else {
-                state = false
-              }
-
-              let checkQualificationMoodle = ['', '-']
-              if (
-                !checkQualificationMoodle.includes(
-                  activity.qualification_moodle
-                ) &&
-                activity.activity.weighing !== 0
-              ) {
-                progress++
-              }
-
-              return {
-                qualificationMoodle: activity.qualification_moodle,
-                statusMoodle: activity.status_moodle,
-                description: activity.activity.description,
-                idActivityMoodle: activity.activity.id_activity_moodle,
-                idSection: activity.activity.section_id,
-                section: activity.activity.section.description,
-                type: activity.activity.type,
-                weighing: activity.activity.weighing
-              }
-            } else {
-              return activity
-            }
-          })
-          .filter(activity => {
-            if (activity) {
-              return activity.section !== 'Formativa'
-            }
-          })
-
-        const totalProgress = this.sections
-          .filter(section => {
-            const filterSection = ['Formativa', 'Renuncia', 'Inicio', 'Cierre']
-            return !filterSection.includes(section.description)
-          })
-          .reduce(
-            (accumulator, currentValue) =>
-              accumulator + currentValue.numberActivities,
-            0
-          )
-
-        const accumulativeProgress = Number.parseFloat(
-          (progress / totalProgress) * 100
-        )
-        user['state'] = state
-        user[
-          'fullname'
-        ] = `${user.registered_user.name} ${user.registered_user.last_name}`
-        user['progress'] = accumulativeProgress
-        user['activities'] = this.groupBy(activities, 'idSection')
-      }
-      return user
-    },
-    selectCourse(user) {
-      this.dialogSelectCourse = false
-
-      this.editedTicketItem.courseRegisteredUser = Object.assign({}, user)
-
-      this.user = Object.assign({}, this.mapUser(user))
-
-      console.log(this.user)
-    },
-    groupBy(objectArray, property) {
-      return objectArray.reduce(function(accumulator, object) {
-        let key = object[property]
-        if (!accumulator[key]) {
-          accumulator[key] = []
-        }
-        accumulator[key].push(object)
-        return accumulator
-      }, {})
     },
     async findActivities(id) {
       const { data } = await axios.get(
@@ -1145,198 +473,14 @@ export default {
       setTimeout(() => {
         this.clearTicket()
       }, 300)
-    },
-    async showSyncTickets(userCourse, index) {
-      await new Promise(resolve => setTimeout(() => resolve(), 100))
-
-      let dataStoreTicket = {
-        type_ticket_id: this.type.id,
-        source_ticket_id: this.source.id,
-        status_ticket_id: this.status.id,
-        priority_ticket_id: this.priority.id,
-        motive_ticket_id: this.motive.id,
-        user_create_id: this.userLog.id,
-        user_assigned_id: this.operator.id
-      }
-
-      if (this.status.description === 'Cerrado') {
-        let arrayDate = new Date().toISOString().substr(0, 10)
-
-        dataStoreTicket = Object.assign(dataStoreTicket, {
-          closing_date: arrayDate
-        })
-      }
-
-      dataStoreTicket = {
-        ...dataStoreTicket,
-        ...{ course_registered_user_id: userCourse.id }
-      }
-      const { success, message, _data } = await this.postTicket(dataStoreTicket)
-
-      if (success) {
-        if (this.statusDetailMasive) {
-          const dataDetailTicket = {
-            comment: this.observationMassive,
-            ticket_id: _data.properties.id,
-            status_detail_ticket_id: this.statusDetailMasive.id,
-            user_created_id: this.userLog.id
-          }
-
-          await this.postDetailTicket(dataDetailTicket)
-        }
-
-        this.currentTicket = `${userCourse.registered_user.name} ${userCourse.registered_user.last_name} del ${userCourse.classroom.description}`
-
-        console.log('true')
-
-        this.indexCurrentSyncUser = `${index + 1} de ${
-          this.selected.length
-        } para`
-        if (index === this.selected.length - 1) {
-          this.overlay = false
-        }
-      } else {
-        this.snackbar = true
-        this.message = message
-      }
-    },
-    async saveMassiveTicket() {
-      this.rulesValueStepThree = true
-
-      if (!this.$v.status.required) {
-        this.$v.status.$touch()
-        this.rulesValueStepThree = this.$v.status.required
-      }
-
-      if (this.rulesValueStepThree) {
-        this.completeStepThree = true
-
-        if (
-          this.status.description === 'Cerrado' &&
-          this.observationMassive === '' &&
-          this.statusDetail === null
-        ) {
-          this.snackbar = true
-          this.message =
-            'Debe seleccionar un intento de contacto y agregar una observación'
-          this.checkCloseStatus = false
-          this.$v.observation.$touch()
-          this.$v.statusDetail.$touch()
-        } else {
-          this.dialogMassive = false
-          this.overlay = true
-          this.selected.forEachAsyncCustom(this.showSyncTickets)
-        }
-      }
-    },
-    showComment(comment) {
-      if (comment.length > 50) {
-        return `${comment.slice(0, 50)}...`
-      } else {
-        return comment
-      }
-    },
-    checkStepOne() {
-      this.rulesValueStepOne = true
-
-      if (this.selected.length === 0 && this.rulesValueStepOne) {
-        this.snackbar = true
-        this.message = 'Debe seleccionar al menos un destinatario'
-        this.rulesValueStepOne = false
-      }
-
-      if (this.rulesValueStepOne) {
-        this.completeStepOne = true
-        this.em1 = 2
-      }
-    },
-    clearTicket() {
-      this.type = null
-      this.source = null
-      this.status = null
-      this.priority = null
-      this.categoryMassiveTicket = null
-      this.motive = null
-      this.operator = null
-      this.statusDetail = null
-      this.observation = ''
-      this.selected = []
-      this.userRegisteredFiltered = []
-      this.completeStepOne = false
-      this.completeStepTwo = false
-      this.completeStepThree = false
-      this.rulesValueStepOne = true
-      this.rulesValueStepTwo = true
-      this.rulesValueStepThree = true
-      this.rut = ''
-      this.e1 = 1
-      this.em1 = 1
-      this.dialogMassive = false
-      this.dialog = false
-      this.user = null
-      this.$v.$reset()
-      this.editedTicketIndex = -1
-      this.editedTicketItem = Object.assign({}, this.defaultTicketItem)
-      this.showStatusDetailTicket = true
-      this.showObservation = true
-      this.classrooms = []
-      this.ticketClose = false
-      this.checkCloseStatus = false
-      this.clearTicketDetail()
-    },
-    checkStepTwo() {
-      this.$v.$reset()
-
-      setTimeout(() => {
-        this.rulesValueStepTwo = true
-
-        if (!this.$v.priority.required) {
-          this.$v.priority.$touch()
-          this.rulesValueStepTwo = this.$v.priority.required
-        }
-
-        if (!this.$v.operator.required) {
-          this.$v.operator.$touch()
-          this.rulesValueStepTwo = this.$v.operator.required
-        }
-
-        if (this.type.description !== 'Correo electrónico') {
-          this.showStatusDetailTicket = false
-          this.showObservation = false
-        } else {
-          this.showStatusDetailTicket = true
-          this.showObservation = true
-        }
-
-        if (this.rulesValueStepTwo) {
-          this.completeStepTwo = true
-          this.em1 = 3
-          this.e1 = 3
-        }
-      }, 500)
-    },
-    showPosition(ticket) {
-      const index = this.tickets.findIndex(find => {
-        return find.properties.id === ticket.properties.id
-      })
-
-      return index + 1
     }
   },
   created() {
     this.loading = true
     this.fetchSections()
-    // this.fetchCourseRegisteredUserItems()
     this.fetchDataCourses()
     this.fetchDataCategories()
-    //this.filterUsersByCategories()
-    // this.fetchPriorityTicket()
-    //  this.fetchUser()
-    //this.fetchStatusTicket()
     this.fetchClassroom()
-    // this.fetchStatusDetailTicket()
-    // this.fetchDetailTicket()
-    //   this.fetchItems().then(() => (this.loading = false))
     this.loadingButton = false
   },
   watch: {
@@ -1459,84 +603,7 @@ export default {
     titleButtonTicket() {
       return this.editedTicketIndex > -1 ? 'Agregar contacto' : 'Generar ticket'
     },
-    categoryErrors() {
-      const errors = []
 
-      if (!this.$v.category.$dirty) return errors
-      !this.$v.category.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    categoryMassiveTicketErrors() {
-      const errors = []
-
-      if (!this.$v.categoryMassiveTicket.$dirty) return errors
-      !this.$v.categoryMassiveTicket.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    priorityErrors() {
-      const errors = []
-
-      if (!this.$v.priority.$dirty) return errors
-      !this.$v.priority.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    statusErrors() {
-      const errors = []
-
-      if (!this.$v.status.$dirty) return errors
-      !this.$v.status.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    operatorErrors() {
-      const errors = []
-
-      if (!this.$v.operator.$dirty) return errors
-      !this.$v.operator.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    statusDetailErrors() {
-      const errors = []
-
-      if (this.editedTicketIndex > -1 && this.checkCloseStatus) {
-        if (!this.$v.statusDetail.$dirty) return errors
-        !this.$v.statusDetail.required && errors.push('Es obligatorio.')
-      }
-
-      return errors
-    },
-    observationErrors() {
-      const errors = []
-
-      if (this.editedTicketIndex > -1 && this.checkCloseStatus) {
-        if (!this.$v.observation.$dirty) return errors
-        !this.$v.observation.required && errors.push('Es obligatorio.')
-        !this.$v.observation.maxLength &&
-          errors.push('No debe sobrepasar los 150 carácteres')
-      }
-
-      return errors
-    },
-    colorLastAccess() {
-      return this.user.last_access_registered_moodle === 'Nunca'
-        ? 'redS'
-        : 'blueS'
-    },
-    colorStatusStudent() {
-      return this.user.isActive ? 'blueS' : 'redS'
-    },
-    iconLastAccess() {
-      return this.user.last_access_registered_moodle === 'Nunca'
-        ? 'mdi-alert-circle'
-        : 'mdi-check-circle'
-    },
-    iconStatusStudent() {
-      return this.user.isActive ? 'mdi-check-circle' : 'mdi-alert-circle'
-    },
     coursesComputed() {
       return this.courses
         .map(course => {
@@ -1617,15 +684,6 @@ export default {
 </script>
 
 <style scoped>
-.v-card--reveal {
-  align-items: flex-start;
-  bottom: 22%;
-  padding: 0.2em;
-  justify-content: left;
-  opacity: 0.9;
-  position: absolute;
-  width: 100%;
-}
 .title-section {
   width: 100px;
   text-align: left;
