@@ -33,13 +33,22 @@
     >
       <template v-slot:default>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="8">
             <base-textfield
               v-model="editedItem.description"
               label="Nombre"
               @input="$v.description.$touch()"
               @blur="$v.description.$touch()"
               :error-messages="descriptionErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="4">
+            <base-textfield
+              v-model="editedItem.categoryCode"
+              label="Código"
+              @input="$v.categoryCode.$touch()"
+              @blur="$v.categoryCode.$touch()"
+              :error-messages="categoryCodeErrors"
             ></base-textfield>
           </v-col>
         </v-row>
@@ -120,6 +129,9 @@ export default {
       minLength: minLength(7),
       maxLength: maxLength(150)
     },
+    categoryCode: {
+      required
+    },
     platform: {
       required
     },
@@ -137,6 +149,10 @@ export default {
       {
         text: 'Nombre',
         value: 'description'
+      },
+      {
+        text: 'Código',
+        value: 'categoryCode'
       },
       {
         text: 'ID moodle',
@@ -180,6 +196,14 @@ export default {
         errors.push('Debe contener máximo 25 caracteres.')
       return errors
     },
+    categoryCodeErrors() {
+      const errors = []
+
+      if (!this.$v.categoryCode.$dirty) return errors
+      !this.$v.categoryCode.required && errors.push('Es obligatorio.')
+
+      return errors
+    },
     platformErrors() {
       const errors = []
 
@@ -204,6 +228,9 @@ export default {
     },
     description() {
       return this.editedItem.description
+    },
+    categoryCode() {
+      return this.editedItem.categoryCode
     },
     platform() {
       return this.editedItem.platform
@@ -286,6 +313,7 @@ export default {
       if (!this.$v.$error) {
         this.loadingSave = true
         let dataStore = Object.assign(this.editedItem, {
+          category_code: this.editedItem.categoryCode,
           platform_id: this.editedItem.platform.id,
           id_category_moodle: this.editedItem.idCategoryMoodle,
           status: 1
