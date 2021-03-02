@@ -6,155 +6,90 @@
       icon="mdi-hammer-wrench"
       title="Curso"
     >
-      <div v-if="loading">
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-heading"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tbody"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tfoot"
-        ></v-skeleton-loader>
-      </div>
-      <v-data-table
-        :search="search"
-        v-else
-        :headers="headers"
-        :items="coursesItems"
-        :items-per-page="5"
-        class="elevation-1"
+      <sigaf-skeleton-loader
+        v-if="loading"
+        :transition="transition"
         :loading="loading"
-        loading-text="Cargando... por favor espere"
-      >
-        <template v-slot:progress>
-          <v-progress-linear
-            color="blueS"
-            :height="3"
-            indeterminate
-          ></v-progress-linear>
-        </template>
-        <template v-slot:top>
-          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
-            <v-text-field
-              v-model="search"
-              color="blueS"
-              clearable
-              flat
-              solo-inverted
-              hide-details
-              prepend-inner-icon="mdi-magnify"
-              label="Buscar"
-            ></v-text-field>
-            <v-spacer></v-spacer>
-            <v-btn depressed large color="blueS" @click="createCourse">
-              <v-icon class="mr-2" size="25">mdi-plus</v-icon>
-              Crear Curso
-            </v-btn>
-          </v-toolbar>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click.prevent="editItem(item)">
-                  mdi-pencil
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Editar</span>
-          </v-tooltip>
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click.prevent="deleteItem(item)">
-                  mdi-delete
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Eliminar</span>
-          </v-tooltip>
-        </template>
-      </v-data-table>
+      ></sigaf-skeleton-loader>
+      <sigaf-datatable
+        v-else
+        :items="coursesItems"
+        :headers="headers"
+        :button-name="buttonName"
+        :loading="loading"
+        :items-per-page="5"
+        @createItem="createCourse"
+        @editItem="editItem"
+        @deleteItem="deleteItem"
+      ></sigaf-datatable>
     </base-card>
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-form>
-        <v-card :loading="loadingSave">
-          <template v-slot:progress>
-            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
-          </template>
-          <v-toolbar dark color="blueS darken-1">
-            <v-toolbar-title>
-              {{ formTitle }}
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <base-textfield
-                  v-model="editedItem.description"
-                  label="Nombre"
-                  @input="$v.description.$touch()"
-                  @blur="$v.description.$touch()"
-                  :error-messages="descriptionErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="8">
-                <base-autocomplete
-                  v-model="editedItem.category"
-                  :items="categoriesItems"
-                  label="Categoría"
-                  item-value="id"
-                  item-text="description"
-                  return-object
-                  @change="$v.category.$touch()"
-                  @blur="$v.category.$touch()"
-                  :error-messages="categoryErrors"
-                ></base-autocomplete>
-              </v-col>
-              <v-col cols="4">
-                <base-textfield
-                  v-model="editedItem.idCourseMoodle"
-                  label="Id Moodle"
-                  required
-                  clearable
-                  @input="$v.idMoodle.$touch()"
-                  @blur="$v.idMoodle.$touch()"
-                  :error-messages="idMoodleErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="close()">
-              CANCELAR
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="blueS"
-              dark
-              depressed
-              @click="save()"
-            >
-              ACEPTAR
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
-    </v-dialog>
+    <sigaf-dialog
+      :dialog="dialog"
+      :form-title="formTitle"
+      :loading="loading"
+      :loading-save="loadingSave"
+      :max-width="maxWidth"
+      @close="close"
+      @save="save"
+    >
+      <template v-slot:default>
+        <v-row>
+          <v-col cols="12">
+            <base-textfield
+              v-model="editedItem.description"
+              label="Nombre"
+              @input="$v.description.$touch()"
+              @blur="$v.description.$touch()"
+              :error-messages="descriptionErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              v-model="editedItem.email"
+              label="Correo electrónico"
+              @input="$v.email.$touch()"
+              @blur="$v.email.$touch()"
+              :error-messages="emailErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              v-model="editedItem.password"
+              label="Contraseña"
+              @input="$v.password.$touch()"
+              @blur="$v.password.$touch()"
+              :error-messages="passwordErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="8">
+            <base-autocomplete
+              v-model="editedItem.category"
+              :items="categoriesItems"
+              label="Categoría"
+              item-value="id"
+              item-text="description"
+              return-object
+              @change="$v.category.$touch()"
+              @blur="$v.category.$touch()"
+              :error-messages="categoryErrors"
+            ></base-autocomplete>
+          </v-col>
+          <v-col cols="4">
+            <base-textfield
+              v-model="editedItem.idCourseMoodle"
+              label="Id Moodle"
+              required
+              clearable
+              @input="$v.idMoodle.$touch()"
+              @blur="$v.idMoodle.$touch()"
+              :error-messages="idMoodleErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+      </template>
+    </sigaf-dialog>
     <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
     </sigaf-snackbar>
     <confirm-dialog
@@ -180,25 +115,39 @@ import {
   maxLength,
   numeric,
   minValue,
-  maxValue
+  maxValue,
+  email
 } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 import SigafSnackbar from '../../components/component/Snackbar'
 import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
+import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
+import SigafDatatable from '../../components/maintenance/SigafDatatable.vue'
+import SigafDialog from '../../components/maintenance/SigafDialog.vue'
 
 export default {
   inject: ['theme'],
   mixins: [validationMixin],
   components: {
     SigafSnackbar,
-    ConfirmDialog
+    ConfirmDialog,
+    SigafSkeletonLoader,
+    SigafDatatable,
+    SigafDialog
   },
   validations: {
     description: {
       required,
       minLength: minLength(10),
       maxLength: maxLength(150)
+    },
+    email: {
+      required,
+      email
+    },
+    password: {
+      required
     },
     category: {
       required
@@ -212,26 +161,32 @@ export default {
   data: () => ({
     dialog: false,
     dialogConfirm: false,
+    buttonName: 'Crear curso',
+    maxWidth: '700px',
     headers: [
       {
         text: 'Nombre',
-        value: 'description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'description'
+      },
+      {
+        text: 'Correo electrónico',
+        value: 'email'
+      },
+      {
+        text: 'Contraseña',
+        value: 'password'
       },
       {
         text: 'ID moodle',
-        value: 'idCourseMoodle',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'idCourseMoodle'
       },
       {
         text: 'Categoría',
-        value: 'category.properties.description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'category.properties.description'
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -263,6 +218,23 @@ export default {
         errors.push('Debe contener máximo 100 caracteres.')
       return errors
     },
+    emailErrors() {
+      const errors = []
+
+      if (!this.$v.email.$dirty) return errors
+      !this.$v.email.required && errors.push('Es obligatorio.')
+      !this.$v.email.email && errors.push('Correo electrónico inválido.')
+
+      return errors
+    },
+    passwordErrors() {
+      const errors = []
+
+      if (!this.$v.password.$dirty) return errors
+      !this.$v.password.required && errors.push('Es obligatorio.')
+
+      return errors
+    },
     categoryErrors() {
       const errors = []
 
@@ -287,6 +259,12 @@ export default {
     },
     description() {
       return this.editedItem.description
+    },
+    email() {
+      return this.editedItem.email
+    },
+    password() {
+      return this.editedItem.password
     },
     category() {
       return this.editedItem.category

@@ -6,153 +6,69 @@
       icon="mdi-hammer-wrench"
       title="Categoría de curso"
     >
-      <div v-if="loading">
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-heading"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tbody"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tfoot"
-        ></v-skeleton-loader>
-      </div>
-      <v-data-table
-        :search="search"
-        v-else
-        :headers="headers"
-        :items="categoriesItems"
-        :items-per-page="5"
+      <sigaf-skeleton-loader
+        v-if="loading"
+        :transition="transition"
         :loading="loading"
-        class="elevation-1"
-        loading-text="Cargando... por favor espere"
-      >
-        <template v-slot:progress>
-          <v-progress-linear
-            color="blueS"
-            :height="3"
-            indeterminate
-          ></v-progress-linear>
-        </template>
-        <template v-slot:top>
-          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
-            <v-text-field
-              v-model="search"
-              color="blueS"
-              clearable
-              flat
-              solo-inverted
-              hide-details
-              prepend-inner-icon="mdi-magnify"
-              label="Buscar"
-            ></v-text-field>
-            <v-spacer></v-spacer>
-            <v-btn depressed large color="blueS" @click="createCategory">
-              <v-icon class="mr-2" size="25">mdi-plus</v-icon>
-              Crear Categoría
-            </v-btn>
-          </v-toolbar>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click.prevent="editItem(item)">
-                  mdi-pencil
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Editar</span>
-          </v-tooltip>
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click.prevent="deleteItem(item)">
-                  mdi-delete
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Eliminar</span>
-          </v-tooltip>
-        </template>
-      </v-data-table>
+      ></sigaf-skeleton-loader>
+      <sigaf-datatable
+        v-else
+        :items="categoriesItems"
+        :headers="headers"
+        :button-name="buttonName"
+        :loading="loading"
+        :items-per-page="5"
+        @createItem="createCategory"
+        @editItem="editItem"
+        @deleteItem="deleteItem"
+      ></sigaf-datatable>
     </base-card>
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-form>
-        <v-card :loading="loadingSave">
-          <template v-slot:progress>
-            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
-          </template>
-          <v-toolbar dark color="blueS darken-1">
-            <v-toolbar-title>
-              {{ formTitle }}
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12">
-                <base-textfield
-                  v-model="editedItem.description"
-                  label="Nombre"
-                  @input="$v.description.$touch()"
-                  @blur="$v.description.$touch()"
-                  :error-messages="descriptionErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="8">
-                <base-autocomplete
-                  v-model="editedItem.platform"
-                  :items="platformsItems"
-                  label="Plataforma"
-                  item-value="id"
-                  item-text="description"
-                  return-object
-                  @change="$v.platform.$touch()"
-                  @blur="$v.platform.$touch()"
-                  :error-messages="platformErrors"
-                ></base-autocomplete>
-              </v-col>
-              <v-col cols="4">
-                <base-textfield
-                  v-model="editedItem.idCategoryMoodle"
-                  label="Id Moodle"
-                  @input="$v.idMoodle.$touch()"
-                  @blur="$v.idMoodle.$touch()"
-                  :error-messages="idMoodleErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="close()">
-              CANCELAR
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="blueS"
-              dark
-              depressed
-              @click="save()"
-            >
-              ACEPTAR
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
-    </v-dialog>
+    <sigaf-dialog
+      :dialog="dialog"
+      :form-title="formTitle"
+      :loading="loading"
+      :loading-save="loadingSave"
+      @close="close"
+      @save="save"
+    >
+      <template v-slot:default>
+        <v-row>
+          <v-col cols="12">
+            <base-textfield
+              v-model="editedItem.description"
+              label="Nombre"
+              @input="$v.description.$touch()"
+              @blur="$v.description.$touch()"
+              :error-messages="descriptionErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="8">
+            <base-autocomplete
+              v-model="editedItem.platform"
+              :items="platformsItems"
+              label="Plataforma"
+              item-value="id"
+              item-text="description"
+              return-object
+              @change="$v.platform.$touch()"
+              @blur="$v.platform.$touch()"
+              :error-messages="platformErrors"
+            ></base-autocomplete>
+          </v-col>
+          <v-col cols="4">
+            <base-textfield
+              v-model="editedItem.idCategoryMoodle"
+              label="Id Moodle"
+              @input="$v.idMoodle.$touch()"
+              @blur="$v.idMoodle.$touch()"
+              :error-messages="idMoodleErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+      </template>
+    </sigaf-dialog>
     <sigaf-snackbar v-model="snackbar" :type="type" :message="message">
     </sigaf-snackbar>
     <confirm-dialog
@@ -184,13 +100,19 @@ import { mapActions, mapGetters } from 'vuex'
 import SigafSnackbar from '../../components/component/Snackbar'
 import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
+import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
+import SigafDatatable from '../../components/maintenance/SigafDatatable.vue'
+import SigafDialog from '../../components/maintenance/SigafDialog.vue'
 
 export default {
   inject: ['theme'],
   mixins: [validationMixin],
   components: {
     SigafSnackbar,
-    ConfirmDialog
+    ConfirmDialog,
+    SigafSkeletonLoader,
+    SigafDatatable,
+    SigafDialog
   },
   validations: {
     description: {
@@ -210,26 +132,23 @@ export default {
   data: () => ({
     dialog: false,
     dialogConfirm: false,
+    buttonName: 'Crear categoría',
     headers: [
       {
         text: 'Nombre',
-        value: 'description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'description'
       },
       {
         text: 'ID moodle',
-        value: 'idCategoryMoodle',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'idCategoryMoodle'
       },
       {
         text: 'Plataforma',
-        value: 'platform.properties.description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'platform.properties.description'
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -332,6 +251,7 @@ export default {
       this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
     },
     editItem(item) {
+      console.log('mostrando item en el papá', item)
       this.getPlatforms()
       this.editedIndex = this.categoriesItems.indexOf(item)
 

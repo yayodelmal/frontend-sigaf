@@ -7,51 +7,12 @@
       title="Ticket"
     >
       <v-col cols="12">
-        <v-toolbar dark color="blueS darken-1" class="mb-1">
-          <v-select
-            v-model="category"
-            :items="categoryItems"
-            label="Categoría"
-            item-value="id"
-            item-text="description"
-            color="blueS"
-            flat
-            solo-inverted
-            hide-details
-            return-object
-            prepend-inner-icon="mdi-filter-outline"
-          >
-          </v-select>
-          <v-spacer />
-          <v-select
-            class="mx-3"
-            v-model="selectedCourse"
-            :items="arrayCourseByCategory"
-            label="Curso"
-            item-value="id"
-            item-text="description"
-            color="blueS"
-            flat
-            solo-inverted
-            hide-details
-            return-object
-            prepend-inner-icon="mdi-filter-outline"
-          >
-          </v-select>
-          <v-spacer />
-          <v-btn
-            :disabled="selectedCourse === null"
-            large
-            depressed
-            color="blueS"
-            @click="findTicketByCourse"
-            :loading="loadingButton"
-          >
-            Buscar
-          </v-btn>
-        </v-toolbar>
+        <sigaf-category-course-toolbar
+          @showTable="showTable = $event"
+          @loading="loading = $event"
+          @selectedCourse="selectedCourse = $event"
+        ></sigaf-category-course-toolbar>
       </v-col>
-
       <v-card v-if="showTable" flat>
         <v-card-title>
           <v-col cols="12">
@@ -59,1065 +20,19 @@
               <v-card-text>
                 <v-row justify="center">
                   <v-col cols="12" sm="12" md="7" lg="6">
-                    <template>
-                      <v-dialog
-                        v-model="dialog"
-                        fullscreen
-                        hide-overlay
-                        transition="dialog-bottom-transition"
-                      >
-                        <template v-slot:activator="{ on }">
-                          <base-button
-                            icon="mdi-plus-circle"
-                            v-on="on"
-                            label="Crear ticket individual"
-                          ></base-button>
-                        </template>
-                        <v-card>
-                          <v-card-title>
-                            <span class="headline">{{ titleTicket }}</span>
-                            <v-spacer></v-spacer>
-                            <v-btn color="blueS" text @click="clearTicket"
-                              >Cancelar</v-btn
-                            >
-                          </v-card-title>
-                          <v-card-text>
-                            <v-container>
-                              <v-stepper alt-labels non-linear v-model="e1">
-                                <v-stepper-header>
-                                  <v-stepper-step
-                                    :color="!completeStepOne ? 'redS' : 'green'"
-                                    dark
-                                    :complete="completeStepOne"
-                                    :rules="[() => rulesValueStepOne]"
-                                    step="1"
-                                    >Destinatario</v-stepper-step
-                                  >
-                                  <v-divider></v-divider>
-                                  <v-stepper-step
-                                    :color="!completeStepTwo ? 'redS' : 'green'"
-                                    dark
-                                    :complete="completeStepTwo"
-                                    :rules="[() => rulesValueStepTwo]"
-                                    step="2"
-                                    >Ticket</v-stepper-step
-                                  >
-                                  <v-divider></v-divider>
-                                  <v-stepper-step
-                                    :color="
-                                      !completeStepThree ? 'redS' : 'green'
-                                    "
-                                    dark
-                                    step="3"
-                                    :complete="completeStepThree"
-                                    :rules="[() => rulesValueStepThree]"
-                                    >Contacto</v-stepper-step
-                                  >
-                                </v-stepper-header>
-                                <v-stepper-items>
-                                  <v-stepper-content step="1">
-                                    <form
-                                      @keydown.enter.prevent="fetchUserByRut()"
-                                    >
-                                      <v-row>
-                                        <v-spacer />
-                                        <v-col cols="10" sm="4" md="4">
-                                          <base-textfield
-                                            label="Rut"
-                                            :disabled="ticketClose"
-                                            required
-                                            color="blueS"
-                                            v-model="rut"
-                                            clearable
-                                            :loading="searchRutLoading"
-                                            hint="Formato 12.345.678-9"
-                                          ></base-textfield>
-                                        </v-col>
-                                        <v-col cols="2" sm="1" md="1">
-                                          <v-btn
-                                            :disabled="ticketClose"
-                                            color="blueS"
-                                            elevation="1"
-                                            fab
-                                            small
-                                            dark
-                                            @click.stop="fetchUserByRut()"
-                                          >
-                                            <v-icon>mdi-magnify</v-icon>
-                                          </v-btn>
-                                        </v-col>
-                                        <v-spacer />
-                                      </v-row>
-                                    </form>
-                                    <div v-if="user !== null">
-                                      <v-row justify="center">
-                                        <v-col
-                                          class="d-flex text-center"
-                                          cols="12"
-                                          sm="8"
-                                          md="6"
-                                          lg="4"
-                                          xl="4"
-                                        >
-                                          <!-- <v-divider vertical></v-divider> -->
-                                          <v-hover
-                                            v-slot:default="{ hover }"
-                                            open-delay="200"
-                                          >
-                                            <v-card
-                                              width="400"
-                                              class="pt-6 mx-auto rounded-t-xl"
-                                              flat
-                                              :elevation="hover ? 16 : 0"
-                                              outlined
-                                            >
-                                              <v-card-text>
-                                                <span
-                                                  class="headline font-weight-bold"
-                                                >
-                                                  {{
-                                                    user.classroom.description
-                                                  }}</span
-                                                ><br />
-                                                <span class="text-caption">
-                                                  Progreso:</span
-                                                ><br />
-                                                <v-avatar size="120">
-                                                  <v-progress-circular
-                                                    :rotate="-90"
-                                                    :size="100"
-                                                    :width="15"
-                                                    :value="
-                                                      getValueProgress(user)
-                                                    "
-                                                    color="blueS"
-                                                  >
-                                                    {{
-                                                      getValueProgress(user)
-                                                    }}%
-                                                  </v-progress-circular>
-                                                </v-avatar>
-                                                <h3 class="headline mb-2">
-                                                  {{
-                                                    user.registered_user.name
-                                                  }}
-                                                </h3>
-                                                <h3 class="mb-2">
-                                                  {{
-                                                    user.registered_user
-                                                      .last_name
-                                                  }}
-                                                  {{
-                                                    user.registered_user
-                                                      .mother_last_name
-                                                  }}
-                                                </h3>
-                                                <div class="blueS--text mb-2">
-                                                  {{
-                                                    user.registered_user.email
-                                                  }}
-                                                </div>
-                                                <div
-                                                  class="redS--text subheading font-weight-bold"
-                                                >
-                                                  {{
-                                                    user.registered_user.mobile
-                                                  }}
-                                                </div>
-                                              </v-card-text>
-                                              <v-expand-transition>
-                                                <div
-                                                  v-if="hover"
-                                                  class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
-                                                  style="height: 78%;"
-                                                >
-                                                  <div
-                                                    class="d-flex flex-column"
-                                                  >
-                                                    <div
-                                                      v-for="section in sectionFiltered"
-                                                      :key="section.id"
-                                                      class="d-flex flex-row"
-                                                    >
-                                                      <div
-                                                        class="px-3 py-2 title-section"
-                                                      >
-                                                        <h6
-                                                          class="text-overline"
-                                                        >
-                                                          {{
-                                                            section.description
-                                                          }}:
-                                                        </h6>
-                                                      </div>
-                                                      <div
-                                                        class="px-1 py-2"
-                                                        v-for="grade in getGrades(
-                                                          section,
-                                                          user.activities
-                                                        )"
-                                                        :key="
-                                                          grade.idActivityMoodle
-                                                        "
-                                                      >
-                                                        <v-tooltip
-                                                          color="white"
-                                                          bottom
-                                                        >
-                                                          <template
-                                                            v-slot:activator="{
-                                                              on
-                                                            }"
-                                                          >
-                                                            <h4 v-on="on">
-                                                              <kbd>{{
-                                                                grade.qualificationMoodle
-                                                              }}</kbd>
-                                                            </h4>
-                                                          </template>
-                                                          <span
-                                                            class="blueS--text darken-2"
-                                                            >{{
-                                                              grade.description
-                                                            }}</span
-                                                          >
-                                                        </v-tooltip>
-                                                      </div>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                              </v-expand-transition>
-                                              <v-divider></v-divider>
-                                              <v-row class="text-center">
-                                                <v-col cols="6" class="mx-auto">
-                                                  <v-card
-                                                    :color="
-                                                      getColorState(user.state)
-                                                    "
-                                                    flat
-                                                    dark
-                                                    class="py-1"
-                                                    ><span>{{
-                                                      user.state
-                                                        ? 'RENUNCIADO'
-                                                        : 'ACTIVO'
-                                                    }}</span></v-card
-                                                  >
-                                                </v-col>
-
-                                                <v-col cols="12">
-                                                  <span
-                                                    class="font-weight-bold"
-                                                  >
-                                                    Última conexión hace
-                                                    {{
-                                                      user.last_access_registered_moodle
-                                                    }}</span
-                                                  >
-                                                </v-col>
-                                              </v-row>
-                                            </v-card>
-                                          </v-hover>
-                                        </v-col>
-                                      </v-row>
-
-                                      <v-row>
-                                        <v-spacer />
-                                        <v-btn
-                                          class="mt-3"
-                                          color="blueS"
-                                          depressed
-                                          dark
-                                          @click="
-                                            () => {
-                                              e1 = 2
-                                              completeStepOne = true
-                                            }
-                                          "
-                                        >
-                                          Continuar
-                                          <v-icon class="ml-3"
-                                            >mdi-arrow-right-bold-circle</v-icon
-                                          >
-                                        </v-btn>
-                                      </v-row>
-                                    </div>
-                                  </v-stepper-content>
-
-                                  <v-stepper-content step="2">
-                                    <v-row>
-                                      <v-col cols="12" sm="4">
-                                        <base-autocomplete
-                                          :disabled="ticketClose"
-                                          :items="sourceTicketItems"
-                                          label="Origen"
-                                          v-model="source"
-                                          item-value="id"
-                                          item-text="description"
-                                          return-object
-                                          @change="setSource($event)"
-                                          @blur="$v.source.$touch()"
-                                          :error-messages="sourceErrors"
-                                        ></base-autocomplete>
-                                      </v-col>
-
-                                      <v-col cols="12" sm="4">
-                                        <base-autocomplete
-                                          :disabled="ticketClose"
-                                          :items="typeTicketItems"
-                                          label="Tipo"
-                                          v-model="type"
-                                          item-value="id"
-                                          item-text="description"
-                                          return-object
-                                          @change="setType($event)"
-                                          @blur="$v.type.$touch()"
-                                          :error-messages="typeErrors"
-                                        ></base-autocomplete>
-                                      </v-col>
-                                      <v-col cols="12" sm="6" md="4">
-                                        <v-menu
-                                          v-model="menu"
-                                          :close-on-content-click="false"
-                                          :nudge-right="40"
-                                          transition="scale-transition"
-                                          offset-y
-                                          min-width="290px"
-                                        >
-                                          <template v-slot:activator="{ on }">
-                                            <base-textfield
-                                              disabled
-                                              v-model="dateSingle"
-                                              label="Fecha apertura"
-                                              readonly
-                                              v-on="on"
-                                            ></base-textfield>
-                                          </template>
-                                          <v-date-picker
-                                            :weekday-format="getDay"
-                                            show-week
-                                            landscape
-                                            locale="es"
-                                            v-model="dateSingle"
-                                            header-color="blueS"
-                                            color="redS"
-                                            @input="menu = false"
-                                          ></v-date-picker>
-                                        </v-menu>
-                                      </v-col>
-                                    </v-row>
-                                    <v-row>
-                                      <v-col cols="12" sm="4">
-                                        <base-autocomplete
-                                          :disabled="ticketClose"
-                                          :items="motiveTicketItems"
-                                          label="Motivo"
-                                          v-model="motive"
-                                          item-value="id"
-                                          item-text="description"
-                                          return-object
-                                          @change="setMotive($event)"
-                                          @blur="$v.motive.$touch()"
-                                          :error-messages="motiveErrors"
-                                        ></base-autocomplete>
-                                      </v-col>
-
-                                      <v-col cols="12" sm="4">
-                                        <base-autocomplete
-                                          :disabled="ticketClose"
-                                          :items="priorityTicketItems"
-                                          label="Prioridad"
-                                          v-model="priority"
-                                          item-value="id"
-                                          item-text="description"
-                                          return-object
-                                          @change="setPriority($event)"
-                                          @blur="$v.priority.$touch()"
-                                          :error-messages="priorityErrors"
-                                        ></base-autocomplete>
-                                      </v-col>
-
-                                      <v-col cols="12" sm="4">
-                                        <base-autocomplete
-                                          :disabled="ticketClose"
-                                          :items="userItems"
-                                          label="Operador"
-                                          v-model="operator"
-                                          item-value="id"
-                                          item-text="name"
-                                          return-object
-                                          @change="setOperator($event)"
-                                          @blur="$v.operator.$touch()"
-                                          :error-messages="operatorErrors"
-                                        ></base-autocomplete>
-                                      </v-col>
-                                    </v-row>
-                                    <v-row>
-                                      <v-spacer />
-                                      <v-btn
-                                        dark
-                                        depressed
-                                        color="grayS"
-                                        @click="e1 = 1"
-                                      >
-                                        <v-icon left
-                                          >mdi-arrow-left-bold-circle</v-icon
-                                        >
-                                        Atrás</v-btn
-                                      >
-                                      <v-btn
-                                        class="ml-3"
-                                        color="blueS"
-                                        depressed
-                                        dark
-                                        @click="checkStepTwo"
-                                      >
-                                        Continuar
-                                        <v-icon class="ml-3"
-                                          >mdi-arrow-right-bold-circle</v-icon
-                                        >
-                                      </v-btn>
-                                    </v-row>
-                                  </v-stepper-content>
-                                  <v-stepper-content step="3">
-                                    <v-row>
-                                      <v-col cols="12" sm="4" md="3">
-                                        <base-autocomplete
-                                          :disabled="ticketClose"
-                                          :items="statusDetailTicketItems"
-                                          label="Intento de contacto"
-                                          v-model="statusDetail"
-                                          item-value="id"
-                                          item-text="description"
-                                          return-object
-                                          @change="setStatusDetail($event)"
-                                          @blur="$v.statusDetail.$touch()"
-                                          :error-messages="statusDetailErrors"
-                                        ></base-autocomplete>
-                                      </v-col>
-
-                                      <v-col cols="12" sm="8" md="9">
-                                        <v-textarea
-                                          :disabled="ticketClose"
-                                          color="blueS"
-                                          v-model="observation"
-                                          dense
-                                          outlined
-                                          auto-grow
-                                          counter
-                                          clearable
-                                          clear-icon="mdi-cancel"
-                                          label="Observaciones"
-                                          rows="1"
-                                          @input="$v.observation.$touch()"
-                                          @blur="$v.observation.$touch()"
-                                          :error-messages="observationErrors"
-                                        ></v-textarea>
-                                      </v-col>
-                                    </v-row>
-                                    <v-row>
-                                      <v-col>
-                                        <v-card hover>
-                                          <v-card-title :class="'blueS--text'">
-                                            Intentos de contacto
-                                          </v-card-title>
-                                          <v-card-text>
-                                            <v-simple-table
-                                              fixed-header
-                                              height="200px"
-                                            >
-                                              <template v-slot:default>
-                                                <thead>
-                                                  <tr>
-                                                    <th class="text-left">#</th>
-                                                    <th class="text-left">
-                                                      Intento
-                                                    </th>
-                                                    <th
-                                                      style="width: 400px;"
-                                                      class="text-left"
-                                                    >
-                                                      Observación
-                                                    </th>
-                                                    <th class="text-left">
-                                                      Fecha
-                                                    </th>
-                                                    <th class="text-left">
-                                                      Operador
-                                                    </th>
-                                                  </tr>
-                                                </thead>
-                                                <tbody>
-                                                  <tr
-                                                    v-for="(item,
-                                                    index) in ticketDetails"
-                                                    :key="item.name"
-                                                  >
-                                                    <td>{{ index + 1 }}</td>
-                                                    <td
-                                                      :class="
-                                                        item.statusDetailTicket
-                                                          .description ===
-                                                        'Fallido'
-                                                          ? 'redS--text'
-                                                          : 'success--text'
-                                                      "
-                                                    >
-                                                      {{
-                                                        item.statusDetailTicket
-                                                          .description
-                                                      }}
-                                                    </td>
-                                                    <td>
-                                                      {{ item.comment }}
-                                                    </td>
-                                                    <td>
-                                                      {{ item.createdAt }}
-                                                    </td>
-                                                    <td>
-                                                      {{
-                                                        item.userCreated.name
-                                                      }}
-                                                    </td>
-                                                  </tr>
-                                                </tbody>
-                                              </template>
-                                            </v-simple-table>
-                                          </v-card-text>
-                                        </v-card>
-                                      </v-col>
-                                    </v-row>
-                                    <v-row>
-                                      <v-spacer />
-                                      <v-col cols="12" sm="6" md="4" lg="3">
-                                        <base-autocomplete
-                                          :disabled="ticketClose"
-                                          :items="statusTicketItems"
-                                          label="Estado"
-                                          v-model="status"
-                                          item-value="id"
-                                          item-text="description"
-                                          return-object
-                                          @change="setStatus($event)"
-                                          @blur="$v.status.$touch()"
-                                          :error-messages="statusErrors"
-                                        ></base-autocomplete>
-                                      </v-col>
-                                    </v-row>
-                                    <v-row>
-                                      <v-spacer />
-                                      <v-btn
-                                        dark
-                                        depressed
-                                        color="grayS"
-                                        @click="e1 = 2"
-                                      >
-                                        <v-icon left
-                                          >mdi-arrow-left-bold-circle</v-icon
-                                        >
-                                        Atrás</v-btn
-                                      >
-                                      <v-btn
-                                        class="ml-3"
-                                        color="blueS"
-                                        depressed
-                                        :dark="!ticketClose"
-                                        :disabled="ticketClose"
-                                        @click="saveTicket()"
-                                      >
-                                        Guardar
-                                        <v-icon class="ml-3"
-                                          >mdi-arrow-right-bold-circle</v-icon
-                                        >
-                                      </v-btn>
-                                    </v-row>
-                                  </v-stepper-content>
-                                </v-stepper-items>
-                              </v-stepper>
-                            </v-container>
-                          </v-card-text>
-                        </v-card>
-                      </v-dialog>
-                    </template>
+                    <base-button
+                      icon="mdi-plus-circle"
+                      label="Crear ticket individual"
+                      @click="openCreateSingleModal"
+                    ></base-button>
                   </v-col>
                   <v-col cols="12" sm="12" md="5" lg="6">
-                    <template>
-                      <v-dialog
-                        v-model="dialogMassive"
-                        fullscreen
-                        hide-overlay
-                        transition="dialog-bottom-transition"
-                      >
-                        <template v-slot:activator="{ on }">
-                          <base-button
-                            v-if="isAdmin || isDeveloper"
-                            icon="mdi-plus-circle"
-                            v-on="on"
-                            label="Crear Ticket Masivo"
-                            @click="
-                              fetchActivities()
-                              findUsersByCourse()
-                            "
-                          ></base-button>
-                        </template>
-                        <v-card>
-                          <v-card-title>
-                            <span class="headline">Ticket masivo</span>
-                            <v-spacer />
-                            <v-btn color="blueS" text @click="clearTicket"
-                              >Cancelar</v-btn
-                            >
-                          </v-card-title>
-                          <v-card-text>
-                            <v-stepper alt-labels non-linear v-model="em1">
-                              <v-stepper-header>
-                                <v-stepper-step
-                                  :color="!completeStepOne ? 'redS' : 'green'"
-                                  dark
-                                  :complete="completeStepOne"
-                                  :rules="[() => rulesValueStepOne]"
-                                  step="1"
-                                  >Destinatarios</v-stepper-step
-                                >
-                                <v-divider></v-divider>
-                                <v-stepper-step
-                                  :color="!completeStepTwo ? 'redS' : 'green'"
-                                  dark
-                                  step="2"
-                                  :complete="completeStepTwo"
-                                  :rules="[() => rulesValueStepTwo]"
-                                  >Ticket</v-stepper-step
-                                >
-                                <v-divider></v-divider>
-                                <v-stepper-step
-                                  :color="!completeStepThree ? 'redS' : 'green'"
-                                  dark
-                                  step="3"
-                                  :complete="completeStepThree"
-                                  :rules="[() => rulesValueStepThree]"
-                                  >Detalle</v-stepper-step
-                                >
-                              </v-stepper-header>
-                              <v-stepper-items>
-                                <v-stepper-content step="1">
-                                  <v-row>
-                                    <v-col cols="8">
-                                      <v-autocomplete
-                                        v-model="selectedActivities"
-                                        :items="filterActivities"
-                                        chips
-                                        color="blueS"
-                                        flat
-                                        solo-inverted
-                                        hide-details
-                                        return-object
-                                        label="Filtrar actividades pendientes"
-                                        item-text="description"
-                                        item-value="description"
-                                        multiple
-                                      >
-                                        <template v-slot:selection="data">
-                                          <v-chip
-                                            small
-                                            v-bind="data.attrs"
-                                            :input-value="data.selected"
-                                            close
-                                            @click="data.select"
-                                            @click:close="remove(data.item)"
-                                          >
-                                            {{ data.item.description }}
-                                          </v-chip>
-                                        </template>
-                                        <template v-slot:item="data">
-                                          <template>
-                                            <v-list-item-content>
-                                              <v-list-item-title
-                                                v-html="data.item.description"
-                                              >
-                                              </v-list-item-title>
-                                              <v-list-item-subtitle
-                                                v-html="
-                                                  data.item.section.description
-                                                "
-                                              ></v-list-item-subtitle>
-                                            </v-list-item-content>
-                                          </template>
-                                        </template>
-                                      </v-autocomplete>
-                                    </v-col>
-                                    <v-col cols="2">
-                                      <v-switch
-                                      class="ml-5 mb-3"
-                                        label="Nunca"
-                                        color="blueS"
-                                        v-model="never"
-                                        hide-details
-                                      ></v-switch>
-                                    </v-col>
-                                    <v-col cols="2">
-                                      <v-btn
-                                        large
-                                        color="blueS"
-                                        depressed
-                                        dark
-                                        @click="findUserByActivityFiltered"
-                                      >
-                                        Buscar
-                                        <v-icon class="ml-3"
-                                          >mdi-arrow-right-bold-circle</v-icon
-                                        >
-                                      </v-btn>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row justify="center">
-                                    <!-- <v-autocomplete
-                                      :items="filterActivities"
-                                      label="Filtrar Actividad"
-                                      item-text="description"
-                                      item-value="description"
-                                      return-object
-                                      v-model="activityItem"
-                                      @change="findUserByActivity()"
-                                      color="blueS"
-                                      outlined
-                                    ></v-autocomplete> -->
-                                    <!--  <v-col cols="12" sm="5" md="5" lg="4">
-                                    <base-autocomplete
-                                        v-model="categoryMassiveTicket"
-                                        :items="selectedCourses"
-                                        label="Curso"
-                                        item-value="id"
-                                        item-text="description"
-                                        @change="
-                                          filterUsersByCategoriesTicket()
-                                          $v.categoryMassiveTicket.$touch()
-                                        "
-                                        return-object
-                                        outlined
-                                        @blur="
-                                          $v.categoryMassiveTicket.$touch()
-                                        "
-                                        :error-messages="
-                                          categoryMassiveTicketErrors
-                                        "
-                                      >
-                                      </base-autocomplete>
-                                    </v-col> -->
-                                    <v-col cols="12" sm="4" md="4" lg="4">
-                                      <v-autocomplete
-                                        :items="classroomItems"
-                                        label="Filtrar aula"
-                                        chips
-                                        dense
-                                        item-text="description"
-                                        item-value="description"
-                                        return-object
-                                        v-model="classrooms"
-                                        @change="
-                                          filterUsersByCategoriesTicket()
-                                        "
-                                        multiple
-                                        color="blueS"
-                                        outlined
-                                      >
-                                        <template v-slot:selection="data">
-                                          <v-chip
-                                            :key="JSON.stringify(data.item)"
-                                            v-bind="data.attrs"
-                                            :input-value="data.selected"
-                                            :disabled="data.disabled"
-                                            close
-                                            small
-                                            @click:close="
-                                              data.parent.selectItem(data.item)
-                                            "
-                                          >
-                                            <v-avatar
-                                              class="redS whiteS--text"
-                                              left
-                                              v-text="
-                                                `${data.item.description
-                                                  .split(' ')[0]
-                                                  .slice(0, 1)
-                                                  .toUpperCase()}${data.item.description
-                                                  .split(' ')[1]
-                                                  .slice(0, 2)
-                                                  .toUpperCase()}`
-                                              "
-                                            ></v-avatar>
-                                            {{ data.item.description }}
-                                          </v-chip>
-                                        </template></v-autocomplete
-                                      >
-                                    </v-col>
-                                    <v-col cols="12" sm="3" md="3" lg="4">
-                                      <v-text-field
-                                        v-model="searchMassiveTicket"
-                                        append-icon="mdi-magnify"
-                                        label="Buscar"
-                                        color="blueS"
-                                        dense
-                                        outlined
-                                      ></v-text-field>
-                                    </v-col>
-                                  </v-row>
-                                  <v-card>
-                                    <div v-if="loadingUsers">
-                                      <v-skeleton-loader
-                                        :loading="loading"
-                                        :transition="transition"
-                                        class="mx-auto"
-                                        type="table-tbody"
-                                      ></v-skeleton-loader>
-                                      <v-skeleton-loader
-                                        :loading="loading"
-                                        :transition="transition"
-                                        class="mx-auto"
-                                        type="table-tfoot"
-                                      ></v-skeleton-loader>
-                                    </div>
-
-                                    <v-data-table
-                                      v-else
-                                      v-model="selected"
-                                      :headers="headersTicket"
-                                      :items="filterUsers"
-                                      item-key="id"
-                                      show-select
-                                      class="elevation-1"
-                                      :search="searchMassiveTicket"
-                                      disable-pagination
-                                      hide-default-footer
-                                    >
-                                    </v-data-table>
-                                  </v-card>
-
-                                  <v-row>
-                                    <v-spacer />
-                                    <v-btn
-                                      :disabled="loadingUsers"
-                                      class="mt-3"
-                                      color="blueS"
-                                      depressed
-                                      dark
-                                      @click="checkStepOne"
-                                    >
-                                      Continuar
-                                      <v-icon class="ml-3"
-                                        >mdi-arrow-right-bold-circle</v-icon
-                                      >
-                                    </v-btn>
-                                  </v-row>
-                                </v-stepper-content>
-                                <v-stepper-content step="2">
-                                  <v-row>
-                                    <v-col cols="12" sm="4">
-                                      <base-autocomplete
-                                        :items="sourceTicketItems"
-                                        label="Origen"
-                                        v-model="source"
-                                        item-value="id"
-                                        item-text="description"
-                                        return-object
-                                        @change="$v.source.$touch()"
-                                        @blur="$v.source.$touch()"
-                                        :error-messages="sourceErrors"
-                                      ></base-autocomplete>
-                                    </v-col>
-
-                                    <v-col cols="12" sm="4">
-                                      <base-autocomplete
-                                        :items="typeTicketItems"
-                                        label="Tipo"
-                                        v-model="type"
-                                        item-value="id"
-                                        item-text="description"
-                                        return-object
-                                        @change="$v.type.$touch()"
-                                        @blur="$v.type.$touch()"
-                                        :error-messages="typeErrors"
-                                      ></base-autocomplete>
-                                    </v-col>
-                                    <v-col cols="12" sm="6" md="4">
-                                      <v-menu
-                                        v-model="menu"
-                                        :close-on-content-click="false"
-                                        :nudge-right="40"
-                                        transition="scale-transition"
-                                        offset-y
-                                        min-width="290px"
-                                      >
-                                        <template v-slot:activator="{ on }">
-                                          <base-textfield
-                                            disabled
-                                            v-model="dateMassive"
-                                            label="Fecha apertura"
-                                            readonly
-                                            v-on="on"
-                                          ></base-textfield>
-                                        </template>
-                                        <v-date-picker
-                                          :weekday-format="getDay"
-                                          show-week
-                                          landscape
-                                          locale="es"
-                                          v-model="dateMassive"
-                                          header-color="blueS"
-                                          color="redS"
-                                          @input="menu = false"
-                                        ></v-date-picker>
-                                      </v-menu>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row>
-                                    <v-col cols="12" sm="4">
-                                      <base-autocomplete
-                                        :items="motiveTicketItems"
-                                        label="Motivo"
-                                        v-model="motive"
-                                        item-value="id"
-                                        item-text="description"
-                                        return-object
-                                        @change="$v.motive.$touch()"
-                                        @blur="$v.motive.$touch()"
-                                        :error-messages="motiveErrors"
-                                      ></base-autocomplete>
-                                    </v-col>
-                                    <v-col cols="12" sm="4">
-                                      <base-autocomplete
-                                        :items="priorityTicketItems"
-                                        label="Prioridad"
-                                        v-model="priority"
-                                        item-value="id"
-                                        item-text="description"
-                                        return-object
-                                        @change="$v.priority.$touch()"
-                                        @blur="$v.priority.$touch()"
-                                        :error-messages="priorityErrors"
-                                      ></base-autocomplete>
-                                    </v-col>
-                                    <v-col cols="12" sm="4">
-                                      <base-autocomplete
-                                        :items="userItems"
-                                        label="Operador"
-                                        v-model="operator"
-                                        item-value="id"
-                                        item-text="name"
-                                        return-object
-                                        @change="$v.operator.$touch()"
-                                        @blur="$v.operator.$touch()"
-                                        :error-messages="operatorErrors"
-                                      ></base-autocomplete>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row>
-                                    <v-spacer />
-                                    <v-btn
-                                      dark
-                                      depressed
-                                      color="grayS"
-                                      @click="em1 = 1"
-                                    >
-                                      <v-icon left
-                                        >mdi-arrow-left-bold-circle</v-icon
-                                      >
-                                      Atrás</v-btn
-                                    >
-                                    <v-btn
-                                      class="ml-3"
-                                      color="blueS"
-                                      depressed
-                                      dark
-                                      @click="checkStepTwo"
-                                    >
-                                      Continuar
-                                      <v-icon class="ml-3"
-                                        >mdi-arrow-right-bold-circle</v-icon
-                                      >
-                                    </v-btn>
-                                  </v-row>
-                                </v-stepper-content>
-
-                                <v-stepper-content step="3">
-                                  <v-row>
-                                    <v-col cols="12" sm="4" md="4">
-                                      <base-autocomplete
-                                        prepend-icon="mdi-comment"
-                                        :items="statusDetailTicketItems"
-                                        label="Intento de contacto"
-                                        v-model="statusDetailMasive"
-                                        item-value="id"
-                                        item-text="description"
-                                        return-object
-                                        v-if="showStatusDetailTicket"
-                                      ></base-autocomplete>
-                                    </v-col>
-                                    <v-col cols="12" sm="8" md="8">
-                                      <v-textarea
-                                        v-model="observationMassive"
-                                        color="blueS"
-                                        dense
-                                        auto-grow
-                                        counter
-                                        v-if="showObservation"
-                                        clearable
-                                        clear-icon="mdi-cancel"
-                                        label="Observaciones"
-                                        rows="1"
-                                        prepend-icon="mdi-comment"
-                                      ></v-textarea>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row>
-                                    <v-spacer />
-                                    <v-col cols="12" md="4">
-                                      <base-autocomplete
-                                        :items="statusTicketItems"
-                                        label="Estado"
-                                        v-model="status"
-                                        item-value="id"
-                                        item-text="description"
-                                        return-object
-                                        @change="$v.status.$touch()"
-                                        @blur="$v.status.$touch()"
-                                        :error-messages="statusErrors"
-                                      ></base-autocomplete>
-                                    </v-col>
-                                  </v-row>
-                                  <v-row>
-                                    <v-spacer />
-                                    <v-btn
-                                      dark
-                                      depressed
-                                      color="grayS"
-                                      @click="em1 = 2"
-                                    >
-                                      <v-icon left
-                                        >mdi-arrow-left-bold-circle</v-icon
-                                      >
-                                      Atrás</v-btn
-                                    >
-                                    <v-btn
-                                      :disabled="ticketClose"
-                                      class="ml-3"
-                                      color="blueS"
-                                      depressed
-                                      :dark="ticketClose"
-                                      @click="saveMassiveTicket()"
-                                    >
-                                      Generar tickets
-                                      <v-icon class="ml-3"
-                                        >mdi-arrow-right-bold-circle</v-icon
-                                      >
-                                    </v-btn>
-                                  </v-row>
-                                </v-stepper-content>
-                              </v-stepper-items>
-                            </v-stepper>
-                          </v-card-text>
-                        </v-card>
-                      </v-dialog>
-                    </template>
+                    <base-button
+                      v-if="isAdmin || isDeveloper"
+                      icon="mdi-plus-circle"
+                      label="Crear Ticket Masivo"
+                      @click="handleCreateMultipleTickets"
+                    ></base-button>
                   </v-col>
                 </v-row>
               </v-card-text>
@@ -1280,7 +195,49 @@
         </v-card-actions>
       </v-card>
 
-      <v-snackbar color="blueS" v-model="snackbar" :timeout="timeout">
+      <sigaf-create-single-ticket
+        v-if="showSingleCreateModal"
+        v-model="singleCreateModal"
+        :selectedCourse="selectedCourse"
+        @closeModal="closeCreatedSingleModal($event)"
+      ></sigaf-create-single-ticket>
+
+      <sigaf-edit-single-ticket
+        v-if="showSingleEditModal"
+        v-model="singleEditModal"
+        :selectedCourse="selectedCourse"
+        :ticket="editedTicketItem"
+        :ticket-details="editedTicketDetails"
+        @closeModal="closeEditedSingleModal($event)"
+      ></sigaf-edit-single-ticket>
+
+      <v-overlay
+        :value="overlayCreateMultipleTicket"
+        color="grayS"
+        :opacity="opacity"
+        z-index="99"
+      >
+        <h3 class="text-body-1 text-center mb-16">
+          {{ overlayMessageCreateMultipleTicket }}
+        </h3>
+        <div class="text-center">
+          <v-progress-circular indeterminate size="64"> </v-progress-circular>
+        </div>
+      </v-overlay>
+      <sigaf-create-multiple-ticket
+        v-if="showMultipleCreateModal"
+        v-model="multipleCreateModal"
+        :selectedCourse="selectedCourse"
+        :courseRegisteredUsers="courseRegisteredUserItems"
+      >
+      </sigaf-create-multiple-ticket>
+
+      <v-snackbar
+        @snackbar="setSnackbar($event)"
+        color="blueS"
+        v-model="snackbar"
+        :timeout="timeout"
+      >
         {{ message }}
         <v-btn dark text @click="snackbar = false">
           Cerrar
@@ -1343,13 +300,18 @@
 </template>
 
 <script>
-import axios from '../services/axios'
-import Ticket from '../models/Ticket'
-import DetailTicket from '../models/DetailTicket'
 import { validationMixin } from 'vuelidate'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
+
+import axios from '../services/axios'
+import Ticket from '../models/Ticket'
+import DetailTicket from '@/models/DetailTicket'
 import ConfirmDialog from '../components/component/ConfirmCard'
+import SigafCategoryCourseToolbar from '../components/utility/SigafCategoryCourseToolbar.vue'
+import SigafCreateSingleTicket from '@/components/ticket/single/SigafCreateSingleTicket.vue'
+import SigafEditSingleTicket from '@/components/ticket/single/SigafEditSingleTicket.vue'
+import SigafCreateMultipleTicket from '@/components/ticket/multiple/SigafCreateMultipleTicket.vue'
 
 Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
@@ -1362,7 +324,11 @@ export default {
   inject: ['theme'],
   mixins: [validationMixin],
   components: {
-    ConfirmDialog
+    ConfirmDialog,
+    SigafCategoryCourseToolbar,
+    SigafCreateSingleTicket,
+    SigafEditSingleTicket,
+    SigafCreateMultipleTicket
   },
   validations: {
     category: {
@@ -1372,15 +338,6 @@ export default {
       required
     },
     priority: {
-      required
-    },
-    source: {
-      required
-    },
-    type: {
-      required
-    },
-    motive: {
       required
     },
     status: {
@@ -1400,6 +357,10 @@ export default {
   },
   data() {
     return {
+      singleCreateModal: false,
+      singleEditModal: false,
+      multipleCreateModal: false,
+      showMultipleCreateModal: false,
       completeStepOne: false,
       completeStepTwo: false,
       completeStepThree: false,
@@ -1561,10 +522,7 @@ export default {
       category: null,
       categoryMassiveTicket: null,
       priority: null,
-      type: null,
-      motive: null,
       status: null,
-      source: null,
       operator: null,
       statusDetail: null,
       statusDetailMasive: null,
@@ -1593,11 +551,12 @@ export default {
       snackbar: false,
       timeout: 3000,
       editedTicketIndex: -1,
-      editedTicketItem: new Ticket(),
+      editedTicketItem: null,
       defaultTicketItem: new Ticket(),
       editedDetailTicketItem: new DetailTicket(),
       defaultDetailTicketItem: new DetailTicket(),
       editItem_: new Ticket(),
+      ticketDetailsItems: [],
       dialogConfirm: false,
       openTicket: true,
       closeTicket: false,
@@ -1619,7 +578,14 @@ export default {
       loadingButton: false,
       loadingUsers: false,
       selectedActivities: [],
-      never: false
+      never: false,
+      test: {},
+      //!nueva data
+      editedTicketDetails: null,
+      showSingleEditModal: false,
+      showSingleCreateModal: false,
+      overlayCreateMultipleTicket: false,
+      overlayMessageCreateMultipleTicket: ''
     }
   },
   methods: {
@@ -1654,8 +620,22 @@ export default {
       fetchActivities: 'activity/fetchActivities',
       findUserByActivity:
         'courseRegisteredUser/findCourseRegisteredUserByActivity',
-      findUsersByPendingActivity: 'activity/findUserByPendingActivity'
+      findUsersByPendingActivity: 'activity/findUserByPendingActivity',
+      findLogEditingTicketByTicket:
+        'logEditingTicket/findLogEditingTicketByTicket',
+      postLogEditingTicket: 'logEditingTicket/postLogEditingTicket',
+      findTicketDetailByTicket: 'ticket/findTicketDetailByTicket'
     }),
+    ...mapMutations({
+      PUT_TICKET: 'ticket/PUT_TICKET'
+    }),
+    openCreateSingleModal() {
+      this.showSingleCreateModal = true
+      this.singleCreateModal = true
+    },
+    setSnackbar(item) {
+      console.log('item', item)
+    },
 
     remove(item) {
       console.log(item.id)
@@ -1668,7 +648,6 @@ export default {
       if (index >= 0) this.selectedActivities.splice(index, 1)
     },
     async findUserByActivityFiltered() {
-
       this.loadingUsers = true
       const idMoodleActivity = this.selectedActivities.map(activity => {
         return activity.idActivityMoodle
@@ -1697,7 +676,7 @@ export default {
 
     async findUsersByCourse() {
       this.loadingUsers = true
-      await this.fetchUsersByCourse(this.selectedCourse)
+
       this.filterUsersByCategoriesTicket()
       this.loadingUsers = false
     },
@@ -1732,21 +711,9 @@ export default {
     showTooltipSearch(item) {
       return item.close ? 'Ver ticket' : 'Agregar contacto'
     },
-    setSource(value) {
-      this.editedTicketItem.sourceTicket = value
-      this.$v.source.$touch()
-    },
     setPriority(value) {
       this.editedTicketItem.prioriryTicket = value
       this.$v.priority.$touch()
-    },
-    setType(value) {
-      this.editedTicketItem.typeTicket = value
-      this.$v.type.$touch()
-    },
-    setMotive(value) {
-      this.editedTicketItem.motiveTicket = value
-      this.$v.motive.$touch()
     },
     setStatus(value) {
       this.editedTicketItem.statusTicket = value
@@ -1875,35 +842,45 @@ export default {
         }
       }
     },
-    async editItem(ticket) {
-      const localTicket = ticket.properties
+    async editItem(item) {
+      const ticket = item.properties
+      const response = await this.findLogEditingTicketByTicket(ticket.id)
+      if (response.statusCode === 204) {
+        const res = await this.findTicket(ticket)
+        const version = res._data.properties.version
 
-      this.priority = localTicket.priorityTicket
-      this.type = localTicket.typeTicket
-      this.motive = localTicket.motiveTicket
-      this.status = localTicket.statusTicket
-      this.source = localTicket.sourceTicket
-      this.operator = localTicket.userAssigned
-      this.rut = localTicket.courseRegisteredUser.registered_user.rut
+        if (version !== ticket.version) {
+          this.PUT_TICKET(res._data)
+        }
+        await this.postLogEditingTicket({
+          ticket_id: ticket.id,
+          user_id: this.loggedUser.id
+        })
 
-      const user = localTicket.courseRegisteredUser
+        const url = item.relationships.links.href
 
-      this.editedTicketIndex = this.tickets.findIndex(
-        find => find.properties.id === localTicket.id
-      )
+        const { _data } = await this.findTicketDetailByTicket(url)
 
-      this.selectCourse(user)
+        this.showSingleEditModal = true
 
-      this.editItem_ = Object.assign({}, localTicket)
-      this.editedTicketItem.id = localTicket.id
-
-      this.ticketClose = ticket.close
-      this.checkCloseStatus = true
-
-      await this.fetchTicketDetails(this.editItem_)
-
-      this.dialog = true
-      this.e1 = 3
+        if (_data) {
+          setTimeout(() => {
+            this.editedTicketDetails = _data.relationships.collection.data
+            this.editedTicketItem = item
+            this.singleEditModal = true
+          }, 200)
+        }
+      }
+    },
+    async handleCreateMultipleTickets() {
+      this.overlayCreateMultipleTicket = true
+      this.overlayMessageCreateMultipleTicket = `Buscando actividades del curso ${this.selectedCourse.description}...`
+      await this.fetchActivities()
+      this.overlayMessageCreateMultipleTicket = `Obteniendo alumnos del curso ${this.selectedCourse.description}...`
+      await this.fetchUsersByCourse(this.selectedCourse)
+      this.multipleCreateModal = true
+      this.showMultipleCreateModal = true
+      this.overlayCreateMultipleTicket = false
     },
     async filterUsersByCategories(users) {
       if (this.category !== null) {
@@ -2154,6 +1131,15 @@ export default {
         this.clearTicket()
       }, 300)
     },
+    closeEditedSingleModal(event) {
+      this.editedTicketItem = null
+      this.singleEditModal = event
+      this.showSingleEditModal = event
+    },
+    closeCreatedSingleModal(event) {
+      this.singleCreateModal = event
+      this.showSingleCreateModal = event
+    },
     close() {
       this.dialogConfirm = false
       setTimeout(() => {
@@ -2304,24 +1290,9 @@ export default {
       setTimeout(() => {
         this.rulesValueStepTwo = true
 
-        if (!this.$v.source.required) {
-          this.$v.source.$touch()
-          this.rulesValueStepTwo = this.$v.source.required
-        }
-
         if (!this.$v.priority.required) {
           this.$v.priority.$touch()
           this.rulesValueStepTwo = this.$v.priority.required
-        }
-
-        if (!this.$v.type.required) {
-          this.$v.type.$touch()
-          this.rulesValueStepTwo = this.$v.type.required
-        }
-
-        if (!this.$v.motive.required) {
-          this.$v.motive.$touch()
-          this.rulesValueStepTwo = this.$v.motive.required
         }
 
         if (!this.$v.operator.required) {
@@ -2359,15 +1330,12 @@ export default {
     this.fetchDataCourses()
     this.fetchDataCategories()
     //this.filterUsersByCategories()
-    this.fetchMotiveTicket()
-    this.fetchPriorityTicket()
-    this.fetchSourceTicket()
-    this.fetchTypeTicket()
-    this.fetchUser()
-    this.fetchStatusTicket()
+    // this.fetchPriorityTicket()
+    //  this.fetchUser()
+    //this.fetchStatusTicket()
     this.fetchClassroom()
-    this.fetchStatusDetailTicket()
-    this.fetchDetailTicket()
+    // this.fetchStatusDetailTicket()
+    // this.fetchDetailTicket()
     //   this.fetchItems().then(() => (this.loading = false))
     this.loadingButton = false
   },
@@ -2420,7 +1388,7 @@ export default {
       userLog: 'auth/user',
       statusDetailTicketItems: 'statusDetailTicket/statusDetailTickets',
       savedTicket: 'ticket/getLastTicket',
-      ticketDetails: 'ticket/ticketDetailsByTicket',
+      //ticketDetails: 'ticket/ticketDetailsByTicket',
       loggedUser: 'auth/user',
       isAdmin: 'auth/isAdmin',
       isDeveloper: 'auth/isDeveloper',
@@ -2512,30 +1480,6 @@ export default {
 
       if (!this.$v.priority.$dirty) return errors
       !this.$v.priority.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    sourceErrors() {
-      const errors = []
-
-      if (!this.$v.source.$dirty) return errors
-      !this.$v.source.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    typeErrors() {
-      const errors = []
-
-      if (!this.$v.type.$dirty) return errors
-      !this.$v.type.required && errors.push('Es obligatorio.')
-
-      return errors
-    },
-    motiveErrors() {
-      const errors = []
-
-      if (!this.$v.motive.$dirty) return errors
-      !this.$v.motive.required && errors.push('Es obligatorio.')
 
       return errors
     },

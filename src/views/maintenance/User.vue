@@ -4,183 +4,101 @@
       color="blueS"
       class="px-5 py-3"
       icon="mdi-hammer-wrench"
-      title="Usuarios"
+      title="Usuario"
     >
-      <div v-if="loading">
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-heading"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tbody"
-        ></v-skeleton-loader>
-        <v-skeleton-loader
-          :loading="loading"
-          :transition="transition"
-          class="mx-auto"
-          type="table-tfoot"
-        ></v-skeleton-loader>
-      </div>
-      <v-data-table
-        v-else
-        :headers="headers"
-        :items="usersItems"
-        :search="search"
-        class="elevation-1"
+      <sigaf-skeleton-loader
+        v-if="loading"
+        :transition="transition"
         :loading="loading"
-        loading-text="Cargando... por favor espere"
-      >
-        <template v-slot:progress>
-          <v-progress-linear
-            :height="3"
-            color="blueS"
-            indeterminate
-          ></v-progress-linear>
-        </template>
-        <template v-slot:top>
-          <v-toolbar tile dark color="blueS darken-1" class="mb-1">
-            <v-text-field
-              v-model="search"
-              color="blueS"
-              clearable
-              flat
-              solo-inverted
-              hide-details
-              prepend-inner-icon="mdi-magnify"
-              label="Buscar"
-            ></v-text-field>
-            <v-spacer></v-spacer>
-            <v-btn depressed large color="blueS" @click="getRoles()">
-              <v-icon class="mr-2" size="25">mdi-plus</v-icon>
-              Crear usuario
-            </v-btn>
-          </v-toolbar>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click="editItem(item)">
-                  mdi-pencil
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Editar</span>
-          </v-tooltip>
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click="deleteItem(item)">
-                  mdi-delete
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Eliminar</span>
-          </v-tooltip>
-        </template>
-      </v-data-table>
+      ></sigaf-skeleton-loader>
+      <sigaf-datatable
+        v-else
+        :items="usersItems"
+        :headers="headers"
+        :button-name="buttonName"
+        :loading="loading"
+        :items-per-page="5"
+        @createItem="createUser"
+        @editItem="editItem"
+        @deleteItem="deleteItem"
+      ></sigaf-datatable>
     </base-card>
-    <v-dialog v-model="dialog" max-width="700" persistent>
-      <v-form>
-        <v-card :loading="loadingSave">
-          <template v-slot:progress>
-            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
-          </template>
-          <v-toolbar dark color="blueS darken-1">
-            <v-toolbar-title>
-              {{ formTitle }}
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-row>
-              <v-col cols="6">
-                <base-textfield
-                  label="RUT"
-                  v-model="editedItem.rut"
-                  @input="$v.rut.$touch()"
-                  @blur="$v.rut.$touch()"
-                  :error-messages="rutErrors"
-                ></base-textfield>
-              </v-col>
-              <v-col cols="6">
-                <base-textfield
-                  label="Nombre"
-                  v-model="editedItem.name"
-                  @blur="$v.name.$touch()"
-                  @input="$v.name.$touch()"
-                  :error-messages="nameErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                <base-textfield
-                  label="Teléfono"
-                  v-model="editedItem.phone"
-                  @blur="$v.phone.$touch()"
-                  @input="$v.phone.$touch()"
-                  :error-messages="phoneErrors"
-                ></base-textfield>
-              </v-col>
-              <v-col cols="6">
-                <base-textfield
-                  label="Celular"
-                  v-model="editedItem.mobile"
-                  @blur="$v.mobile.$touch()"
-                  @input="$v.mobile.$touch()"
-                  :error-messages="mobileErrors"
-                ></base-textfield>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                <base-textfield
-                  label="Correo electrónico"
-                  v-model="editedItem.email"
-                  @blur="$v.email.$touch()"
-                  @input="$v.email.$touch()"
-                  :error-messages="emailErrors"
-                ></base-textfield>
-              </v-col>
-              <v-col cols="6">
-                <base-autocomplete
-                  label="Rol"
-                  v-model="editedItem.role"
-                  :items="rolesItems"
-                  item-value="id"
-                  item-text="description"
-                  return-object
-                  @blur="$v.role.$touch()"
-                  @change="$v.role.$touch()"
-                  :error-messages="roleErrors"
-                ></base-autocomplete>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="close">
-              CANCELAR
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="blueS"
-              dark
-              depressed
-              @click="save"
-            >
-              ACEPTAR
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
-    </v-dialog>
+    <sigaf-dialog
+      :dialog="dialog"
+      :form-title="formTitle"
+      :loading="loading"
+      :loading-save="loadingSave"
+      :max-width="maxWidth"
+      @close="close"
+      @save="save"
+    >
+      <template v-slot:default>
+        <v-row>
+          <v-col cols="6">
+            <base-textfield
+              label="RUT"
+              v-model="editedItem.rut"
+              @input="$v.rut.$touch()"
+              @blur="$v.rut.$touch()"
+              :error-messages="rutErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              label="Nombre"
+              v-model="editedItem.name"
+              @blur="$v.name.$touch()"
+              @input="$v.name.$touch()"
+              :error-messages="nameErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="6">
+            <base-textfield
+              label="Teléfono"
+              v-model="editedItem.phone"
+              @blur="$v.phone.$touch()"
+              @input="$v.phone.$touch()"
+              :error-messages="phoneErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              label="Celular"
+              v-model="editedItem.mobile"
+              @blur="$v.mobile.$touch()"
+              @input="$v.mobile.$touch()"
+              :error-messages="mobileErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="6">
+            <base-textfield
+              label="Correo electrónico"
+              v-model="editedItem.email"
+              @blur="$v.email.$touch()"
+              @input="$v.email.$touch()"
+              :error-messages="emailErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-autocomplete
+              label="Rol"
+              v-model="editedItem.role"
+              :items="rolesItems"
+              item-value="id"
+              item-text="description"
+              return-object
+              @blur="$v.role.$touch()"
+              @change="$v.role.$touch()"
+              :error-messages="roleErrors"
+            ></base-autocomplete>
+          </v-col>
+        </v-row>
+      </template>
+    </sigaf-dialog>
     <snackbar-component v-model="snackbar" :type="type" :message="message">
     </snackbar-component>
     <confirm-dialog
@@ -206,6 +124,9 @@ import { mapGetters, mapActions } from 'vuex'
 import SnackbarComponent from '../../components/component/Snackbar'
 import { Snackbar } from '../../utils/constants'
 import ConfirmDialog from '../../components/component/ConfirmCard'
+import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
+import SigafDatatable from '../../components/maintenance/SigafDatatable.vue'
+import SigafDialog from '../../components/maintenance/SigafDialog.vue'
 
 export default {
   mixins: [validationMixin],
@@ -241,39 +162,38 @@ export default {
   },
   components: {
     SnackbarComponent,
-    ConfirmDialog
+    ConfirmDialog,
+    SigafSkeletonLoader,
+    SigafDatatable,
+    SigafDialog
   },
   data: () => ({
+    buttonName: 'Crear usuario',
+    maxWidth: '700px',
     headers: [
       {
         text: 'RUT',
-        value: 'rut',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'rut'
       },
       {
         text: 'Nombre',
-        value: 'name',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'name'
       },
       {
         text: 'Celular',
-        value: 'mobile',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'mobile'
       },
       {
         text: 'Correo electrónico',
-        value: 'email',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'email'
       },
       {
         text: 'Rol',
-        value: 'role.description',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+        value: 'role.description'
       },
       {
         text: 'Acciones',
         value: 'actions',
-        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold'],
         sortable: false
       }
     ],
@@ -342,7 +262,7 @@ export default {
       const errors = []
       if (!this.$v.email.$dirty) return errors
       !this.$v.email.required && errors.push('Es obligatorio.')
-      !this.$v.email.email && errors.push('Email inválido.')
+      !this.$v.email.email && errors.push('Correo electrónico inválido.')
       !this.$v.email.minLength &&
         errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.email.maxLength &&
@@ -393,11 +313,14 @@ export default {
       removeItem: 'user/deleteUser',
       putItem: 'user/putUser'
     }),
-    async getRoles() {
-      if (this.rolesItems.length !== 0) {
-        await this.fetchRoleItems()
-      }
+    createUser() {
+      this.getRoles()
       this.dialog = true
+    },
+    getRoles() {
+      if (this.rolesItems.length !== 0) {
+        this.fetchRoleItems()
+      }
     },
     makeSnakResponse(message, type) {
       this.snackbar = true
