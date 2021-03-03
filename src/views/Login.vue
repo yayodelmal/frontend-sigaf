@@ -97,52 +97,43 @@
       <v-card>
         <v-card-title class="headline">Modificar contraseña</v-card-title>
         <v-card-text>
-          <label class="text-subtitle-2">Contraseña actual</label>
-          <v-text-field
-            class="mb-5"
-            color="blueS"
-            flat
-            solo-inverted
-            hide-details
-            :type="showCurrentPassword ? 'text' : 'password'"
-            prepend-inner-icon="mdi-onepassword"
-            :append-icon="showCurrentPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            label="* * * * * * * * *"
-            @click:append="showCurrentPassword = !showCurrentPassword"
-          ></v-text-field>
-
           <label class="text-subtitle-2">Nueva contraseña</label>
           <v-text-field
             class="mb-5"
             color="blueS"
             flat
             solo-inverted
-            hide-details
             :type="showNewPassword ? 'text' : 'password'"
             prepend-inner-icon="mdi-onepassword"
             :append-icon="showNewPassword ? 'mdi-eye' : 'mdi-eye-off'"
             label="* * * * * * * * *"
             @click:append="showNewPassword = !showNewPassword"
+            v-model="newPassword"
+            @input="$v.newPassword.$touch()"
+            @blur="$v.newPassword.$touch()"
+            :error-messages="newPasswordErrors"
           ></v-text-field>
           <label class="text-subtitle-2">Confirmar contraseña</label>
           <v-text-field
             color="blueS"
             flat
             solo-inverted
-            hide-details
             :type="showConfirmPassword ? 'text' : 'password'"
             prepend-inner-icon="mdi-onepassword"
             :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
             label="* * * * * * * * *"
             @click:append="showConfirmPassword = !showConfirmPassword"
+            v-model="confirmPassword"
+            @input="$v.confirmPassword.$touch()"
+            @blur="$v.confirmPassword.$touch()"
+            @keypress.enter="submitNewPassword"
+            :error-messages="confirmPasswordErrors"
           ></v-text-field>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="grayS" depressed dark @click="dialog = false"
-            >Cancelar</v-btn
-          >
-          <v-btn color="blueS" depressed dark @click="dialog = false"
+          <v-btn color="grayS" depressed dark @click="close">Cancelar</v-btn>
+          <v-btn color="blueS" depressed dark @click="submitNewPassword"
             >ACEPTAR</v-btn
           >
         </v-card-actions>
@@ -155,7 +146,7 @@ import Navbar from '../components/my/Navbar'
 import User from '../models/User'
 
 import { validationMixin } from 'vuelidate'
-import { required, email } from 'vuelidate/lib/validators'
+import { required, email, sameAs, minLength } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
@@ -167,9 +158,8 @@ export default {
   validations: {
     password: { required },
     email: { required, email },
-    currentPassword: { required },
-    newPassword: { required },
-    confirmPassword: { required }
+    newPassword: { required, minLength: minLength(6) },
+    confirmPassword: { sameAsPassword: sameAs('newPassword') }
   },
   data: () => ({
     userEdited: new User(),
@@ -180,19 +170,38 @@ export default {
     userCurrent: null,
     dialogLogin: false,
     dialogFirstLogin: false,
-    currentPassword: '',
     newPassword: '',
     confirmPassword: '',
     showCurrentPassword: false,
     showNewPassword: false,
     showConfirmPassword: false,
-    dialog: true
+    dialog: true,
+    bearerToken: ''
   }),
+  watch: {
+    user(newValue, oldValue) {
+      if (oldValue === null) {
+        this.userEdited.id = this.user.id
+        this.userEdited.rut = this.user.rut
+        this.userEdited.name = this.user.name
+        this.userEdited.phone = this.user.phone
+        this.userEdited.mobile = this.user.mobile
+        this.userEdited.isFirstLogin = this.user.isFirstLogin
+        this.userEdited.role_id = this.user.role.id
+      }
+    },
+    token(newValue, oldValue) {
+      if (oldValue === null) {
+        this.bearerToken = this.token
+      }
+    }
+  },
   computed: {
     ...mapGetters({
       authenticated: 'auth/authenticated',
       user: 'auth/user',
-      isFirstLogin: 'auth/isFirstLogin'
+      isFirstLogin: 'auth/isFirstLogin',
+      token: 'auth/token'
     }),
 
     // ...mapGetters(['user', 'authenticated']),
@@ -209,6 +218,22 @@ export default {
       !this.$v.email.required && errors.push('El E-mail es requerido.')
       return errors
     },
+    newPasswordErrors() {
+      const errors = []
+      if (!this.$v.newPassword.$dirty) return errors
+      !this.$v.newPassword.required &&
+        errors.push('Ingrese una nueva contraseña.')
+      !this.$v.newPassword.minLength &&
+        errors.push('Debe contener al menos 6 caracteres.')
+      return errors
+    },
+    confirmPasswordErrors() {
+      const errors = []
+      if (!this.$v.confirmPassword.$dirty) return errors
+      !this.$v.confirmPassword.sameAsPassword &&
+        errors.push('Las contraseñas deben ser iguales.')
+      return errors
+    },
     email() {
       return this.userEdited.email
     },
@@ -219,7 +244,10 @@ export default {
   methods: {
     ...mapActions({
       login: 'auth/login',
-      attempt: 'auth/attempt'
+      attempt: 'auth/attempt',
+      putUser: 'user/putUser',
+      partialLogout: 'auth/partialLogout',
+      changePassword: 'user/changePasswordIsFirstLogin'
     }),
     async submit() {
       this.$v.email.$touch()
@@ -234,7 +262,9 @@ export default {
             if (this.isFirstLogin) {
               this.dialogLogin = false
               this.dialogFirstLogin = true
-              console.log('firstLogin')
+              setTimeout(() => {
+                this.partialLogout()
+              }, 2000)
             } else {
               this.dialogLogin = false
               this.$router.push({ name: 'My' })
@@ -251,9 +281,41 @@ export default {
         }
       }
     },
+    async submitNewPassword() {
+      this.$v.newPassword.$touch()
+      this.$v.confirmPassword.$touch()
+
+      if (!this.$v.$error) {
+        this.dialogLogin = true
+        this.userEdited.password = this.newPassword
+        this.userEdited.isFirstLogin = 1
+
+        const paylaod = {
+          user: this.userEdited,
+          token: this.bearerToken
+        }
+
+        const { success } = await this.changePassword(paylaod)
+
+        if (success) {
+          this.dialogFirstLogin = false
+          this.submit()
+        } else {
+          this.dialogFirstLogin = false
+          this.snackbar = true
+          this.message = 'No se ha podido establecer la nueva contraseña.'
+        }
+      }
+    },
     clear() {
       this.$v.$reset()
       this.userEdited = Object.assign({}, this.userDefault)
+    },
+    close() {
+      this.dialogFirstLogin = false
+      setTimeout(() => {
+        this.clear()
+      }, 300)
     }
   }
 }

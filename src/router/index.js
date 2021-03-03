@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../views/Login.vue'
-import store from '../store/index'
 
 Vue.use(VueRouter)
 
@@ -241,13 +240,6 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem('access_token')
-
-  const array = store.getters['logEditingTicket/logEditingTickets']
-
-  for (let index = 0; index < array.length; index++) {
-    const element = array[index]
-    console.log(element)
-  }
 
   if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
     next('/')

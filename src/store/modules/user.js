@@ -71,7 +71,6 @@ export default {
       try {
         const { data } = await axios.get(BASE_URL)
 
-        console.log(data)
         const { _data, success, error, message } = data
 
         if (success) {
@@ -137,6 +136,23 @@ export default {
         if (success) {
           commit('PUT_USER', _data)
         }
+
+        return { success, message }
+      } catch (error) {
+        console.log(error.message)
+        console.log(error.name)
+        return { success: false, message: error.message }
+      }
+    },
+    changePasswordIsFirstLogin: async (_, { user, token }) => {
+      try {
+        const URL = `${BASE_URL}/${user.id}`
+
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+
+        const { data } = await axios.put(URL, user)
+
+        const { success, message } = data
 
         return { success, message }
       } catch (error) {
