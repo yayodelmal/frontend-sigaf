@@ -32,7 +32,7 @@
                     :error-messages="emailErrors"
                   ></base-textfield>
                   <base-textfield
-                    v-model="userEdited.password"
+                    v-model.trim="userEdited.password"
                     label="Contraseña"
                     type="password"
                     prepend-icon="mdi-lock"
@@ -108,7 +108,7 @@
             :append-icon="showNewPassword ? 'mdi-eye' : 'mdi-eye-off'"
             label="* * * * * * * * *"
             @click:append="showNewPassword = !showNewPassword"
-            v-model="newPassword"
+            v-model.trim="newPassword"
             @input="$v.newPassword.$touch()"
             @blur="$v.newPassword.$touch()"
             :error-messages="newPasswordErrors"
@@ -123,7 +123,7 @@
             :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
             label="* * * * * * * * *"
             @click:append="showConfirmPassword = !showConfirmPassword"
-            v-model="confirmPassword"
+            v-model.trim="confirmPassword"
             @input="$v.confirmPassword.$touch()"
             @blur="$v.confirmPassword.$touch()"
             @keypress.enter="submitNewPassword"
