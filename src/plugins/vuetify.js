@@ -1,14 +1,15 @@
 import Vue from 'vue'
 import Vuetify, { VSkeletonLoader } from 'vuetify/lib'
 import { es, en } from 'vuetify/es5/locale'
-import { Ripple } from 'vuetify/lib/directives'
+import { Ripple, Scroll } from 'vuetify/lib/directives'
 
 Vue.use(Vuetify, {
   components: {
     VSkeletonLoader
   },
   directives: {
-    Ripple
+    Ripple,
+    Scroll
   }
 })
 

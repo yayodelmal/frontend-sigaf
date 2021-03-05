@@ -20,7 +20,7 @@ export default {
       state.ticketDetails = ticketDetails
     },
     POST_TICKET: (state, ticket) => {
-      state.tickets.push(ticket)
+      state.tickets.unshift(ticket)
     },
     PUT_TICKET: (state, ticket) => {
       const editedIndex = state.tickets.findIndex(
@@ -36,13 +36,17 @@ export default {
     }
   },
   getters: {
-    tickets: (state, getters, rootState) => {
+    tickets: (state, getters, rootState, rootGetters) => {
       return state.tickets.map(ticket => {
         if (rootState.auth.loginUser !== null) {
           if (ticket.relationships.numberOfElements === 0) {
             if (ticket.properties.statusTicket.description === 'Abierto') {
+              console.log(rootGetters)
               if (
-                ticket.properties.userCreated.id === rootState.auth.loginUser.id
+                ticket.properties.userCreated.id ===
+                  rootState.auth.loginUser.id ||
+                rootGetters['auth/isAdmin'] ||
+                rootGetters['auth/isDeveloper']
               ) {
                 return Object.assign(ticket, {
                   showDeleteButton: true,
@@ -56,7 +60,10 @@ export default {
               }
             } else {
               if (
-                ticket.properties.userCreated.id === rootState.auth.loginUser.id
+                ticket.properties.userCreated.id ===
+                  rootState.auth.loginUser.id ||
+                rootGetters['auth/isAdmin'] ||
+                rootGetters['auth/isDeveloper']
               ) {
                 return Object.assign(ticket, {
                   showDeleteButton: true,
@@ -83,7 +90,7 @@ export default {
             }
           }
         } else {
-          return ticket
+          return []
         }
       })
     },
@@ -276,13 +283,16 @@ export default {
       commit('SET_TICKET_DETAILS', [])
     },
 
-    postMultipleTicket: async (_, payload) => {
+    postMultipleTicket: async ({ commit }, payload) => {
       try {
         const { data } = await axios.post('/api/v2/tickets/multiple', payload)
 
         const { _data, success, error } = data
 
         if (success) {
+          for (let index = 0; index < _data.length; index++) {
+            commit('POST_TICKET', _data[index])
+          }
           return { _data, success }
         } else {
           console.log(error)
@@ -322,6 +332,48 @@ export default {
         const { _data, success, error } = data
 
         if (success) {
+          console.log(_data)
+          return { _data, success }
+        } else {
+          console.log(error)
+        }
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    postMailTicket: async (_, payload) => {
+      try {
+        let data
+        if (payload.files) {
+          let formData = new FormData()
+
+          payload.files.forEach((file, index) => {
+            formData.append(`file_${index}`, file)
+          })
+
+          formData.append('text', payload.text)
+          formData.append('ticketId', payload.ticketId)
+          formData.append('numberOfFiles', payload.files.length)
+          formData.append('subject', payload.subject)
+
+          const config = {
+            'Content-Type': 'multipart/form-data'
+          }
+          data = await axios.post('/api/v2/mail/single', formData, config)
+        } else {
+          data = await axios.post('/api/v2/mail/single', payload)
+        }
+
+        console.log(data)
+
+        const { _data, success, error } = data
+
+        if (success) {
+          console.log(_data)
           return { _data, success }
         } else {
           console.log(error)

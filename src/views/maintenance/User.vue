@@ -370,6 +370,7 @@ export default {
       this.editedIndex = this.usersItems.findIndex(
         findUser => findUser.id === user.id
       )
+      this.dialog = true
     },
     deleteItem(user) {
       this.editedIndex = this.usersItems.indexOf(user)

@@ -5,6 +5,7 @@
       class="pt-6 mx-auto rounded-t-xl"
       flat
       min-width="330"
+      max-width="350"
       :elevation="hover ? 16 : 0"
       outlined
     >

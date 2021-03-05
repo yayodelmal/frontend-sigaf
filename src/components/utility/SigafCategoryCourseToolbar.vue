@@ -17,6 +17,8 @@
     </template>
     <template v-slot:right>
       <v-btn
+        class="mx-auto"
+        width="128"
         :disabled="selectedCourse === null"
         large
         depressed
@@ -44,6 +46,9 @@ export default {
   watch: {
     async category() {
       await this.fetchCourseByCategory(this.category.courses.href)
+    },
+    selectedCourse() {
+      this.$emit('showTable', false)
     }
   },
   async mounted() {
