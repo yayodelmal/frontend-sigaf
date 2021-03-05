@@ -23,7 +23,9 @@ export default {
     errors: String
   },
   created() {
-    this.fetchItems()
+    if (this.items.length === 0) {
+      this.fetchItems()
+    }
   },
   methods: {
     ...mapActions({

@@ -3,7 +3,7 @@
     :headers="headers"
     :search="search"
     :items="parseTickets"
-    class="elevation-1"
+    class="elevation-0"
     :loading="loading"
     loading-text="Cargando... por favor espere"
     calculate-widths
@@ -11,23 +11,22 @@
     hide-default-footer
     height="400"
     fixed-header
+    :header-props="{ sortIcon: null }"
   >
-    <template
-      v-slot:item.id="{
-        item
-      }"
-    >
-      {{ showPosition(item) }}
+    <template v-slot:item.code="{ item }">
+      <span class="caption font-weight-bold"> {{ item.code }}</span>
     </template>
     <template v-slot:item.rut="{ item }">
-      {{ item.rut.toUpperCase() }}
+      <span class="caption">{{ item.rut.toUpperCase() }}</span>
     </template>
     <template v-slot:item.fullname="{ item }">
       <v-tooltip color="blueS" bottom>
         <template v-slot:activator="{ on }">
-          <v-label v-on="on"> {{ item.fullname.toUpperCase() }}</v-label>
+          <v-label v-on="on">
+            <span class="caption"> {{ item.fullname.toUpperCase() }}</span>
+          </v-label>
         </template>
-        <span>{{ item.fullname.toUpperCase() }}</span>
+        <span class="caption">{{ item.fullname.toUpperCase() }}</span>
       </v-tooltip>
     </template>
     <template v-slot:item.typeTicket="{ item }">
@@ -53,11 +52,20 @@
     </template>
     <template v-slot:item.attemptOfContact="{ item }">
       <v-avatar
-        size="30"
+        size="25"
         :color="item.attemptOfContact === 0 ? 'error' : 'success'"
       >
-        <span class="white--text subtitle-1">{{ item.attemptOfContact }}</span>
+        <span class="white--text caption">{{ item.attemptOfContact }}</span>
       </v-avatar>
+    </template>
+    <template v-slot:item.ageTicket="{ item }">
+      <span class="caption"> {{ addDayWord(item.ageTicket) }}</span>
+    </template>
+    <template v-slot:item.operator="{ item }">
+      <span class="caption">{{ item.operator.toUpperCase() }}</span>
+    </template>
+    <template v-slot:item.createdAt="{ item }">
+      <span class="caption">{{ item.createdAt.toUpperCase() }}</span>
     </template>
     <template v-slot:item.actions="{ item }">
       <v-tooltip color="blueS" bottom>
@@ -68,13 +76,10 @@
         </template>
         <span>{{ showTooltipSearch(item) }}</span>
       </v-tooltip>
-      <v-tooltip color="blueS" bottom>
+
+      <v-tooltip v-if="showDeleteButton(item)" color="blueS" bottom>
         <template v-slot:activator="{ on }">
-          <v-icon
-            v-if="item.showDeleteButton"
-            v-on="on"
-            @click.prevent="deleteItem(item)"
-          >
+          <v-icon v-on="on" @click.prevent="deleteItem(item)">
             mdi-delete
           </v-icon>
         </template>
@@ -86,6 +91,8 @@
 
 <script>
 import { mapActions, mapMutations, mapGetters } from 'vuex'
+
+const HEADER_CLASS = 'blueS white--text'
 export default {
   props: {
     tickets: Array,
@@ -95,82 +102,74 @@ export default {
   data: () => ({
     headers: [
       {
-        text: '#',
-        align: 'center',
-        sortable: false,
-        width: 50,
-        value: 'id',
-        class: 'redS--text'
-      },
-      {
-        text: 'RUT',
-        width: 120,
-        value: 'rut',
-        class: 'redS--text'
-      },
-      {
-        text: 'Nombre',
-        width: 250,
-        value: 'fullname',
-        class: 'redS--text'
-      },
-      {
-        text: 'Tipo',
-        value: 'typeTicket',
-        class: 'redS--text'
-      },
-      {
-        text: 'Estado',
-        value: 'statusTicket',
-        class: 'redS--text'
-      },
-      {
-        text: 'Prioridad',
-        width: 80,
-        value: 'priorityTicket',
-        class: 'redS--text'
-      },
-
-      {
-        text: 'Antigüedad (días)',
-        align: 'center',
-        width: 100,
-        value: 'ageTicket',
-        class: 'redS--text'
-      },
-      {
-        text: 'Fecha creación',
-        align: 'center',
-        value: 'createdAt',
-        width: 120,
-        class: 'redS--text'
-      },
-      /*       {
-        text: 'Fecha cierre',
-        align: 'center',
-        value: 'closingDate',
-        width: 150,
-        class: 'redS--text'
-      }, */
-      {
-        text: `Operador`,
-        align: 'center',
+        text: 'Código',
         width: 130,
-        value: 'operator',
-        class: 'redS--text'
-      },
-      {
-        text: 'Intentos',
-        align: 'center',
-        value: 'attemptOfContact',
-        class: 'redS--text'
+        sortable: false,
+        value: 'code',
+        class: HEADER_CLASS
       },
       {
         text: 'Opciones',
         value: 'actions',
         sortable: false,
         width: 90,
-        class: 'redS--text'
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Rut',
+        width: 120,
+        value: 'rut',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Nombre',
+        width: 250,
+        value: 'fullname',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Tipo',
+        value: 'typeTicket',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Estado',
+        value: 'statusTicket',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Prioridad',
+        width: 80,
+        value: 'priorityTicket',
+        class: HEADER_CLASS
+      },
+
+      {
+        text: 'Antigüedad',
+        align: 'center',
+        width: 100,
+        value: 'ageTicket',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Fecha creación',
+        align: 'center',
+        value: 'createdAt',
+        width: 120,
+        class: HEADER_CLASS
+      },
+      {
+        text: `Operador`,
+        align: 'center',
+        width: 130,
+        value: 'operator',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Intentos',
+        align: 'center',
+        value: 'attemptOfContact',
+        class: HEADER_CLASS
       }
     ]
   }),
@@ -180,25 +179,30 @@ export default {
     }),
     parseTickets() {
       if (!this.tickets) return this.tickets
-      return this.tickets.map(({ properties, relationships, links }) => {
-        const ticket = properties
-        const attemptOfContact = relationships.numberOfElements
-        const user = properties.courseRegisteredUser.registered_user
-        return {
-          id: ticket.id,
-          rut: user.rut,
-          fullname: `${user.name} ${user.last_name} ${user.mother_last_name}`,
-          statusTicket: ticket.statusTicket.description,
-          priorityTicket: ticket.priorityTicket.description,
-          typeTicket: ticket.typeTicket.description,
-          closingDate: ticket.closingDate,
-          createdAt: `${ticket.createdAt} ${ticket.timeCreatedAt}`,
-          ageTicket: `${ticket.ageTicket}`,
-          operator: ticket.userAssigned.name,
-          attemptOfContact: attemptOfContact,
-          immutableTicket: { properties, relationships, links }
+      return this.tickets.map(
+        ({ properties, relationships, links, showDeleteButton, close }) => {
+          const ticket = properties
+          const attemptOfContact = relationships.numberOfElements
+          const user = properties.courseRegisteredUser.registered_user
+          return {
+            id: ticket.id,
+            code: ticket.ticketCode,
+            rut: user.rut,
+            fullname: `${user.name} ${user.last_name} ${user.mother_last_name}`,
+            statusTicket: ticket.statusTicket.description,
+            priorityTicket: ticket.priorityTicket.description,
+            typeTicket: ticket.typeTicket.description,
+            closingDate: ticket.closingDate,
+            createdAt: `${ticket.createdAt} ${ticket.timeCreatedAt}`,
+            ageTicket: `${ticket.ageTicket}`,
+            operator: ticket.userAssigned.name,
+            attemptOfContact: attemptOfContact,
+            immutableTicket: { properties, relationships, links },
+            showDeleteButton: showDeleteButton,
+            close: close
+          }
         }
-      })
+      )
     }
   },
   methods: {
@@ -212,6 +216,13 @@ export default {
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
     }),
+    showDeleteButton(event) {
+      return event.showDeleteButton
+    },
+    addDayWord(ageTicket) {
+      if (ageTicket === 1) return `${ageTicket} día`
+      return `${ageTicket} días`
+    },
     showPosition(ticket) {
       const index = this.parseTickets.findIndex(find => {
         return find.id === ticket.id
@@ -240,7 +251,6 @@ export default {
       return item.close ? 'Ver ticket' : 'Agregar contacto'
     },
     async editItem({ immutableTicket }) {
-      console.log(immutableTicket)
       const ticket = immutableTicket.properties
       const response = await this.findLogEditingTicketByTicket(ticket.id)
       if (response.statusCode === 204) {

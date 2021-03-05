@@ -1,66 +1,76 @@
 <template>
-  <v-container fluid>
-    <base-card
-      color="blueS"
-      class="px-5 py-3"
-      icon="mdi-ticket-account"
-      title="Ticket"
-    >
-      <v-col cols="12">
-        <sigaf-category-course-toolbar
-          @showTable="showTable = $event"
-          @loading="loading = $event"
-          @selectedCourse="selectedCourse = $event"
-        ></sigaf-category-course-toolbar>
-      </v-col>
-      <v-card v-if="showTable" flat>
-        <v-card-title>
-          <v-col cols="12">
-            <v-card flat outlined>
-              <v-card-text>
-                <v-row justify="center">
-                  <v-col cols="12" sm="12" md="7" lg="6">
-                    <base-button
-                      icon="mdi-plus-circle"
-                      label="Crear ticket individual"
-                      @click="openCreateSingleModal"
-                    ></base-button>
-                  </v-col>
-                  <v-col cols="12" sm="12" md="5" lg="6">
-                    <base-button
-                      v-if="isAdmin || isDeveloper"
-                      icon="mdi-plus-circle"
-                      label="Crear Ticket Masivo"
-                      @click="handleCreateMultipleTickets"
-                    ></base-button>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-col>
-          <v-col cols="12">
-            <v-toolbar dark color="blueS darken-1" class="mb-1">
-              <v-text-field
-                v-model="search"
-                color="blueS"
-                clearable
-                flat
-                solo-inverted
-                hide-details
-                prepend-inner-icon="mdi-magnify"
-                label="Buscar"
-              ></v-text-field>
-              <v-spacer />
-              <v-checkbox v-model="openTicket" label="Abierto"></v-checkbox>
+  <base-card
+    color="blueS"
+    class="px-5 py-3"
+    icon="mdi-ticket-account"
+    title="Ticket"
+  >
+    <div>
+      <sigaf-category-course-toolbar
+        @showTable="showTable = $event"
+        @loading="loading = $event"
+        @selectedCourse="selectedCourse = $event"
+      ></sigaf-category-course-toolbar>
+      <v-divider class="mt-5 mb-3" />
+      <v-expand-transition>
+        <div v-if="showTable">
+          <v-toolbar dark color="blueS darken-1">
+            <v-text-field
+              v-model="search"
+              color="blueS"
+              clearable
+              flat
+              solo-inverted
+              hide-details
+              prepend-inner-icon="mdi-magnify"
+              label="Buscar"
+            ></v-text-field>
+            <v-divider class="mx-4" vertical></v-divider>
+            <div class="d-flex flex-column">
               <v-checkbox
-                class="ml-10"
+                class="mt-5"
+                v-model="openTicket"
+                label="Abierto"
+              ></v-checkbox>
+              <v-checkbox
+                class="mt-n5"
                 v-model="closeTicket"
                 label="Cerrado"
               ></v-checkbox>
-            </v-toolbar>
-          </v-col>
-        </v-card-title>
-        <v-card-text>
+            </div>
+            <v-divider class="mx-4" vertical></v-divider>
+            <div class="d-none d-sm-flex">
+              <v-btn
+                large
+                depressed
+                color="blueS"
+                @click="openCreateSingleModal"
+              >
+                <div class="d-flex flex-column">
+                  Individual
+                  <v-icon right dark class="mx-auto">
+                    mdi-plus
+                  </v-icon>
+                </div>
+              </v-btn>
+              <v-btn
+                class="ml-3"
+                width="128"
+                large
+                depressed
+                color="blueS"
+                v-if="isAdmin || isDeveloper"
+                @click="handleCreateMultipleTickets"
+              >
+                <div class="d-flex flex-column">
+                  Masivo
+                  <v-icon right dark class="mx-auto">
+                    mdi-plus
+                  </v-icon>
+                </div>
+              </v-btn>
+            </div>
+          </v-toolbar>
           <div v-if="loading">
             <v-skeleton-loader
               :loading="loading"
@@ -75,117 +85,83 @@
               type="table-tfoot"
             ></v-skeleton-loader>
           </div>
-          <s-table-ticket
-            v-else
-            :loading="loading"
-            :tickets="tickets"
-            :search="search"
-            @editTicket="editItem"
-          />
-        </v-card-text>
-      </v-card>
-
-      <sigaf-create-single-ticket
-        v-if="showSingleCreateModal"
-        v-model="singleCreateModal"
-        :selectedCourse="selectedCourse"
-        @closeModal="closeCreatedSingleModal($event)"
-      ></sigaf-create-single-ticket>
-
-      <sigaf-edit-single-ticket
-        v-if="showSingleEditModal"
-        v-model="singleEditModal"
-        :selectedCourse="selectedCourse"
-        :ticket="editedTicketItem"
-        :ticket-details="editedTicketDetails"
-        @closeModal="closeEditedSingleModal($event)"
-      ></sigaf-edit-single-ticket>
-
-      <v-overlay
-        :value="overlayCreateMultipleTicket"
-        color="grayS"
-        :opacity="opacity"
-        z-index="99"
-      >
-        <h3 class="text-body-1 text-center mb-16">
-          {{ overlayMessageCreateMultipleTicket }}
-        </h3>
-        <div class="text-center">
-          <v-progress-circular indeterminate size="64"> </v-progress-circular>
+          <div v-else class="mt-5">
+            <span class="subtitle-1 gray--text mb-2">Lista de tickets</span>
+            <s-table-ticket
+              :loading="loading"
+              :tickets="tickets"
+              :search="search"
+              @editTicket="editItem"
+            />
+          </div>
         </div>
-      </v-overlay>
-      <sigaf-create-multiple-ticket
-        v-if="showMultipleCreateModal"
-        v-model="multipleCreateModal"
-        :selectedCourse="selectedCourse"
-        :courseRegisteredUsers="courseRegisteredUserItems"
-      >
-      </sigaf-create-multiple-ticket>
+      </v-expand-transition>
+    </div>
+    <sigaf-create-single-ticket
+      v-if="showSingleCreateModal"
+      v-model="singleCreateModal"
+      :selectedCourse="selectedCourse"
+      @closeModal="closeCreatedSingleModal($event)"
+    ></sigaf-create-single-ticket>
 
-      <v-snackbar
-        @snackbar="setSnackbar($event)"
-        color="blueS"
-        v-model="snackbar"
-        :timeout="timeout"
-      >
-        {{ message }}
-        <v-btn dark text @click="snackbar = false">
-          Cerrar
-        </v-btn>
-      </v-snackbar>
+    <sigaf-edit-single-ticket
+      v-if="showSingleEditModal"
+      v-model="singleEditModal"
+      :selectedCourse="selectedCourse"
+      :ticket="editedTicketItem"
+      :ticket-details="editedTicketDetails"
+      @closeModal="closeEditedSingleModal($event)"
+    ></sigaf-edit-single-ticket>
 
-      <confirm-dialog
-        :icon="'mdi-alert-circle-outline'"
-        :color-icon="'warning'"
-        :dialog="dialogConfirm"
-        :cancel="close"
-        :accept="confirmDelete"
-      >
-        <template v-slot:content>
-          <h3 class="text-button">
-            Eliminará un registro de forma permanente
-          </h3>
-        </template>
-      </confirm-dialog>
-      <v-dialog v-model="dialogSelectCourse" max-width="400">
-        <v-card>
-          <v-card-title class="headline text-center"
-            >Seleccione un curso:</v-card-title
-          >
-          <v-card-text>
-            <v-hover
-              v-for="user in arrayCourseUserSelect"
-              :key="user.course.id"
-              v-slot:default="{ hover }"
-              close-delay="100"
-            >
-              <v-card
-                class="mt-3"
-                :elevation="hover ? 6 : 0"
-                flat
-                @click="selectCourse(user)"
-              >
-                <v-card-text class="font-weight-medium text-center subtitle-1">
-                  {{ user.course.description }}
-                </v-card-text>
-              </v-card>
-            </v-hover>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-    </base-card>
-    <v-overlay :value="overlay" color="grayS" :opacity="opacity">
-      <h3 class="text-body-2 text-center mb-16">
-        Por favor espere. Esto puede tardar un momento
+    <v-overlay
+      :value="overlayCreateMultipleTicket"
+      color="grayS"
+      :opacity="opacity"
+      z-index="99"
+    >
+      <h3 class="headline text-center mb-16">
+        {{ overlayMessageCreateMultipleTicket }}
       </h3>
       <div class="text-center">
         <v-progress-circular indeterminate size="64"> </v-progress-circular>
       </div>
-      <h3 class="headline text-center mt-5">
-        Generando tickets...
-      </h3>
     </v-overlay>
-  </v-container>
+
+    <sigaf-create-multiple-ticket
+      v-if="showMultipleCreateModal"
+      v-model="multipleCreateModal"
+      :selectedCourse="selectedCourse"
+      :courseRegisteredUsers="filteredUsersCourse"
+      @closeModalMultiple="closeEditedMultipleModal($event)"
+    >
+    </sigaf-create-multiple-ticket>
+
+    <v-snackbar
+      @snackbar="setSnackbar($event)"
+      color="blueS"
+      v-model="snackbar"
+      :timeout="timeout"
+    >
+      {{ message }}
+      <v-btn dark text @click="snackbar = false">
+        Cerrar
+      </v-btn>
+    </v-snackbar>
+
+    <confirm-dialog
+      :icon="'mdi-alert-circle-outline'"
+      :color-icon="'warning'"
+      :dialog="dialogConfirm"
+      :cancel="close"
+      :accept="confirmDelete"
+    >
+      <template v-slot:content>
+        <h3 class="text-button">
+          Eliminará un registro de forma permanente
+        </h3>
+      </template>
+    </confirm-dialog>
+  </base-card>
 </template>
 
 <script>
@@ -313,7 +289,8 @@ export default {
       findLogEditingTicketByTicket:
         'logEditingTicket/findLogEditingTicketByTicket',
       postLogEditingTicket: 'logEditingTicket/postLogEditingTicket',
-      findTicketDetailByTicket: 'ticket/findTicketDetailByTicket'
+      findTicketDetailByTicket: 'ticket/findTicketDetailByTicket',
+      numberOfUsersByCourse: 'courseRegisteredUser/numberOfUsersByCourse'
     }),
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
@@ -380,10 +357,31 @@ export default {
     },
     async handleCreateMultipleTickets() {
       this.overlayCreateMultipleTicket = true
-      this.overlayMessageCreateMultipleTicket = `Buscando actividades del curso ${this.selectedCourse.description}...`
-      await this.fetchActivities()
-      this.overlayMessageCreateMultipleTicket = `Obteniendo alumnos del curso ${this.selectedCourse.description}...`
-      await this.fetchUsersByCourse(this.selectedCourse)
+      this.overlayMessageCreateMultipleTicket = `Buscando actividades del curso ${this.selectedCourse.description}`
+
+      if (this.activityItems.length === 0) {
+        await this.fetchActivities()
+      }
+      this.overlayMessageCreateMultipleTicket = `Obteniendo alumnos del curso ${this.selectedCourse.description}`
+
+      const countCourseUser = {
+        ...this.countUsersByCourses.filter(courseUser => {
+          return courseUser.id === this.selectedCourse.id
+        })[0]
+      }
+
+      if (countCourseUser) {
+        const { _data } = await this.numberOfUsersByCourse(this.selectedCourse)
+
+        if (countCourseUser.count !== _data.count) {
+          await this.fetchUsersByCourse(this.selectedCourse)
+        } else {
+          //TODO envio de mensake a SNACKBAR
+        }
+      } else {
+        //TODO envio de mensake a SNACKBAR
+      }
+
       this.multipleCreateModal = true
       this.showMultipleCreateModal = true
       this.overlayCreateMultipleTicket = false
@@ -408,7 +406,7 @@ export default {
     },
     async fetchDataCategories() {
       const { success, message } = await this.fetchCategoryItems()
-      console.log()
+
       if (!success) {
         this.snackbar = true
         this.message = message
@@ -468,11 +466,35 @@ export default {
       this.singleCreateModal = event
       this.showSingleCreateModal = event
     },
+    closeEditedMultipleModal(event) {
+      this.multipleCreateModal = event
+      this.showMultipleCreateModal = event
+    },
     close() {
       this.dialogConfirm = false
       setTimeout(() => {
         this.clearTicket()
       }, 300)
+    },
+    handleAuthTicket(ticket) {
+      if (this.loggedUser) {
+        if (this.isAdmin || this.isDeveloper) {
+          return ticket
+        } else {
+          return ticket.properties.userAssigned.id === this.loggedUser.id
+        }
+      }
+    },
+    handleOpenAndCloseTicket(ticket) {
+      if (this.openTicket === true && this.closeTicket === false) {
+        return ticket.properties.statusTicket.description === 'Abierto'
+      } else if (this.openTicket === false && this.closeTicket === true) {
+        return ticket.properties.statusTicket.description === 'Cerrado'
+      } else if (this.openTicket === true && this.closeTicket === true) {
+        return ticket
+      } else {
+        return
+      }
     }
   },
   created() {
@@ -486,28 +508,8 @@ export default {
   watch: {
     async category() {
       await this.fetchCourseByCategory(this.category.courses.href)
-      // if (this.category !== null) {
-      //   this.filterUsersByCategories()
-      // }
     },
-    async openTicket() {
-      this.loading = true
 
-      // this.fetchItems().then(() => (this.loading = false))
-
-      await this.findTicketByCourse()
-
-      this.loading = false
-    },
-    async closeTicket() {
-      this.loading = true
-
-      // this.fetchItems().then(() => (this.loading = false))
-
-      await this.findTicketByCourse()
-
-      this.loading = false
-    },
     courseRegisteredUserItems() {
       if (this.courseRegisteredUserItems.length === 0) {
         this.showTable = false
@@ -532,16 +534,27 @@ export default {
       userLog: 'auth/user',
       statusDetailTicketItems: 'statusDetailTicket/statusDetailTickets',
       savedTicket: 'ticket/getLastTicket',
-      //ticketDetails: 'ticket/ticketDetailsByTicket',
       loggedUser: 'auth/user',
       isAdmin: 'auth/isAdmin',
       isDeveloper: 'auth/isDeveloper',
       sections: 'section/sections',
       ticketsByCourse: 'ticket/ticketsByCourse',
       courseByCategory: 'course/coursesByCategory',
-      activityItems: 'activity/activities'
+      activityItems: 'activity/activities',
+      countUsersByCourses: 'courseRegisteredUser/countUsersByCourses',
+      storeUsersByCourse: 'courseRegisteredUser/storeUsersByCourse'
     }),
 
+    filteredUsersCourse() {
+      const usersByCourse = this.storeUsersByCourse.filter(course => {
+        return course.id === this.selectedCourse.id
+      })
+
+      if (usersByCourse.length !== 0) {
+        return usersByCourse[0].collection
+      }
+      return []
+    },
     nameNever() {
       if (this.never) {
         return 'Agregar nunca'
@@ -549,29 +562,7 @@ export default {
         return 'Eliminar nunca'
       }
     },
-    filterUsers() {
-      if (this.never) {
-        return this.userRegisteredFiltered.filter(user => {
-          const user_ = user.activity_course_users.filter(activity => {
-            return activity.activity.section.description === 'Renuncia'
-          })
 
-          if (user_.length === 0) {
-            return user.last_access_registered_moodle !== 'Nunca'
-          }
-        })
-      } else {
-        return this.userRegisteredFiltered.filter(user => {
-          const user_ = user.activity_course_users.filter(activity => {
-            return activity.activity.section.description === 'Renuncia'
-          })
-
-          if (user_.length === 0) {
-            return user
-          }
-        })
-      }
-    },
     filterActivities() {
       return this.activityItems.filter(
         activity =>
@@ -618,60 +609,9 @@ export default {
         })
     },
     tickets() {
-      const vm = this
-      if (this.category !== null) {
-        return this.items
-          .filter(item => {
-            if (this.openTicket === true && this.closeTicket === false) {
-              return (
-                item.properties.statusTicket.description === 'Abierto' &&
-                item.properties.courseRegisteredUser.course.category
-                  .description === this.category.description
-              )
-            } else if (this.openTicket === false && this.closeTicket === true) {
-              return (
-                item.properties.statusTicket.description === 'Cerrado' &&
-                item.properties.courseRegisteredUser.course.category
-                  .description === this.category.description
-              )
-            } else {
-              return (
-                item &&
-                item.properties.courseRegisteredUser.course.category
-                  .description === this.category.description
-              )
-            }
-          })
-          .filter(item => {
-            if (vm.loggedUser) {
-              if (vm.isAdmin || vm.isDeveloper) {
-                return true
-              } else {
-                return item.properties.userAssigned.id === vm.loggedUser.id
-              }
-            }
-          })
-      } else {
-        return this.items
-          .filter(item => {
-            if (this.openTicket === true && this.closeTicket === false) {
-              return item.properties.statusTicket.description === 'Abierto'
-            } else if (this.openTicket === false && this.closeTicket === true) {
-              return item.properties.statusTicket.description === 'Cerrado'
-            } else {
-              return item
-            }
-          })
-          .filter(item => {
-            if (vm.loggedUser) {
-              if (vm.isAdmin || vm.isDeveloper) {
-                return true
-              } else {
-                return item.properties.userAssigned.id === vm.loggedUser.id
-              }
-            }
-          })
-      }
+      return this.items
+        .filter(item => this.handleOpenAndCloseTicket(item))
+        .filter(item => this.handleAuthTicket(item))
     },
     courseId() {
       return this.course.id

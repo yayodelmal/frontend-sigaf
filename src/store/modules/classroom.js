@@ -46,6 +46,8 @@ export default {
 
         if (success) {
           commit('SET_CLASSROOMS', _data.collections)
+
+          console.log(_data.collections)
         } else {
           console.log(error)
         }

@@ -1,158 +1,156 @@
 <template>
-  <v-container fluid>
-    <base-card
-      color="blueS"
-      class="px-5 py-3"
-      icon="mdi-view-dashboard"
-      title="Dashboard"
-    >
-      <v-row>
-        <v-col cols="12">
-          <v-toolbar dark color="blueS darken-1" class="mb-1">
-            <v-select
-              v-model="category"
-              :items="categoryItems"
-              label="Curso"
-              item-value="id"
-              item-text="description"
-              color="blueS"
-              flat
-              solo-inverted
-              hide-details
-              return-object
-              prepend-inner-icon="mdi-filter-outline"
-            >
-            </v-select>
-          </v-toolbar>
-        </v-col>
-      </v-row>
-      <v-row v-if="loaded">
-        <v-col cols="12" sm="6" md="6" lg="3">
-          <base-material-stats-card
-            color="info"
-            icon="mdi-view-dashboard"
-            title="Total tickets"
-            value="245"
-            sub-icon="mdi-clock"
-            sub-text="Just Updated"
-          />
-        </v-col>
-        <v-col cols="12" sm="6" md="6" lg="3">
-          <base-material-stats-card
-            color="warning"
-            icon="mdi-view-dashboard"
-            title="Nuevos tickets"
-            value="+24"
-            sub-icon="mdi-clock"
-            sub-text="Just Updated"
-          />
-        </v-col>
-        <v-col cols="12" sm="6" md="6" lg="3">
-          <base-material-stats-card
-            color="redS"
-            icon="mdi-view-dashboard"
-            title="Ticket abiertos"
-            value="45"
-            sub-icon="mdi-clock"
-            sub-text="Just Updated"
-          />
-        </v-col>
-        <v-col cols="12" sm="6" md="6" lg="3">
-          <base-material-stats-card
-            color="success"
-            icon="mdi-view-dashboard"
-            title="Ticket cerrados"
-            value="200"
-            sub-icon="mdi-clock"
-            sub-text="Just Updated"
-          />
-        </v-col>
-      </v-row>
-      <v-row v-if="loaded">
-        <v-col cols="12" sm="12" md="12" lg="4">
-          <v-hover v-slot:default="{ hover }">
-            <v-expand-transition>
-              <v-card class="d-flex flex-column text-center">
-                <div class="spacer-chart">
-                  <v-btn>Actualizar</v-btn>
-                </div>
-                <v-card
-                  color="white"
-                  class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                  :class="{ 'v-card--reveal': hover }"
-                  width="95%"
+  <base-card
+    color="blueS"
+    class="px-5 py-3"
+    icon="mdi-view-dashboard"
+    title="Dashboard"
+  >
+    <v-row>
+      <v-col cols="12">
+        <v-toolbar dark color="blueS darken-1" class="mb-1">
+          <v-select
+            v-model="category"
+            :items="categoryItems"
+            label="Curso"
+            item-value="id"
+            item-text="description"
+            color="blueS"
+            flat
+            solo-inverted
+            hide-details
+            return-object
+            prepend-inner-icon="mdi-filter-outline"
+          >
+          </v-select>
+        </v-toolbar>
+      </v-col>
+    </v-row>
+    <v-row v-if="loaded">
+      <v-col cols="12" sm="6" md="6" lg="3">
+        <base-material-stats-card
+          color="info"
+          icon="mdi-view-dashboard"
+          title="Total tickets"
+          value="245"
+          sub-icon="mdi-clock"
+          sub-text="Just Updated"
+        />
+      </v-col>
+      <v-col cols="12" sm="6" md="6" lg="3">
+        <base-material-stats-card
+          color="warning"
+          icon="mdi-view-dashboard"
+          title="Nuevos tickets"
+          value="+24"
+          sub-icon="mdi-clock"
+          sub-text="Just Updated"
+        />
+      </v-col>
+      <v-col cols="12" sm="6" md="6" lg="3">
+        <base-material-stats-card
+          color="redS"
+          icon="mdi-view-dashboard"
+          title="Ticket abiertos"
+          value="45"
+          sub-icon="mdi-clock"
+          sub-text="Just Updated"
+        />
+      </v-col>
+      <v-col cols="12" sm="6" md="6" lg="3">
+        <base-material-stats-card
+          color="success"
+          icon="mdi-view-dashboard"
+          title="Ticket cerrados"
+          value="200"
+          sub-icon="mdi-clock"
+          sub-text="Just Updated"
+        />
+      </v-col>
+    </v-row>
+    <v-row v-if="loaded">
+      <v-col cols="12" sm="12" md="12" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-expand-transition>
+            <v-card class="d-flex flex-column text-center">
+              <div class="spacer-chart">
+                <v-btn>Actualizar</v-btn>
+              </div>
+              <v-card
+                color="white"
+                class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
+                :class="{ 'v-card--reveal': hover }"
+                width="95%"
+              >
+                <doughnut-chart
+                  v-if="loaded"
+                  :chartData="chartData"
+                  :options="options"
                 >
-                  <doughnut-chart
-                    v-if="loaded"
-                    :chartData="chartData"
-                    :options="options"
-                  >
-                  </doughnut-chart>
-                </v-card>
-                <div class="title font-weight-light margin-custom">
-                  Estado Tickets
-                </div>
+                </doughnut-chart>
               </v-card>
-            </v-expand-transition>
-          </v-hover>
-        </v-col>
-        <v-col cols="12" sm="12" md="12" lg="4">
-          <v-hover v-slot:default="{ hover }">
-            <v-expand-transition>
-              <v-card class="d-flex flex-column text-center">
-                <div class="spacer-chart">
-                  <v-btn>Actualizar</v-btn>
-                </div>
-                <v-card
-                  class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                  color="white"
-                  :class="{ 'v-card--reveal': hover }"
-                  width="95%"
+              <div class="title font-weight-light margin-custom">
+                Estado Tickets
+              </div>
+            </v-card>
+          </v-expand-transition>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-expand-transition>
+            <v-card class="d-flex flex-column text-center">
+              <div class="spacer-chart">
+                <v-btn>Actualizar</v-btn>
+              </div>
+              <v-card
+                class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
+                color="white"
+                :class="{ 'v-card--reveal': hover }"
+                width="95%"
+              >
+                <bar-chart
+                  v-if="loaded"
+                  :chartData="chartDataBar"
+                  :options="optionsBar"
                 >
-                  <bar-chart
-                    v-if="loaded"
-                    :chartData="chartDataBar"
-                    :options="optionsBar"
-                  >
-                  </bar-chart>
-                </v-card>
-                <div class="title font-weight-light margin-custom">
-                  Estado Ticket por Operador
-                </div>
+                </bar-chart>
               </v-card>
-            </v-expand-transition>
-          </v-hover>
-        </v-col>
-        <v-col cols="12" sm="12" md="12" lg="4">
-          <v-hover v-slot:default="{ hover }">
-            <v-expand-transition>
-              <v-card class="d-flex flex-column text-center">
-                <div class="spacer-chart">
-                  <v-btn>Actualizar</v-btn>
-                </div>
-                <v-card
-                  class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                  color="white"
-                  :class="{ 'v-card--reveal': hover }"
-                  width="95%"
+              <div class="title font-weight-light margin-custom">
+                Estado Ticket por Operador
+              </div>
+            </v-card>
+          </v-expand-transition>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-expand-transition>
+            <v-card class="d-flex flex-column text-center">
+              <div class="spacer-chart">
+                <v-btn>Actualizar</v-btn>
+              </div>
+              <v-card
+                class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
+                color="white"
+                :class="{ 'v-card--reveal': hover }"
+                width="95%"
+              >
+                <doughnut-chart
+                  v-if="loaded"
+                  :chartData="chartDataPriority"
+                  :options="optionsPriority"
                 >
-                  <doughnut-chart
-                    v-if="loaded"
-                    :chartData="chartDataPriority"
-                    :options="optionsPriority"
-                  >
-                  </doughnut-chart>
-                </v-card>
-                <div class="title font-weight-light margin-custom">
-                  Prioridad Ticket
-                </div>
+                </doughnut-chart>
               </v-card>
-            </v-expand-transition>
-          </v-hover>
-        </v-col>
-      </v-row>
-    </base-card>
-  </v-container>
+              <div class="title font-weight-light margin-custom">
+                Prioridad Ticket
+              </div>
+            </v-card>
+          </v-expand-transition>
+        </v-hover>
+      </v-col>
+    </v-row>
+  </base-card>
 </template>
 
 <script>
