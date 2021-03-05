@@ -816,7 +816,7 @@ export default {
               }
 
               if (this.text === '' && this.subject === '') {
-                //! Aca va lógica de mensake de validación
+                //TODO Aca va lógica de mensake de validación
               } else {
                 if (this.text !== '') {
                   payload = {
@@ -837,7 +837,7 @@ export default {
           this.overlay = false
         }
       } else {
-        //! Aca va lógica de mensake de validación
+        //TODO Aca va lógica de mensake de validación
       }
     },
 

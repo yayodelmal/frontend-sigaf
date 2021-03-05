@@ -13,14 +13,15 @@
           </v-col>
 
           <v-col cols="12">
-            <base-card
-              color="blueS"
-              title="Iniciar Sesión"
+            <v-card
               max-width="400px"
               class="mx-auto mt-8"
               v-show="!dialogLogin"
             >
               <v-form ref="form">
+                <v-card-text class="headline d-flex justify-center blueS">
+                  <span class="white--text"> Iniciar sesión</span>
+                </v-card-text>
                 <v-card-text>
                   <base-textfield
                     v-model="userEdited.email"
@@ -51,7 +52,7 @@
                   ></base-button>
                 </v-card-actions>
               </v-form>
-            </base-card>
+            </v-card>
           </v-col>
         </v-row>
       </v-container>

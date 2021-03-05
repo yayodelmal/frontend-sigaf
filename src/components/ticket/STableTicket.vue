@@ -278,6 +278,9 @@ export default {
           })
         }
       }
+    },
+    deleteItem({ immutableTicket }) {
+      this.$emit('deleteItem', immutableTicket)
     }
   }
 }

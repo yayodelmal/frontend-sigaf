@@ -6,6 +6,8 @@ import './plugins/base'
 import vuetify from './plugins/vuetify'
 import CKEditor from '@ckeditor/ckeditor5-vue2'
 
+console.log(process.env)
+
 Vue.use(CKEditor)
 // import VueMask from 'v-mask'
 

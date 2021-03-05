@@ -92,6 +92,7 @@
               :tickets="tickets"
               :search="search"
               @editTicket="editItem"
+              @deleteItem="deleteItem"
             />
           </div>
         </div>
@@ -453,9 +454,6 @@ export default {
     },
     closeConfirmDelete() {
       this.dialogConfirm = false
-      setTimeout(() => {
-        this.clearTicket()
-      }, 300)
     },
     closeEditedSingleModal(event) {
       this.editedTicketItem = null
