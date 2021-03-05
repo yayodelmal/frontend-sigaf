@@ -4,6 +4,7 @@ node_modules
 
 # local env files
 .env.local
+/src/services/axios.js
 .env.*.local
 
 # Log files

@@ -113,6 +113,7 @@ export default {
 
         if (success) {
           commit('SET_COURSES', _data.collections)
+          console.log(_data.collections)
         } else {
           console.log(error)
         }

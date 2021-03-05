@@ -37,6 +37,7 @@ export default {
         return {
           id: properties.id,
           description: properties.description,
+          categoryCode: properties.categoryCode,
           courses: {
             numberOfElements: relationships.numberOfElements,
             href: relationships.links.href

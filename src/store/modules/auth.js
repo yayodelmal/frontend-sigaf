@@ -92,7 +92,6 @@ export default {
     },
     logout: async ({ commit }) => {
       try {
-        console.log('exe')
         const { data } = await axios.get(`${BASE_URL}/logout`)
 
         commit('SET_LOGIN_USER', null)
@@ -102,6 +101,14 @@ export default {
       } catch (error) {
         console.log(error)
         return { success: false }
+      }
+    },
+    partialLogout: ({ commit }) => {
+      try {
+        commit('SET_LOGIN_USER', null)
+        commit('SET_ACCESS_TOKEN', null)
+      } catch (error) {
+        console.log(error)
       }
     }
   }

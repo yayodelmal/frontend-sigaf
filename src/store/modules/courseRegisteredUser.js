@@ -5,7 +5,9 @@ const BASE_URL = '/api/v2/course-registered-user'
 export default {
   namespaced: true,
   state: {
-    courseRegisteredUsers: []
+    courseRegisteredUsers: [],
+    countUsersByCourses: [],
+    storeUsersByCourse: []
   },
   mutations: {
     SET_COURSE_REGISTERED_USERS: (state, courseRegisteredUsers) => {
@@ -22,7 +24,6 @@ export default {
       )
     },
     DELETE_COURSE_REGISTERED_USER: (state, courseRegisteredUser) => {
-      console.log()
       const editedIndex = state.courseRegisteredUsers.findIndex(
         find => find.id === courseRegisteredUser.id
       )
@@ -32,19 +33,45 @@ export default {
 
     POST_COURSE_REGISTERED_USER: (state, courseRegisteredUser) => {
       state.courseRegisteredUsers.push(courseRegisteredUser)
+    },
+    SET_COUNT_BY_COURSE: (state, payload) => {
+      const editedIndex = state.countUsersByCourses.findIndex(
+        find => find.id === payload.id
+      )
+      if (editedIndex === -1) {
+        state.countUsersByCourses.push(payload)
+      } else {
+        Object.assign(state.countUsersByCourses[editedIndex], payload)
+      }
+      console.log('stateCountusers', state.countUsersByCourses)
+    },
+    SET_STORE_USERS_BY_COURSE: (state, payload) => {
+      const editedIndex = state.storeUsersByCourse.findIndex(
+        find => find.id === payload.id
+      )
+      if (editedIndex === -1) {
+        state.storeUsersByCourse.push(payload)
+      } else {
+        Object.assign(state.storeUsersByCourse[editedIndex], payload)
+      }
+      console.log('stateStoreUsersByCourse', state.storeUsersByCourse)
     }
   },
   getters: {
     courseRegisteredUsers: state => {
       return state.courseRegisteredUsers
+    },
+    countUsersByCourses: state => {
+      return state.countUsersByCourses
+    },
+    storeUsersByCourse: state => {
+      return state.storeUsersByCourse
     }
   },
   actions: {
     fetchCourseRegisteredUsers: async ({ commit }) => {
       try {
         const { data } = await axios.get(`${BASE_URL}`)
-
-        console.log('data', data)
 
         const { _data, success, error, message } = data
 
@@ -212,6 +239,10 @@ export default {
 
           if (data.success) {
             commit('SET_COURSE_REGISTERED_USERS', data._data)
+            commit('SET_STORE_USERS_BY_COURSE', {
+              id: id,
+              collection: data._data
+            })
             return data
           } else {
             console.log(data.error)
@@ -238,6 +269,23 @@ export default {
     },
     findCourseRegisteredUserByActivity: async (_, IdActivity) => {
       console.log(IdActivity)
+    },
+    numberOfUsersByCourse: async ({ commit }, course) => {
+      try {
+        const { data } = await axios.get(`${BASE_URL}s/${course.id}/count`)
+
+        const { _data, success, message } = data
+
+        commit('SET_COUNT_BY_COURSE', _data)
+        return { success, message, _data }
+      } catch (error) {
+        const { data } = error.response
+        console.log(error)
+        return {
+          success: data.success,
+          message: data.message
+        }
+      }
     }
   }
 }

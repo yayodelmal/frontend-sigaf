@@ -13,9 +13,9 @@
 
       <navigation-drawer-app></navigation-drawer-app>
 
-      <router-view> </router-view>
-
-      <!-- <footer-app></footer-app> -->
+      <v-container fluid>
+        <router-view> </router-view>
+      </v-container>
     </v-container>
   </v-main>
 </template>
