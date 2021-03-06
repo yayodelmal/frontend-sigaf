@@ -6,6 +6,7 @@ node_modules
 .env.local
 /src/services/axios.js
 .env.*.local
+.env
 
 # Log files
 npm-debug.log*

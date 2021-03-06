@@ -6,7 +6,7 @@
     :items="items"
     item-key="id"
     show-select
-    class="elevation-1"
+    class="elevation-0"
     :search="search"
     disable-pagination
     hide-default-footer

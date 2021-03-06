@@ -1,19 +1,20 @@
 <template>
-  <base-card
-    color="blueS"
-    class="px-5 py-3"
-    icon="mdi-ticket-account"
-    title="Ticket"
-  >
-    <div>
+  <div>
+    <base-card
+      color="blueS"
+      class="px-5 py-3"
+      icon="mdi-ticket-account"
+      title="Ticket"
+    >
       <sigaf-category-course-toolbar
         @showTable="showTable = $event"
         @loading="loading = $event"
         @selectedCourse="selectedCourse = $event"
       ></sigaf-category-course-toolbar>
-      <v-divider class="mt-5 mb-3" />
+
       <v-expand-transition>
         <div v-if="showTable">
+          <v-divider class="mt-5 mb-3" />
           <v-toolbar dark color="blueS darken-1">
             <v-text-field
               v-model="search"
@@ -92,18 +93,19 @@
               :tickets="tickets"
               :search="search"
               @editTicket="editItem"
+              @deleteItem="deleteItem"
+              @showItem="showItem"
             />
           </div>
         </div>
       </v-expand-transition>
-    </div>
+    </base-card>
     <sigaf-create-single-ticket
       v-if="showSingleCreateModal"
       v-model="singleCreateModal"
       :selectedCourse="selectedCourse"
       @closeModal="closeCreatedSingleModal($event)"
-    ></sigaf-create-single-ticket>
-
+    />
     <sigaf-edit-single-ticket
       v-if="showSingleEditModal"
       v-model="singleEditModal"
@@ -111,8 +113,7 @@
       :ticket="editedTicketItem"
       :ticket-details="editedTicketDetails"
       @closeModal="closeEditedSingleModal($event)"
-    ></sigaf-edit-single-ticket>
-
+    />
     <v-overlay
       :value="overlayCreateMultipleTicket"
       color="grayS"
@@ -132,10 +133,10 @@
       v-model="multipleCreateModal"
       :selectedCourse="selectedCourse"
       :courseRegisteredUsers="filteredUsersCourse"
-      @closeModalMultiple="closeEditedMultipleModal($event)"
-    >
-    </sigaf-create-multiple-ticket>
-
+      @closeModalMultiple="closeEditedMultipleModal"
+      @showSnackbar="showSnackbar"
+    />
+    <!-- 
     <v-snackbar
       @snackbar="setSnackbar($event)"
       color="blueS"
@@ -146,7 +147,9 @@
       <v-btn dark text @click="snackbar = false">
         Cerrar
       </v-btn>
-    </v-snackbar>
+    </v-snackbar> -->
+
+    <sigaf-snackbar v-model="snackbar" v-bind="configSnack" />
 
     <confirm-dialog
       :icon="'mdi-alert-circle-outline'"
@@ -161,7 +164,7 @@
         </h3>
       </template>
     </confirm-dialog>
-  </base-card>
+  </div>
 </template>
 
 <script>
@@ -176,6 +179,7 @@ import SigafCreateSingleTicket from '@/components/ticket/single/SigafCreateSingl
 import SigafEditSingleTicket from '@/components/ticket/single/SigafEditSingleTicket.vue'
 import SigafCreateMultipleTicket from '@/components/ticket/multiple/SigafCreateMultipleTicket.vue'
 import STableTicket from '../components/ticket/STableTicket.vue'
+import SigafSnackbar from '../components/component/Snackbar'
 
 Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
@@ -192,7 +196,8 @@ export default {
     SigafCreateSingleTicket,
     SigafEditSingleTicket,
     SigafCreateMultipleTicket,
-    STableTicket
+    STableTicket,
+    SigafSnackbar
   },
   data() {
     return {
@@ -228,7 +233,11 @@ export default {
       message: '',
       successMessage: 'Operación realizada con éxito.',
       errorMEssage: 'Ha ocurrido un error.',
-      snackbar: false,
+      configSnack: {
+        type: '',
+        active: false,
+        message: ''
+      },
       timeout: 3000,
       editedTicketIndex: -1,
       editedTicketItem: null,
@@ -260,7 +269,8 @@ export default {
       showSingleCreateModal: false,
       overlayCreateMultipleTicket: false,
       overlayMessageCreateMultipleTicket: '',
-      transition: 'scale-transition'
+      transition: 'scale-transition',
+      snackbar: false
     }
   },
   methods: {
@@ -295,12 +305,18 @@ export default {
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
     }),
+    showItem(ticket) {
+      console.log(ticket)
+    },
     openCreateSingleModal() {
       this.showSingleCreateModal = true
       this.singleCreateModal = true
     },
-    setSnackbar(item) {
-      console.log('item', item)
+    showSnackbar(item) {
+      this.snackbar = false
+      this.configSnack = { ...item }
+      this.snackbar = true
+      console.log('snackbar', this.configSnack)
     },
 
     remove(item) {
@@ -453,9 +469,6 @@ export default {
     },
     closeConfirmDelete() {
       this.dialogConfirm = false
-      setTimeout(() => {
-        this.clearTicket()
-      }, 300)
     },
     closeEditedSingleModal(event) {
       this.editedTicketItem = null

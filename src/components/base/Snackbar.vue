@@ -3,12 +3,13 @@
     v-bind="$attrs"
     v-on="$listeners"
     :color="setColor"
-    v-model="isActive"
+    :value="value"
+    @input="$emit('input', $event)"
     :timeout="timeout"
   >
     <v-icon x-large dark>{{ setIcon }}</v-icon>
     <span class="ml-3">{{ message }}</span>
-    <v-btn dark text @click="isActive = false">
+    <v-btn dark text @click="$emit('input', $event)">
       Cerrar
     </v-btn>
   </v-snackbar>
@@ -20,25 +21,15 @@ export default {
   name: 'BaseSnackbar',
   props: {
     type: String,
-    active: {
-      type: Boolean
-    },
-    message: String
+    message: String,
+    value: Boolean
   },
   data: () => ({
     color: '',
     timeout: 5000,
-    icon: '',
-    isActive: false
+    icon: ''
   }),
-  watch: {
-    active() {
-      this.isActive = this.active
-    },
-    isActive() {
-      this.$emit('changeValue', this.isActive)
-    }
-  },
+
   computed: {
     setColor() {
       switch (this.type) {

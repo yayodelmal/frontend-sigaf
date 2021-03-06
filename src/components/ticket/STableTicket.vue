@@ -250,34 +250,41 @@ export default {
     showTooltipSearch(item) {
       return item.close ? 'Ver ticket' : 'Agregar contacto'
     },
-    async editItem({ immutableTicket }) {
-      const ticket = immutableTicket.properties
-      const response = await this.findLogEditingTicketByTicket(ticket.id)
-      if (response.statusCode === 204) {
-        const res = await this.findTicket(ticket)
-        const version = res._data.properties.version
+    async editItem({ immutableTicket, close }) {
+      if (close) {
+        this.$emit('showItem', immutableTicket)
+      } else {
+        const ticket = immutableTicket.properties
+        const response = await this.findLogEditingTicketByTicket(ticket.id)
+        if (response.statusCode === 204) {
+          const res = await this.findTicket(ticket)
+          const version = res._data.properties.version
 
-        if (version !== ticket.version) {
-          this.PUT_TICKET(res._data)
-        }
-        await this.postLogEditingTicket({
-          ticket_id: ticket.id,
-          user_id: this.loggedUser.id
-        })
-
-        const url = immutableTicket.relationships.links.href
-
-        const { _data } = await this.findTicketDetailByTicket(url)
-
-        if (_data) {
-          this.$emit('editTicket', {
-            editedTicketDetails: _data.relationships.collection.data,
-            editedTicketItem: immutableTicket,
-            showSingleEditModal: true,
-            singleEditModal: true
+          if (version !== ticket.version) {
+            this.PUT_TICKET(res._data)
+          }
+          await this.postLogEditingTicket({
+            ticket_id: ticket.id,
+            user_id: this.loggedUser.id
           })
+
+          const url = immutableTicket.relationships.links.href
+
+          const { _data } = await this.findTicketDetailByTicket(url)
+
+          if (_data) {
+            this.$emit('editTicket', {
+              editedTicketDetails: _data.relationships.collection.data,
+              editedTicketItem: immutableTicket,
+              showSingleEditModal: true,
+              singleEditModal: true
+            })
+          }
         }
       }
+    },
+    deleteItem({ immutableTicket }) {
+      this.$emit('deleteItem', immutableTicket)
     }
   }
 }

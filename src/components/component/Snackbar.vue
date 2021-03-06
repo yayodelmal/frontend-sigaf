@@ -9,10 +9,8 @@
     transition="scale-transition"
     :content-class="setClass"
   >
-    <v-row>
-      <v-icon size="30" class="mx-3" :color="setColor" dark>{{
-        setIcon
-      }}</v-icon>
+    <div class="d-flex justtify-content-between">
+      <v-icon size="30" :color="setColor" dark>{{ setIcon }}</v-icon>
       <v-spacer />
       <span class="ml-3 mr-10 mt-1 grayS--text text-subtitle-1">{{
         message
@@ -21,7 +19,7 @@
       <v-btn icon @click="active = false">
         <v-icon :color="setColor">mdi-close</v-icon>
       </v-btn>
-    </v-row>
+    </div>
   </snackbar>
 </template>
 
@@ -40,7 +38,7 @@ export default {
   },
   data: () => ({
     colorIcon: '',
-    timeout: 5000,
+    timeout: 3000,
     icon: '',
     style: ''
   }),
@@ -92,7 +90,11 @@ export default {
   }
 }
 </script>
-<style>
+<style scope>
+.v-application--is-ltr .v-snack__action {
+  margin-right: 0;
+}
+
 .success_ {
   border-radius: 5px;
   border-left: 10px;
