@@ -12,7 +12,6 @@
       </v-app-bar>
 
       <navigation-drawer-app></navigation-drawer-app>
-
       <v-container fluid>
         <router-view> </router-view>
       </v-container>

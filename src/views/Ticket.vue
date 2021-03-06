@@ -11,9 +11,10 @@
         @loading="loading = $event"
         @selectedCourse="selectedCourse = $event"
       ></sigaf-category-course-toolbar>
-      <v-divider class="mt-5 mb-3" />
+
       <v-expand-transition>
         <div v-if="showTable">
+          <v-divider class="mt-5 mb-3" />
           <v-toolbar dark color="blueS darken-1">
             <v-text-field
               v-model="search"
@@ -132,9 +133,10 @@
       v-model="multipleCreateModal"
       :selectedCourse="selectedCourse"
       :courseRegisteredUsers="filteredUsersCourse"
-      @closeModalMultiple="closeEditedMultipleModal($event)"
+      @closeModalMultiple="closeEditedMultipleModal"
+      @showSnackbar="showSnackbar"
     />
-
+    <!-- 
     <v-snackbar
       @snackbar="setSnackbar($event)"
       color="blueS"
@@ -145,9 +147,9 @@
       <v-btn dark text @click="snackbar = false">
         Cerrar
       </v-btn>
-    </v-snackbar>
+    </v-snackbar> -->
 
-    <base-snackbar v-bind="snackbar" />
+    <sigaf-snackbar v-model="snackbar" v-bind="configSnack" />
 
     <confirm-dialog
       :icon="'mdi-alert-circle-outline'"
@@ -177,6 +179,7 @@ import SigafCreateSingleTicket from '@/components/ticket/single/SigafCreateSingl
 import SigafEditSingleTicket from '@/components/ticket/single/SigafEditSingleTicket.vue'
 import SigafCreateMultipleTicket from '@/components/ticket/multiple/SigafCreateMultipleTicket.vue'
 import STableTicket from '../components/ticket/STableTicket.vue'
+import SigafSnackbar from '../components/component/Snackbar'
 
 Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
@@ -193,7 +196,8 @@ export default {
     SigafCreateSingleTicket,
     SigafEditSingleTicket,
     SigafCreateMultipleTicket,
-    STableTicket
+    STableTicket,
+    SigafSnackbar
   },
   data() {
     return {
@@ -229,12 +233,11 @@ export default {
       message: '',
       successMessage: 'Operación realizada con éxito.',
       errorMEssage: 'Ha ocurrido un error.',
-      snackbar: {
+      configSnack: {
         type: '',
         active: false,
         message: ''
       },
-
       timeout: 3000,
       editedTicketIndex: -1,
       editedTicketItem: null,
@@ -266,7 +269,8 @@ export default {
       showSingleCreateModal: false,
       overlayCreateMultipleTicket: false,
       overlayMessageCreateMultipleTicket: '',
-      transition: 'scale-transition'
+      transition: 'scale-transition',
+      snackbar: false
     }
   },
   methods: {
@@ -309,7 +313,10 @@ export default {
       this.singleCreateModal = true
     },
     showSnackbar(item) {
-      console.log('item', item)
+      this.snackbar = false
+      this.configSnack = { ...item }
+      this.snackbar = true
+      console.log('snackbar', this.configSnack)
     },
 
     remove(item) {
