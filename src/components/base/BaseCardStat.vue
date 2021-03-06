@@ -77,7 +77,7 @@ export default {
 }
 </script>
 
-<style lang="sass">
+<style lang="sass" scope>
 .v-card--material-stats
   display: flex
   flex-wrap: wrap

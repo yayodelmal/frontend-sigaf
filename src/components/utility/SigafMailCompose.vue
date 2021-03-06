@@ -7,10 +7,14 @@
           color="blueS"
           v-model="subject"
           clearable
+          hide-details
           placeholder="Asunto"
-          class="mb-n3"
         ></base-textfield>
+      </v-col>
+      <v-col cols="12">
         <sigaf-editor v-model="text" />
+      </v-col>
+      <v-col cols="12">
         <v-file-input
           outlined
           multiple
@@ -21,7 +25,6 @@
           prepend-inner-icon="mdi-paperclip"
           color="blueS"
           show-size
-          class="mt-3 mb-n10"
         >
           <template v-slot:selection="{ text }">
             <v-chip label color="blueS" dark small>

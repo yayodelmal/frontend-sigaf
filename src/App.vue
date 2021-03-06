@@ -11,3 +11,9 @@ export default {
   name: 'App'
 }
 </script>
+
+<style>
+/* .row {
+  margin: -12px !important;
+} */
+</style>

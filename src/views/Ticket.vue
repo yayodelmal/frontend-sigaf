@@ -1,11 +1,11 @@
 <template>
-  <base-card
-    color="blueS"
-    class="px-5 py-3"
-    icon="mdi-ticket-account"
-    title="Ticket"
-  >
-    <div>
+  <div>
+    <base-card
+      color="blueS"
+      class="px-5 py-3"
+      icon="mdi-ticket-account"
+      title="Ticket"
+    >
       <sigaf-category-course-toolbar
         @showTable="showTable = $event"
         @loading="loading = $event"
@@ -93,18 +93,18 @@
               :search="search"
               @editTicket="editItem"
               @deleteItem="deleteItem"
+              @showItem="showItem"
             />
           </div>
         </div>
       </v-expand-transition>
-    </div>
+    </base-card>
     <sigaf-create-single-ticket
       v-if="showSingleCreateModal"
       v-model="singleCreateModal"
       :selectedCourse="selectedCourse"
       @closeModal="closeCreatedSingleModal($event)"
-    ></sigaf-create-single-ticket>
-
+    />
     <sigaf-edit-single-ticket
       v-if="showSingleEditModal"
       v-model="singleEditModal"
@@ -112,8 +112,7 @@
       :ticket="editedTicketItem"
       :ticket-details="editedTicketDetails"
       @closeModal="closeEditedSingleModal($event)"
-    ></sigaf-edit-single-ticket>
-
+    />
     <v-overlay
       :value="overlayCreateMultipleTicket"
       color="grayS"
@@ -134,8 +133,7 @@
       :selectedCourse="selectedCourse"
       :courseRegisteredUsers="filteredUsersCourse"
       @closeModalMultiple="closeEditedMultipleModal($event)"
-    >
-    </sigaf-create-multiple-ticket>
+    />
 
     <v-snackbar
       @snackbar="setSnackbar($event)"
@@ -162,7 +160,7 @@
         </h3>
       </template>
     </confirm-dialog>
-  </base-card>
+  </div>
 </template>
 
 <script>
@@ -296,6 +294,9 @@ export default {
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
     }),
+    showItem(ticket) {
+      console.log(ticket)
+    },
     openCreateSingleModal() {
       this.showSingleCreateModal = true
       this.singleCreateModal = true
