@@ -701,7 +701,12 @@ export default {
       this.rulesValueStepOne = true
       this.timelineData = []
 
-      if (this.selectedUsers.length === 0 && this.rulesValueStepOne) {
+      if (this.selectedUsers.length === 0) {
+        this.$emit('showSnackbar', {
+          type: 'warning',
+          active: true,
+          message: 'Debe escoger un alumno.'
+        })
         this.rulesValueStepOne = false
       }
 
