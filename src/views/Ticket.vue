@@ -147,6 +147,8 @@
       </v-btn>
     </v-snackbar>
 
+    <base-snackbar v-bind="snackbar" />
+
     <confirm-dialog
       :icon="'mdi-alert-circle-outline'"
       :color-icon="'warning'"
@@ -227,7 +229,12 @@ export default {
       message: '',
       successMessage: 'Operación realizada con éxito.',
       errorMEssage: 'Ha ocurrido un error.',
-      snackbar: false,
+      snackbar: {
+        type: '',
+        active: false,
+        message: ''
+      },
+
       timeout: 3000,
       editedTicketIndex: -1,
       editedTicketItem: null,
@@ -301,7 +308,7 @@ export default {
       this.showSingleCreateModal = true
       this.singleCreateModal = true
     },
-    setSnackbar(item) {
+    showSnackbar(item) {
       console.log('item', item)
     },
 
