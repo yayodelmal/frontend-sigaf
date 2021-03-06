@@ -4,6 +4,7 @@
       :value="value"
       @input="$emit('input', $event)"
       fullscreen
+      persistent
       hide-overlay
       transition="dialog-bottom-transition"
     >
@@ -773,11 +774,9 @@ export default {
       this.timelineData = []
 
       if (this.selectedUsers.length === 0) {
-        //TODO agregar snackbar
-
         this.$emit('showSnackbar', {
-          open: true,
-          message: 'Custom message'
+          type: 'warning',
+          message: 'Debe seleccionar al menos un alumno'
         })
         this.rulesValueStepOne = false
       }
@@ -842,8 +841,6 @@ export default {
       this.$v.$touch()
 
       if (!this.$v.$invalid) {
-        this.overlay = true
-
         const mapUsersId = this.selectedUsers.map(user => {
           return user.id
         })
@@ -865,36 +862,44 @@ export default {
           dataStoreTicket = { ...dataStoreTicket, ...clossingDate }
         }
 
-        const { success, _data } = await this.postMultipleTicket(
-          dataStoreTicket
-        )
+        if (
+          this.isEmailActivated &&
+          (this.text === '' || this.subject === '')
+        ) {
+          this.$emit('showSnackbar', {
+            type: 'warning',
+            message: 'Complete campos correo electrónico.'
+          })
+        } else {
+          this.overlay = true
 
-        if (success) {
-          if (this.editedDetailTicketItem.statusDetail.id !== 0) {
-            const ticketsId = _data.map(ticket => {
-              return ticket.properties.id
-            })
+          const { success, _data } = await this.postMultipleTicket(
+            dataStoreTicket
+          )
 
-            const dataDetailTicket = {
-              comment: this.editedDetailTicketItem.comment,
-              ticket_id: ticketsId,
-              status_detail_ticket_id: this.editedDetailTicketItem.statusDetail
-                .id,
-              user_created_id: this.loggedUser.id
-            }
+          if (success) {
+            if (this.editedDetailTicketItem.statusDetail.id !== 0) {
+              const ticketsId = _data.map(ticket => {
+                return ticket.properties.id
+              })
 
-            const response = await this.postMassiveDetailTicket(
-              dataDetailTicket
-            )
-
-            if (response.success && this.isEmailActivated) {
-              let payload = {
-                ticketsId: ticketsId
+              const dataDetailTicket = {
+                comment: this.editedDetailTicketItem.comment,
+                ticket_id: ticketsId,
+                status_detail_ticket_id: this.editedDetailTicketItem
+                  .statusDetail.id,
+                user_created_id: this.loggedUser.id
               }
 
-              if (this.text === '' && this.subject === '') {
-                //TODO Aca va lógica de mensake de validación
-              } else {
+              const response = await this.postMassiveDetailTicket(
+                dataDetailTicket
+              )
+
+              if (response.success && this.isEmailActivated) {
+                let payload = {
+                  ticketsId: ticketsId
+                }
+
                 if (this.text !== '') {
                   payload = {
                     ...payload,
@@ -907,14 +912,22 @@ export default {
                 }
 
                 await this.postMailMultipleTicket(payload)
+
+                this.$emit('showSnackbar', {
+                  type: 'success',
+                  message: 'Tickets creados correctamente.'
+                })
               }
             }
+            this.$emit('closeModalMultiple', false)
+            this.overlay = false
           }
-          this.$emit('closeModalMultiple', false)
-          this.overlay = false
         }
       } else {
-        //TODO Aca va lógica de mensake de validación
+        this.$emit('showSnackbar', {
+          type: 'warning',
+          message: 'Complete los campos obligatorios.'
+        })
       }
     },
 
