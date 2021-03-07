@@ -51,7 +51,8 @@ export default new Vuex.Store({
     logEditingTicket
   },
   state: {
-    drawer: null
+    drawer: null,
+    version: process.env.VUE_APP_VERSION
   },
   mutations: {
     SET_DRAWER(state, payload) {

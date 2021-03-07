@@ -1,13 +1,14 @@
 <template>
   <v-hover v-slot:default="{ hover }" open-delay="200">
     <v-card
-      :color="getColorCard(user.state)"
-      class="pt-6 mx-auto rounded-t-xl"
+      :color="backgroundColor ? 'white' : getColorCard(user.state)"
+      class="mx-auto"
+      :class="backgroundColor ? '' : 'rounded-t-xl'"
       flat
-      min-width="330"
-      max-width="350"
-      :elevation="hover ? 16 : 0"
+      width="350"
+      :elevation="backgroundColor ? 0 : hover ? 16 : 0"
       outlined
+      max-height="480"
     >
       <v-card-text>
         <span class="headline font-weight-bold"> {{ user.classroom }}</span
@@ -38,10 +39,14 @@
           {{ user.registered_user.email }}
         </h3>
         <h3 class="redS--text subheading font-weight-bold">
-          {{ user.registered_user.mobile }}
+          {{
+            user.registered_user.mobile
+              ? user.registered_user.mobile
+              : 'Sin teléfono registrado'
+          }}
         </h3>
       </v-card-text>
-      <v-expand-transition>
+      <v-expand-transition v-if="!backgroundColor">
         <div
           v-if="hover"
           class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
@@ -80,7 +85,7 @@
           </div>
         </div>
       </v-expand-transition>
-      <v-divider></v-divider>
+      <v-divider class="my-2"></v-divider>
       <v-row class="text-center">
         <v-col cols="6" class="mx-auto">
           <v-card :color="getColorState(user.state)" flat dark class="py-1"
@@ -89,8 +94,7 @@
             </span></v-card
           >
         </v-col>
-
-        <v-col cols="12">
+        <v-col cols="12" class="mb-2">
           <span class="font-weight-bold">
             <v-icon class="mr-2">
               mdi-clock
@@ -111,7 +115,8 @@ export default {
   props: {
     user: {
       type: Object
-    }
+    },
+    backgroundColor: Boolean
   },
   created() {},
   methods: {

@@ -8,17 +8,10 @@
     width="260"
     mobile-breakpoint="960"
     v-bind="$attrs"
+    @mouseover="test"
+    v-on:update:mini-variant="prueba = $event"
+    @transitionend="test"
   >
-    <!-- <v-list color="white">
-      <v-list-item>
-        <v-img
-          contain
-          max-height="50"
-          src="..\..\assets\iie_iso@2x.png"
-        ></v-img>
-      </v-list-item>
-    </v-list> -->
-
     <v-list elevation="10" height="64">
       <v-list-item two-line class="px-2 mt-n3">
         <v-list-item-avatar>
@@ -106,29 +99,14 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+      <div class="d-flex pr-3">
+        <span class="caption mx-auto white--text text-truncate">
+          v{{ version }} <span>SIGAF</span
+          ><v-icon small>mdi-registered-trademark</v-icon> 2020 -
+          {{ new Date().getFullYear() }}
+        </span>
+      </div>
     </template>
-    <!-- <v-dialog v-model="dialog" max-width="350">
-      <v-card>
-        <v-toolbar flat color="blueS" dark dense>
-          <v-toolbar-title>SIGAF</v-toolbar-title>
-        </v-toolbar>
-
-        <v-card-text class="text-center title my-6">
-          ¿Cerrar sesión?
-        </v-card-text>
-
-        <v-divider />
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn outlined @click="dialog = false">
-            CANCELAR
-          </v-btn>
-          <v-btn color="blueS" dark depressed @click="logout">
-            ACEPTAR
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog> -->
     <confirm-dialog
       :icon="'mdi-exit-to-app'"
       :color-icon="'blueS'"
@@ -150,7 +128,8 @@ import ConfirmDialog from '../component/ConfirmCard'
 export default {
   name: 'NavigationDrawerApp',
   props: {
-    breakpoint: String
+    breakpoint: String,
+    miniVariant: Boolean
   },
   components: {
     'confirm-dialog': ConfirmDialog
@@ -282,13 +261,9 @@ export default {
         }
       ]
     },
-    dialog: false
+    dialog: false,
+    prueba: false
   }),
-  // props: {
-  //   // drawer: {
-  //   //   type: Boolean
-  //   // },
-  // },
   created() {
     this.attempt(localStorage.getItem('access_token'))
   },
@@ -301,6 +276,9 @@ export default {
       isOperator: 'auth/isOperator',
       role: 'auth/typeRole'
     }),
+    version() {
+      return this.$store.state.version
+    },
     hover() {
       switch (this.$vuetify.breakpoint.name) {
         case 'md':
@@ -334,15 +312,6 @@ export default {
         link.privileges.includes(this.role.description)
       )
     },
-
-    // drawerLocal: {
-    //   get: function() {
-    //     return this.drawer
-    //   },
-    //   set: function(value) {
-    //     this.$emit('update:drawer', value)
-    //   }
-    // },
     drawer: {
       get() {
         return this.$store.state.drawer
@@ -375,6 +344,13 @@ export default {
       attempt: 'auth/attempt',
       logoutStore: 'auth/logout'
     }),
+    test() {
+      if (!this.prueba) {
+        this.colapseVersion = false
+      } else {
+        this.colapseVersion = true
+      }
+    },
     getPrivilegesSecondaryLinks(index) {
       return this.links.secondary[index].links.filter(link =>
         link.privileges.includes(this.role.description)

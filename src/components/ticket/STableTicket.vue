@@ -252,7 +252,16 @@ export default {
     },
     async editItem({ immutableTicket, close }) {
       if (close) {
-        this.$emit('showItem', immutableTicket)
+        const url = immutableTicket.relationships.links.href
+
+        const { _data } = await this.findTicketDetailByTicket(url)
+
+        this.$emit('showItem', {
+          editedTicketDetails: _data.relationships.collection.data,
+          editedTicketItem: immutableTicket,
+          showSingleShowModal: true,
+          singleShowModal: true
+        })
       } else {
         const ticket = immutableTicket.properties
         const response = await this.findLogEditingTicketByTicket(ticket.id)
