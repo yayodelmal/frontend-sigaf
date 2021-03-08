@@ -35,149 +35,157 @@
           </v-stepper-header>
           <v-stepper-items>
             <v-stepper-content step="1">
-              <form @keydown.enter.prevent="fetchUserByRut()">
-                <v-row>
-                  <v-spacer />
-                  <v-col cols="10" sm="4" md="4">
-                    <base-textfield
-                      label="Rut"
-                      :disabled="ticketClose"
-                      required
-                      color="blueS"
-                      v-model="rut"
-                      clearable
-                      :loading="searchRutLoading"
-                      hint="Formato 12.345.678-9"
-                    ></base-textfield>
+              <v-card elevation="0" tile class="ma-2">
+                <v-row class="bg-gray lighten-4">
+                  <v-col cols="12">
+                    <v-toolbar dark color="blueS darken-1">
+                      <v-spacer />
+                      <v-text-field
+                        label="12.345.678-9"
+                        prepend-inner-icon="mdi-magnify"
+                        flat
+                        clearable
+                        dark
+                        hide-details
+                        solo-inverted
+                        color="blueS"
+                        v-model="rut"
+                        :loading="searchRutLoading"
+                        class="shrink"
+                      ></v-text-field>
+
+                      <v-btn
+                        class="ml-2"
+                        depressed
+                        large
+                        color="blueS"
+                        :loading="searchRutLoading"
+                        @click.stop="fetchUserByRut()"
+                      >
+                        BUSCAR
+                      </v-btn>
+                      <v-spacer />
+                    </v-toolbar>
                   </v-col>
-                  <v-col cols="2" sm="1" md="1">
-                    <v-btn
-                      :disabled="ticketClose"
-                      color="blueS"
-                      elevation="1"
-                      fab
-                      small
-                      dark
-                      @click.stop="fetchUserByRut()"
-                    >
-                      <v-icon>mdi-magnify</v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-spacer />
-                </v-row>
-              </form>
-              <div v-if="user">
-                <v-row justify="center">
-                  <v-col
-                    class="d-flex text-center"
-                    cols="12"
-                    sm="8"
-                    md="6"
-                    lg="4"
-                    xl="4"
-                  >
+                  <v-col class="d-flex text-center" cols="12" v-if="user">
                     <sigaf-card-data-student
                       :user="user"
                     ></sigaf-card-data-student>
                   </v-col>
                 </v-row>
-                <v-row>
-                  <v-spacer />
-                  <v-btn
-                    class="mt-3"
-                    color="blueS"
-                    depressed
-                    dark
-                    @click="secondStep"
-                  >
-                    Continuar
-                    <v-icon class="ml-3">mdi-arrow-right-bold-circle</v-icon>
-                  </v-btn>
-                </v-row>
-              </div>
+                <div v-if="user">
+                  <v-row class="justify-end">
+                    <v-col cols="2" class="d-flex">
+                      <v-btn
+                        class="ml-auto"
+                        color="blueS"
+                        depressed
+                        dark
+                        @click="secondStep"
+                      >
+                        Continuar
+                        <v-icon class="ml-3"
+                          >mdi-arrow-right-bold-circle</v-icon
+                        >
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </div>
+              </v-card>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <v-row>
-                <v-col cols="12" md="5" xl="3" lg="4" sm="12">
-                  <v-card>
-                    <v-card-title>
-                      <span
-                        class="subtitle-1 font-weight-bold  blueS--text mb-3"
-                      >
-                        Información resumen
-                      </span>
-                    </v-card-title>
-                    <v-card-text v-if="user" class="d-flex text-center">
-                      <sigaf-card-data-student
-                        :user="user"
-                      ></sigaf-card-data-student>
-                    </v-card-text>
-                  </v-card>
-                </v-col>
-                <v-col cols="12" md="7" xl="9" lg="8" sm="12">
-                  <v-card>
-                    <v-card-text>
-                      <span
-                        class="subtitle-1 font-weight-bold  blueS--text mb-3"
-                      >
-                        Opciones ticket
-                      </span>
-                      <v-row>
-                        <v-col cols="12" md="6" sm="6" lg="4">
-                          <s-autocomplete-source-ticket
-                            v-model="editedTicketItem.source"
-                            @blur="$v.editedTicketItem.source.$touch()"
-                            :errors="sourceErrors[0]"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="6" sm="6" lg="4">
-                          <s-autocomplete-type-ticket
-                            v-model="editedTicketItem.type"
-                            @blur="$v.editedTicketItem.type.$touch()"
-                            :errors="typeErrors[0]"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="6" sm="6" lg="4">
-                          <s-autocomplete-motive-ticket
-                            v-model="editedTicketItem.motive"
-                            @blur="$v.editedTicketItem.motive.$touch()"
-                            :errors="motiveErrors[0]"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="6" sm="6" lg="4">
-                          <s-autocomplete-priority-ticket
-                            v-model="editedTicketItem.priority"
-                            @blur="$v.editedTicketItem.priority.$touch()"
-                            :errors="priorityErrors[0]"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="6" sm="6" lg="4">
-                          <s-autocomplete-operator-ticket
-                            v-model="editedTicketItem.operator"
-                            @blur="$v.editedTicketItem.operator.$touch()"
-                            :errors="operatorErrors[0]"
-                          />
-                        </v-col>
-                        <v-col cols="12" md="6" sm="6" lg="4">
-                          <s-autocomplete-status-ticket
-                            v-model="editedTicketItem.status"
-                            @blur="$v.editedTicketItem.status.$touch()"
-                            :errors="statusErrors[0]"
-                          />
-                        </v-col>
-                      </v-row>
-                    </v-card-text>
-                  </v-card>
-                  <v-expand-transition>
-                    <v-card class="mt-5" v-show="isEmailActivated">
+              <v-card elevation="0" tile class="mx-2 my-2">
+                <v-row class="bg-gray lighten-4">
+                  <v-col cols="12" md="5" xl="3" lg="4" sm="12">
+                    <v-card tile elevation="0">
+                      <v-card-title>
+                        <span
+                          class="subtitle-1 font-weight-bold  blueS--text mb-3"
+                        >
+                          Información resumen
+                        </span>
+                      </v-card-title>
+                      <v-card-text v-if="user" class="d-flex text-center">
+                        <sigaf-card-data-student
+                          :user="user"
+                        ></sigaf-card-data-student>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="12" md="7" xl="9" lg="8" sm="12">
+                    <v-card tile elevation="0">
                       <v-card-text>
-                        <div>
-                          <span
-                            class="subtitle-1 font-weight-bold blueS--text mb-3"
-                          >
-                            Correo electrónico
-                          </span>
+                        <v-row>
+                          <v-col cols="12">
+                            <span
+                              class="subtitle-1 font-weight-bold  blueS--text mb-3"
+                            >
+                              Opciones ticket
+                            </span>
+                          </v-col>
+
+                          <v-col cols="12" md="6" sm="6" lg="4">
+                            <s-autocomplete-source-ticket
+                              v-model="editedTicketItem.source"
+                              @blur="$v.editedTicketItem.source.$touch()"
+                              :errors="sourceErrors[0]"
+                            />
+                          </v-col>
+                          <v-col cols="12" md="6" sm="6" lg="4">
+                            <s-autocomplete-type-ticket
+                              v-model="editedTicketItem.type"
+                              @blur="$v.editedTicketItem.type.$touch()"
+                              :errors="typeErrors[0]"
+                            />
+                          </v-col>
+                          <v-col cols="12" md="6" sm="6" lg="4">
+                            <s-autocomplete-motive-ticket
+                              v-model="editedTicketItem.motive"
+                              @blur="$v.editedTicketItem.motive.$touch()"
+                              :errors="motiveErrors[0]"
+                            />
+                          </v-col>
+                          <v-col cols="12" md="6" sm="6" lg="4">
+                            <s-autocomplete-priority-ticket
+                              v-model="editedTicketItem.priority"
+                              @blur="$v.editedTicketItem.priority.$touch()"
+                              :errors="priorityErrors[0]"
+                            />
+                          </v-col>
+                          <v-col cols="12" md="6" sm="6" lg="4">
+                            <s-autocomplete-operator-ticket
+                              v-model="editedTicketItem.operator"
+                              @blur="$v.editedTicketItem.operator.$touch()"
+                              :errors="operatorErrors[0]"
+                            />
+                          </v-col>
+                          <v-col cols="12" md="6" sm="6" lg="4">
+                            <s-autocomplete-status-ticket
+                              v-model="editedTicketItem.status"
+                              @blur="$v.editedTicketItem.status.$touch()"
+                              :errors="statusErrors[0]"
+                            />
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                    </v-card>
+                    <v-expand-transition>
+                      <v-card
+                        class="mt-5"
+                        v-show="isEmailActivated"
+                        tile
+                        elevation="0"
+                      >
+                        <v-card-text>
                           <v-row>
+                            <v-col cols="12">
+                              <span
+                                class="subtitle-1 font-weight-bold blueS--text mb-3"
+                              >
+                                Correo electrónico
+                              </span>
+                            </v-col>
+
                             <v-col cols="12">
                               <sigaf-mail-compose
                                 :sender="sender"
@@ -185,58 +193,72 @@
                               />
                             </v-col>
                           </v-row>
-                        </div>
-                      </v-card-text>
-                    </v-card>
-                  </v-expand-transition>
-                  <v-expand-transition>
-                    <v-card class="mt-5" v-show="showContactAttemp">
-                      <v-card-text>
-                        <span
-                          class="subtitle-1 font-weight-bold  blueS--text mb-3"
-                        >
-                          Intento de contacto
-                        </span>
-                        <v-row class="mb-n6">
-                          <v-col cols="12" sm="4" md="4">
-                            <s-autocomplete-status-detail-ticket
-                              v-model="editedDetailTicketItem.statusDetail"
-                              @blur="
-                                $v.editedDetailTicketItem.statusDetail.$touch()
-                              "
-                              :errors="statusDetailErrors[0]"
-                            />
-                          </v-col>
-                          <v-col cols="12" sm="8" md="8">
-                            <base-textarea
-                              label="Observaciones"
-                              v-model="editedDetailTicketItem.comment"
-                              @blur="$v.editedDetailTicketItem.comment.$touch()"
-                            >
-                            </base-textarea>
-                          </v-col>
-                        </v-row>
-                      </v-card-text>
-                    </v-card>
-                  </v-expand-transition>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-spacer />
-                <v-btn dark depressed color="grayS" @click="e1 = 1">
-                  <v-icon left>mdi-arrow-left-bold-circle</v-icon>
-                  Atrás</v-btn
-                >
-                <v-btn
-                  class="ml-3"
-                  color="blueS"
-                  depressed
-                  @click="saveTicket()"
-                >
-                  Guardar
-                  <v-icon class="ml-3">mdi-arrow-right-bold-circle</v-icon>
-                </v-btn>
-              </v-row>
+                        </v-card-text>
+                      </v-card>
+                    </v-expand-transition>
+                    <v-expand-transition>
+                      <v-card
+                        class="mt-3"
+                        v-show="showContactAttemp"
+                        tile
+                        elevation="0"
+                      >
+                        <v-card-text>
+                          <v-row>
+                            <v-col cols="12">
+                              <span
+                                class="subtitle-1 font-weight-bold  blueS--text mb-3"
+                              >
+                                Intento de contacto
+                              </span>
+                            </v-col>
+
+                            <v-col cols="12" sm="4" md="4">
+                              <s-autocomplete-status-detail-ticket
+                                v-model="editedDetailTicketItem.statusDetail"
+                                @blur="
+                                  $v.editedDetailTicketItem.statusDetail.$touch()
+                                "
+                                :errors="statusDetailErrors[0]"
+                              />
+                            </v-col>
+                            <v-col cols="12" sm="8" md="8">
+                              <base-textarea
+                                label="Observaciones"
+                                v-model="editedDetailTicketItem.comment"
+                                @blur="
+                                  $v.editedDetailTicketItem.comment.$touch()
+                                "
+                              >
+                              </base-textarea>
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+                      </v-card>
+                    </v-expand-transition>
+                  </v-col>
+                </v-row>
+                <v-row class="justify-space-between">
+                  <v-col cols="2">
+                    <v-btn dark depressed color="grayS" @click="e1 = 1">
+                      <v-icon left>mdi-arrow-left-bold-circle</v-icon>
+                      Atrás</v-btn
+                    >
+                  </v-col>
+                  <v-col cols="2">
+                    <v-btn
+                      dark
+                      class="float-right"
+                      color="blueS"
+                      depressed
+                      @click="saveTicket()"
+                    >
+                      Guardar
+                      <v-icon class="ml-3">mdi-arrow-right-bold-circle</v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-card>
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
