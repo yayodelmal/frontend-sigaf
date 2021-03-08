@@ -3,12 +3,13 @@
     :value="value"
     @input="$emit('input', $event)"
     fullscreen
+    persistent
     hide-overlay
     transition="dialog-bottom-transition"
   >
     <v-card tile elevation="0">
       <v-card-title>
-        <span class="headline">Editar ticket individual</span>
+        <span class="headline">Editar ticket</span>
         <v-spacer></v-spacer>
         <v-btn color="blueS" text @click="clearTicket">Cancelar</v-btn>
       </v-card-title>
@@ -192,7 +193,7 @@
                     xl="3"
                     lg="4"
                     sm="12"
-                    class="d-flex align-center"
+                    class="d-flex justify-center align-center"
                   >
                     <sigaf-container-card title="Datos alumno">
                       <template v-slot:content>
@@ -299,7 +300,7 @@
                       depressed
                       :dark="!ticketClose"
                       :disabled="ticketClose"
-                      @click="editTicket()"
+                      @click="editTicket"
                     >
                       Guardar
                       <v-icon class="ml-3">mdi-arrow-right-bold-circle</v-icon>
@@ -413,26 +414,6 @@ export default {
   watch: {
     ticket() {
       this.parseTicket()
-    },
-    type() {
-      this.handleKeepDataStatus()
-      this.showContactAttemp = false
-      if (this.type === 'Correo electrónico') {
-        this.showContactAttemp = true
-      }
-      if (this.type === 'Contacto telefónico' && this.status === 'Cerrado') {
-        this.showContactAttemp = true
-      }
-    },
-    status() {
-      this.handleKeepDataStatus()
-      this.showContactAttemp = false
-      if (this.status === 'Cerrado') {
-        this.showContactAttemp = true
-      }
-      if (this.status === 'Abierto' && this.type === 'Correo electrónico') {
-        this.showContactAttemp = true
-      }
     }
   },
   computed: {
@@ -604,6 +585,9 @@ export default {
     async editTicket() {
       this.rulesValueStepThree = true
       this.checkValidStepThree = true
+      this.sender = true
+
+      this.$v.validationGroup.editedDetailTicketItem.$touch()
 
       if (!this.$v.validationGroup.editedDetailTicketItem.$invalid) {
         let dataStoreTicket = {
@@ -622,7 +606,6 @@ export default {
         if (this.editedTicketItem.status.description === 'Cerrado') {
           const clossingDate = { closing_date: true }
 
-          console.log('currentDate', currentDate)
           dataStoreTicket = { ...dataStoreTicket, ...clossingDate }
         }
 
@@ -642,21 +625,22 @@ export default {
           this.PUT_TICKET(_data)
           this.$emit('closeModal', false)
         }
+      } else {
+        this.$emit('showSnackbar', {
+          type: 'warning',
+          message: 'Complete los campos obligatorios.'
+        })
+
+        setTimeout(() => {
+          this.$v.validationGroup.editedDetailTicketItem.$reset()
+        }, 3000)
       }
     },
     clearTicket() {
       this.deleteLogEditingTicket(this.logEditingTicket)
       this.$emit('closeModal', false)
     },
-    handleKeepDataStatus() {
-      if (!this.isKeepDataStatusDetail) {
-        this.editedDetailTicketItem.statusDetail = null
-      }
 
-      if (!this.isKeepDataStatusComment) {
-        this.editedDetailTicketItem.comment = null
-      }
-    },
     handleDataEmailComposer(value) {
       this.text = value.text
       this.files = value.files

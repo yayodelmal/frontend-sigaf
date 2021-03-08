@@ -10,7 +10,7 @@
           <th style="width: 300px;" class="text-left">
             Observación
           </th>
-          <th class="text-left">
+          <th class="text-left" style="min-width:120px;">
             Fecha
           </th>
           <th class="text-left">

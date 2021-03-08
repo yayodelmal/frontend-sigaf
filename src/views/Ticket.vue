@@ -105,6 +105,7 @@
       v-model="singleCreateModal"
       :selectedCourse="selectedCourse"
       @closeModal="closeCreatedSingleModal($event)"
+      @showSnackbar="showSnackbar"
     />
     <sigaf-edit-single-ticket
       v-if="showSingleEditModal"
@@ -113,6 +114,7 @@
       :ticket="editedTicketItem"
       :ticket-details="editedTicketDetails"
       @closeModal="closeEditedSingleModal($event)"
+      @showSnackbar="showSnackbar"
     />
     <sigaf-show-single-ticket
       v-if="showSingleShowModal"
