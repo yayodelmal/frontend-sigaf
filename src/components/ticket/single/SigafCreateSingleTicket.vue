@@ -8,7 +8,7 @@
   >
     <v-card>
       <v-card-title>
-        <span class="headline">Ticket individual</span>
+        <span class="headline">Crear ticket individual</span>
         <v-spacer></v-spacer>
         <v-btn color="blueS" text @click="clearTicket">Cancelar</v-btn>
       </v-card-title>
