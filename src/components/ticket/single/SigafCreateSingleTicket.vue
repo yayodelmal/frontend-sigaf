@@ -352,7 +352,7 @@ export default {
     sender: false,
     subject: '',
     text: '',
-    offsetTop: 0
+    CCRecipient: ''
   }),
   created() {
     this.fetchSections()
@@ -649,7 +649,10 @@ export default {
             if (this.text !== '') {
               payload = {
                 ...payload,
-                ...{ text: this.text, subject: this.subject }
+                ...{
+                  text: this.text,
+                  subject: this.subject
+                }
               }
             }
 
@@ -657,12 +660,28 @@ export default {
               payload = { ...payload, ...{ files: this.files } }
             }
 
+            if (this.CCRecipient !== '') {
+              payload = { ...payload, ...{ CCRecipient: this.CCRecipient } }
+            }
+
             await this.postMailTicket(payload)
           }
         }
+        this.$emit('showSnackbar', {
+          type: 'success',
+          message: 'El ticket se ha creado correctamente.'
+        })
         this.clearTicket()
       } else {
-        console.log('data invalid')
+        this.$emit('showSnackbar', {
+          type: 'warning',
+          message: 'Complete los campos obligatorios.'
+        })
+
+        setTimeout(() => {
+          this.$v.validationGroup.editedTicketItem.$reset()
+          this.$v.validationGroup.editedDetailTicketItem.$reset()
+        }, 3000)
       }
     },
     clearTicket() {
@@ -681,6 +700,9 @@ export default {
       this.text = value.text
       this.files = value.files
       this.subject = value.subject
+      this.CCRecipient = value.CCRecipient
+
+      console.log(value)
     }
   }
 }

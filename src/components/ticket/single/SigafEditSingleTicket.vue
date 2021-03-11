@@ -190,7 +190,7 @@
                   <v-col
                     cols="12"
                     md="5"
-                    xl="3"
+                    xl="4"
                     lg="4"
                     sm="12"
                     class="d-flex justify-center align-center"
@@ -203,22 +203,14 @@
                       </template>
                     </sigaf-container-card>
                   </v-col>
-                  <v-col
-                    cols="12"
-                    md="7"
-                    xl="9"
-                    lg="8"
-                    sm="12"
-                    style="max-height: 590px"
-                    class="overflow-y-auto"
-                  >
+                  <v-col cols="12" md="7" xl="8" lg="8" sm="12">
                     <v-row>
-                      <v-col cols="12">
+                      <v-col cols="12" md="12" xl="6" lg="11">
                         <sigaf-container-card
                           title="Registrar intento de contacto"
                         >
                           <template v-slot:content>
-                            <v-col cols="12" sm="6" md="6">
+                            <v-col cols="12" sm="6" md="6" lg="10">
                               <s-autocomplete-status-detail-ticket
                                 v-model="editedDetailTicketItem.statusDetail"
                                 @blur="
@@ -227,14 +219,14 @@
                                 :errors="statusDetailErrors[0]"
                               />
                             </v-col>
-                            <v-col cols="12" sm="6" md="6">
+                            <v-col cols="12" sm="6" md="6" lg="10">
                               <s-autocomplete-status-ticket
                                 v-model="editedTicketItem.status"
                                 @blur="$v.editedTicketItem.status.$touch()"
                                 :errors="statusErrors[0]"
                               />
                             </v-col>
-                            <v-col cols="12">
+                            <v-col cols="12" lg="10">
                               <base-textarea
                                 label="Observaciones"
                                 v-model="editedDetailTicketItem.comment"
@@ -246,27 +238,36 @@
                               >
                               </base-textarea>
                             </v-col>
+                            <v-col
+                              v-if="isEmailActivated"
+                              cols="6"
+                              xl="9"
+                              lg="9"
+                              class="d-flex mt-n3 mb-3"
+                            >
+                              <v-chip
+                                class="mx-auto pt-1"
+                                color="blueS darken-1"
+                              >
+                                <v-checkbox
+                                  class="mx-auto"
+                                  dark
+                                  color="white"
+                                  v-model="activateEmail"
+                                >
+                                  <template v-slot:label>
+                                    <div>
+                                      Redactar correo electrónico
+                                    </div>
+                                  </template>
+                                </v-checkbox>
+                              </v-chip>
+                            </v-col>
                           </template>
                         </sigaf-container-card>
                       </v-col>
-                      <v-col
-                        v-if="isEmailActivated"
-                        cols="12"
-                        class="d-flex my-n6"
-                      >
-                        <v-checkbox
-                          class="mx-auto mb-2"
-                          color="blueS"
-                          v-model="activateEmail"
-                        >
-                          <template v-slot:label>
-                            <div>
-                              ¿Componer correo electrónico?
-                            </div>
-                          </template>
-                        </v-checkbox>
-                      </v-col>
-                      <v-col cols="12" class="mt-n5">
+
+                      <v-col cols="12" md="12" xl="6" lg="11">
                         <v-expand-transition>
                           <sigaf-container-card
                             v-show="isEmailActivated && activateEmail"
@@ -409,7 +410,13 @@ export default {
     sender: false,
     subject: '',
     text: '',
-    offsetTop: 0
+    offsetTop: 0,
+    emailData: {
+      subject: '',
+      text: '',
+      files: [],
+      CCRecipient: ''
+    }
   }),
   watch: {
     ticket() {
@@ -422,6 +429,7 @@ export default {
       loggedUser: 'auth/user',
       logEditingTicket: 'logEditingTicket/logEditingTicket'
     }),
+
     sourceErrors() {
       const errors = []
 
@@ -527,11 +535,19 @@ export default {
       putTicket: 'ticket/putTicket',
       postDetailTicket: 'detailTicket/postDetailTicket',
       findTicket: 'ticket/findTicket',
-      deleteLogEditingTicket: 'logEditingTicket/deleteLogEditingTicket'
+      deleteLogEditingTicket: 'logEditingTicket/deleteLogEditingTicket',
+      postMailTicket: 'ticket/postMailTicket'
     }),
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
     }),
+
+    /*     scrollToComposeMail() {
+      this.$vuetify.goTo(this.$refs.filesUploaded, {
+        container: 'v-virtual-scroll'
+      })
+    }, */
+
     getDay(date) {
       const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
       let i = new Date(date).getDay(date)
@@ -562,24 +578,28 @@ export default {
     },
 
     async parseTicket() {
-      if (this.ticket?.properties) {
-        const editedTicket = this.ticket.properties
-        this.editedTicketItem.id = editedTicket.id
-        this.editedTicketItem.source = editedTicket.sourceTicket
-        this.editedTicketItem.type = editedTicket.typeTicket
-        this.editedTicketItem.motive = editedTicket.motiveTicket
-        this.editedTicketItem.priority = editedTicket.priorityTicket
-        this.editedTicketItem.operator = editedTicket.userAssigned
-        this.editedTicketItem.status = editedTicket.statusTicket
-        this.editedTicketItem.courseRegisteredUser =
-          editedTicket.courseRegisteredUser
-        this.editedTicketItem.createdAt = editedTicket.createdAt
+      try {
+        if (this.ticket?.properties) {
+          const editedTicket = this.ticket.properties
+          this.editedTicketItem.id = editedTicket.id
+          this.editedTicketItem.source = editedTicket.sourceTicket
+          this.editedTicketItem.type = editedTicket.typeTicket
+          this.editedTicketItem.motive = editedTicket.motiveTicket
+          this.editedTicketItem.priority = editedTicket.priorityTicket
+          this.editedTicketItem.operator = editedTicket.userAssigned
+          this.editedTicketItem.status = editedTicket.statusTicket
+          this.editedTicketItem.courseRegisteredUser =
+            editedTicket.courseRegisteredUser
+          this.editedTicketItem.createdAt = editedTicket.createdAt
 
-        const userTicket = { ...editedTicket.courseRegisteredUser }
+          const userTicket = { ...editedTicket.courseRegisteredUser }
 
-        this.user = Object.assign({}, mapUser(userTicket, this.sections))
+          this.user = Object.assign({}, mapUser(userTicket, this.sections))
 
-        this.user
+          this.user
+        }
+      } catch (error) {
+        this.clearTicket()
       }
     },
     async editTicket() {
@@ -623,7 +643,20 @@ export default {
           await this.postDetailTicket(dataDetailTicket)
           const { _data } = await this.findTicket(this.editedTicketItem)
           this.PUT_TICKET(_data)
+
+          if (this.isEmailActivated) {
+            this.emailData = Object.assign(this.emailData, {
+              ticketId: this.editedTicketItem.id
+            })
+
+            await this.postMailTicket(this.emailData)
+          }
+
           this.$emit('closeModal', false)
+          this.$emit('showSnackbar', {
+            type: 'success',
+            message: 'El ticket se ha editado correctamente.'
+          })
         }
       } else {
         this.$emit('showSnackbar', {
@@ -642,9 +675,7 @@ export default {
     },
 
     handleDataEmailComposer(value) {
-      this.text = value.text
-      this.files = value.files
-      this.subject = value.subject
+      this.emailData = { ...value }
     }
   }
 }

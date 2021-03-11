@@ -897,7 +897,7 @@ export default {
 
               if (response.success && this.isEmailActivated) {
                 let payload = {
-                  ticketsId: ticketsId
+                  ticketsId: JSON.stringify(ticketsId)
                 }
 
                 if (this.text !== '') {

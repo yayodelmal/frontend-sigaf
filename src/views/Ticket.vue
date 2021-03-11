@@ -146,18 +146,6 @@
       @closeModalMultiple="closeEditedMultipleModal"
       @showSnackbar="showSnackbar"
     />
-    <!-- 
-    <v-snackbar
-      @snackbar="setSnackbar($event)"
-      color="blueS"
-      v-model="snackbar"
-      :timeout="timeout"
-    >
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar> -->
 
     <sigaf-snackbar v-model="snackbar" v-bind="configSnack" />
 
@@ -192,13 +180,13 @@ import STableTicket from '../components/ticket/STableTicket.vue'
 import SigafSnackbar from '../components/component/Snackbar'
 import SigafShowSingleTicket from '../components/ticket/single/SigafShowSingleTicket.vue'
 
-Array.prototype.forEachAsyncCustom = function(fn) {
+/* Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
     (promise, n, index) => promise.then(() => fn(n, index)),
     Promise.resolve()
   )
 }
-
+ */
 export default {
   inject: ['theme'],
   components: {
