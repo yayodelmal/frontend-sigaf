@@ -5,92 +5,69 @@
     icon="mdi-google-classroom"
     title="Seguimiento de estudiantes"
   >
-    <v-col cols="12">
-      <v-toolbar dark color="blueS darken-1" class="mb-1">
-        <v-select
-          v-model="category"
-          :items="categoryItems"
-          label="Categoría"
-          item-value="id"
-          item-text="description"
-          color="blueS"
-          flat
-          solo-inverted
-          hide-details
-          return-object
-          prepend-inner-icon="mdi-filter-outline"
-        >
-        </v-select>
-        <v-spacer />
-        <v-select
-          class="mx-3"
-          v-model="selectedCourses"
-          :items="arrayCourseByCategory"
-          label="Curso"
-          item-value="id"
-          item-text="description"
-          color="blueS"
-          multiple
-          flat
-          solo-inverted
-          hide-details
-          return-object
-          prepend-inner-icon="mdi-filter-outline"
-        >
-        </v-select>
-        <v-spacer />
-        <v-btn large depressed color="blueS" @click="fetchUserByCourse">
-          Buscar
-        </v-btn>
-      </v-toolbar>
-    </v-col>
-    <v-sheet color="white" class="px-3 pt-3 pb-3">
-      <v-data-iterator
-        :items="usersRegisteredFiltered"
-        :items-per-page.sync="itemsPerPage"
-        :page.sync="page"
-        :loading="loading"
-        hide-default-footer
-        @page-count="pageCount = $event"
-        :search="search"
-        :sort-by="sortBy"
-        :sort-desc="sortDesc"
+    <sigaf-category-course-toolbar
+      v-if="isAdmin || isDeveloper"
+      @selectedCourse="selectedCourse = $event"
+    ></sigaf-category-course-toolbar>
+    <div v-else>data full</div>
+    <div v-if="showTable">
+      <v-progress-linear
+        v-if="progressUser !== 100"
+        v-model="progressUser"
+        color="warning darken-1"
+        height="5"
       >
-        <template v-slot:loading>
-          <v-row>
-            <v-col
-              v-for="n in itemsPerPage"
-              :key="n"
-              cols="12"
-              sm="6"
-              md="6"
-              lg="4"
-              xl="3"
-            >
-              <v-skeleton-loader
-                v-if="loading"
-                class="mx-auto"
-                type="card"
-                max-width="350"
-              ></v-skeleton-loader>
-            </v-col>
-          </v-row>
-        </template>
+        <!--         <template v-slot:default="{ value }">
+          <strong>{{ Math.ceil(value) }}%</strong>
+        </template> -->
+      </v-progress-linear>
+      <v-sheet color="white" class="px-3 pt-3 pb-3">
+        <v-data-iterator
+          :items="usersRegisteredFiltered"
+          :items-per-page.sync="itemsPerPage"
+          :page.sync="page"
+          :loading="loading"
+          hide-default-footer
+          @page-count="pageCount = $event"
+          :search="search"
+          :sort-by="sortBy"
+          :sort-desc="sortDesc"
+        >
+          <template v-slot:loading>
+            <v-row>
+              <v-col
+                v-for="n in itemsPerPage"
+                :key="n"
+                cols="12"
+                sm="6"
+                md="6"
+                lg="4"
+                xl="3"
+              >
+                <v-skeleton-loader
+                  v-if="loading"
+                  class="mx-auto"
+                  type="card"
+                  max-width="350"
+                ></v-skeleton-loader>
+              </v-col>
+            </v-row>
+          </template>
 
-        <template v-if="usersRegisteredFiltered.length" v-slot:header>
-          <v-toolbar dark color="blueS darken-1" class="mb-1">
-            <v-text-field
-              v-model="search"
-              color="blueS"
-              clearable
-              flat
-              solo-inverted
-              hide-details
-              prepend-inner-icon="mdi-magnify"
-              label="Buscar"
-            ></v-text-field>
-            <template v-if="$vuetify.breakpoint.mdAndUp">
-              <!-- <v-select
+          <template v-if="usersRegisteredFiltered.length" v-slot:header>
+            <v-toolbar dark color="blueS darken-1" class="mb-1">
+              <v-text-field
+                v-model="search"
+                color="blueS"
+                clearable
+                flat
+                solo-inverted
+                hide-details
+                prepend-inner-icon="mdi-magnify"
+                label="Buscar"
+              ></v-text-field>
+              <template v-if="$vuetify.breakpoint.mdAndUp">
+                <!-- <v-select
                   v-model="sortByClassRoom"
                   flat
                   item-value="key"
@@ -101,184 +78,187 @@
                   prepend-inner-icon="mdi-filter-outline"
                   label="Filtrar por Aula"
                 ></v-select> -->
-              <v-spacer></v-spacer>
-              <v-select
-                v-model="sortBy"
-                flat
-                item-value="key"
-                item-text="value"
-                solo-inverted
-                hide-details
-                :items="keys"
-                prepend-inner-icon="mdi-filter-outline"
-                label="Ordernar por"
-              ></v-select>
-              <v-spacer></v-spacer>
-              <v-btn-toggle v-model="sortDesc" mandatory>
-                <v-btn large depressed color="blueS" :value="false">
-                  <v-icon>mdi-arrow-up</v-icon>
-                </v-btn>
-                <v-btn large depressed color="blueS" :value="true">
-                  <v-icon>mdi-arrow-down</v-icon>
-                </v-btn>
-              </v-btn-toggle>
-            </template>
-          </v-toolbar>
-        </template>
-        <template v-slot:default="props">
-          <v-row>
-            <v-col
-              v-for="(user, index) in props.items"
-              :key="index"
-              cols="12"
-              sm="6"
-              md="6"
-              lg="4"
-              xl="3"
-            >
-              <v-skeleton-loader
-                :loading="loading"
-                :transition="transition"
-                v-if="loading"
-                class="mx-auto"
-                type="card"
-              ></v-skeleton-loader>
+                <v-spacer></v-spacer>
+                <v-select
+                  v-model="sortBy"
+                  flat
+                  item-value="key"
+                  item-text="value"
+                  solo-inverted
+                  hide-details
+                  :items="keys"
+                  prepend-inner-icon="mdi-filter-outline"
+                  label="Ordernar por"
+                ></v-select>
+                <v-spacer></v-spacer>
+                <v-btn-toggle v-model="sortDesc" mandatory>
+                  <v-btn large depressed color="blueS" :value="false">
+                    <v-icon>mdi-arrow-up</v-icon>
+                  </v-btn>
+                  <v-btn large depressed color="blueS" :value="true">
+                    <v-icon>mdi-arrow-down</v-icon>
+                  </v-btn>
+                </v-btn-toggle>
+              </template>
+            </v-toolbar>
+          </template>
+          <template v-slot:default="props">
+            <v-row>
+              <v-col
+                v-for="(user, index) in props.items"
+                :key="index"
+                cols="12"
+                sm="6"
+                md="6"
+                lg="4"
+                xl="3"
+              >
+                <v-skeleton-loader
+                  :loading="loading"
+                  :transition="transition"
+                  v-if="loading"
+                  class="mx-auto"
+                  type="card"
+                ></v-skeleton-loader>
 
-              <v-col v-else class="d-flex text-center">
-                <!-- <v-divider vertical></v-divider> -->
-                <v-hover v-slot:default="{ hover }" open-delay="200">
-                  <v-card
-                    color="grey lighten-4"
-                    class="pt-6 mx-auto rounded-t-xl"
-                    flat
-                    min-width="330"
-                    :elevation="hover ? 16 : 0"
-                    outlined
-                  >
-                    <v-card-text>
-                      <span class="headline font-weight-bold">
-                        {{ user.classroom }}</span
-                      ><br />
-                      <span class="text-caption"> Progreso:</span><br />
-                      <v-avatar size="120">
-                        <v-progress-circular
-                          :rotate="-90"
-                          :size="100"
-                          :width="15"
-                          :value="getValueProgress(user)"
-                          color="blueS"
-                        >
-                          {{ getValueProgress(user) }}%
-                        </v-progress-circular>
-                      </v-avatar>
-                      <h3 class="font-weight-bold mb-2">
-                        {{ user.registered_user.rut }}
-                      </h3>
-                      <h3 class="title mb-2">
-                        {{ user.registered_user.name }}
-                      </h3>
-                      <h3 class="mb-2">
-                        {{ user.registered_user.last_name }}
-                        {{ user.registered_user.mother_last_name }}
-                      </h3>
-                      <h3 class="blueS--text mb-2">
-                        {{ user.registered_user.email }}
-                      </h3>
-                      <h3 class="redS--text subheading font-weight-bold">
-                        {{ user.registered_user.mobile }}
-                      </h3>
-                    </v-card-text>
-                    <v-expand-transition>
-                      <div
-                        v-if="hover"
-                        class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
-                        style="height: 78%;"
-                      >
-                        <div class="d-flex flex-column">
-                          <div
-                            v-for="section in sectionFiltered"
-                            :key="section.id"
-                            class="d-flex flex-row"
+                <v-col v-else class="d-flex text-center">
+                  <!-- <v-divider vertical></v-divider> -->
+                  <v-hover v-slot:default="{ hover }" open-delay="200">
+                    <v-card
+                      color="grey lighten-4"
+                      class="pt-6 mx-auto rounded-t-xl"
+                      flat
+                      min-width="330"
+                      :elevation="hover ? 16 : 0"
+                      outlined
+                    >
+                      <v-card-text>
+                        <span class="headline font-weight-bold">
+                          {{ user.classroom }}</span
+                        ><br />
+                        <span class="text-caption"> Progreso:</span><br />
+                        <v-avatar size="120">
+                          <v-progress-circular
+                            :rotate="-90"
+                            :size="100"
+                            :width="15"
+                            :value="getValueProgress(user)"
+                            color="blueS"
                           >
-                            <div class="px-3 py-2 title-section">
-                              <h6 class="text-overline">
-                                {{ section.description }}:
-                              </h6>
-                            </div>
+                            {{ getValueProgress(user) }}%
+                          </v-progress-circular>
+                        </v-avatar>
+                        <h3 class="font-weight-bold mb-2">
+                          {{ user.registered_user.rut }}
+                        </h3>
+                        <h3 class="title mb-2">
+                          {{ user.registered_user.name }}
+                        </h3>
+                        <h3 class="mb-2">
+                          {{ user.registered_user.last_name }}
+                          {{ user.registered_user.mother_last_name }}
+                        </h3>
+                        <h3 class="blueS--text mb-2">
+                          {{ user.registered_user.email }}
+                        </h3>
+                        <h3 class="redS--text subheading font-weight-bold">
+                          {{ user.registered_user.mobile }}
+                        </h3>
+                      </v-card-text>
+                      <v-expand-transition>
+                        <div
+                          v-if="hover"
+                          class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
+                          style="height: 78%;"
+                        >
+                          <div class="d-flex flex-column">
                             <div
-                              class="px-1 py-2"
-                              v-for="grade in getGrades(
-                                section,
-                                user.activities
-                              )"
-                              :key="grade.idActivityMoodle"
+                              v-for="section in sectionFiltered"
+                              :key="section.id"
+                              class="d-flex flex-row"
                             >
-                              <v-tooltip color="white" bottom>
-                                <template v-slot:activator="{ on }">
-                                  <h4 v-on="on">
-                                    <kbd>{{
-                                      grade.qualificationMoodle === ''
-                                        ? 'S/I'
-                                        : grade.qualificationMoodle
-                                    }}</kbd>
-                                  </h4>
-                                </template>
-                                <span class="blueS--text darken-2">{{
-                                  grade.description
-                                }}</span>
-                              </v-tooltip>
+                              <div class="px-3 py-2 title-section">
+                                <h6 class="text-overline">
+                                  {{ section.description }}:
+                                </h6>
+                              </div>
+                              <div
+                                class="px-1 py-2"
+                                v-for="grade in getGrades(
+                                  section,
+                                  user.activities
+                                )"
+                                :key="grade.idActivityMoodle"
+                              >
+                                <v-tooltip color="white" bottom>
+                                  <template v-slot:activator="{ on }">
+                                    <h4 v-on="on">
+                                      <kbd>{{
+                                        grade.qualificationMoodle === ''
+                                          ? 'S/I'
+                                          : grade.qualificationMoodle
+                                      }}</kbd>
+                                    </h4>
+                                  </template>
+                                  <span class="blueS--text darken-2">{{
+                                    grade.description
+                                  }}</span>
+                                </v-tooltip>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </v-expand-transition>
-                    <v-divider></v-divider>
-                    <v-row class="text-center">
-                      <v-col cols="6" class="mx-auto">
-                        <v-card
-                          :color="getColorState(user.state)"
-                          flat
-                          dark
-                          class="py-1"
-                          ><span>
-                            {{ user.state }}
-                          </span></v-card
-                        >
-                      </v-col>
+                      </v-expand-transition>
+                      <v-divider></v-divider>
+                      <v-row class="text-center">
+                        <v-col cols="6" class="mx-auto">
+                          <v-card
+                            :color="getColorState(user.state)"
+                            flat
+                            dark
+                            class="py-1"
+                            ><span>
+                              {{ user.state }}
+                            </span></v-card
+                          >
+                        </v-col>
 
-                      <v-col cols="12">
-                        <span class="font-weight-bold">
-                          <v-icon class="mr-2">
-                            mdi-clock
-                          </v-icon>
-                          Última conexión:
-                          {{ user.last_access_registered_moodle }}</span
-                        >
-                      </v-col>
-                    </v-row>
-                  </v-card>
-                </v-hover>
+                        <v-col cols="12">
+                          <span class="font-weight-bold">
+                            <v-icon class="mr-2">
+                              mdi-clock
+                            </v-icon>
+                            Última conexión:
+                            {{ user.last_access_registered_moodle }}</span
+                          >
+                        </v-col>
+                      </v-row>
+                    </v-card>
+                  </v-hover>
+                </v-col>
               </v-col>
-            </v-col>
-          </v-row>
-        </template>
-      </v-data-iterator>
-    </v-sheet>
-    <div class="text-center">
-      <v-pagination
-        v-model="page"
-        :length="pageCount"
-        circle
-        color="blueS"
-      ></v-pagination>
+            </v-row>
+          </template>
+        </v-data-iterator>
+      </v-sheet>
+      <div class="text-center">
+        <v-pagination
+          v-model="page"
+          :length="pageCount"
+          circle
+          color="blueS"
+        ></v-pagination>
+      </div>
     </div>
   </base-card>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import SigafCategoryCourseToolbar from '../components/utility/SigafCategoryCourseToolbar.vue'
 
 export default {
+  components: { SigafCategoryCourseToolbar },
   data: () => ({
     headers: [
       {
@@ -332,7 +312,7 @@ export default {
     message: '',
     timeout: 3000,
     category: null,
-    selectedCourses: [],
+    selectedCourse: null,
     userCourse: {},
     user: {
       registered_user: {},
@@ -353,7 +333,9 @@ export default {
       { key: 'progress', value: 'Progreso' }
     ],
     filter: {},
-    sortDesc: false
+    sortDesc: false,
+    showTable: false,
+    progressUser: 0
   }),
   computed: {
     ...mapGetters({
@@ -361,7 +343,10 @@ export default {
       courseItems: 'course/courses',
       categoryItems: 'category/categories',
       courseByCategory: 'course/coursesByCategory',
-      sections: 'section/sections'
+      sections: 'section/sections',
+      isAdmin: 'auth/isAdmin',
+      isDeveloper: 'auth/isDeveloper',
+      isTutor: 'auth/isTutor'
     }),
     sectionFiltered() {
       return this.sections.filter(
@@ -426,7 +411,20 @@ export default {
     if (this.isLG) this.itemsPerPage = 9
     if (this.isXL) this.itemsPerPage = 12
   },
+  mounted() {
+    if (this.isTutor) {
+      console.log('istutor')
+    }
+  },
   watch: {
+    usersRegisteredFiltered(value) {
+      console.log(value)
+    },
+    selectedCourse() {
+      this.usersRegisteredFiltered = []
+      this.progressUser = 0
+      this.test(this.selectedCourse)
+    },
     breackPoint() {
       switch (this.breackPoint) {
         case 'xs':
@@ -464,7 +462,9 @@ export default {
       fetchCourseByCategory: 'course/getCoursesByCategory',
       fetchCourseUserByCategory:
         'courseRegisteredUser/getCourseRegisteredByCourse',
-      fetchSections: 'section/fetchSections'
+      fetchSections: 'section/fetchSections',
+      getCourseRegisteredByCoursePaginate:
+        'courseRegisteredUser/getCourseRegisteredByCoursePaginate'
     }),
     getValueProgress(user) {
       return user.progress
@@ -496,114 +496,129 @@ export default {
         })
       }
     },
-    async fetchUserByCourse() {
-      if (this.category !== null && this.selectedCourses.length !== 0) {
-        //await this.fetchCourseByCategory(this.category.courses.href)
+    async test(course) {
+      this.showTable = true
+      this.loading = true
+      const url = `/api/v2/course-registered-user/${course.id}/users?page=1`
+      console.log(url)
+      const response = await this.getCourseRegisteredByCoursePaginate(url)
 
-        //this.mapActivityUser(this.courseByCategory)
+      const total = response._data.total
 
-        this.loading = true
-        this.usersRegisteredFiltered = []
-        this.mapActivityUserByCourse()
-      } else {
-        console.log('no cumple')
+      this.progressUser += (response._data.data.length / total) * 100
+
+      let flag = true
+
+      if (!response._data.next_page_url) {
+        flag = false
+      }
+
+      this.mapActivityUserByCourse(response)
+
+      let page = response._data.current_page + 1
+
+      this.loading = false
+
+      while (flag) {
+        const innerUrl = `/api/v2/course-registered-user/${course.id}/users?page=${page}`
+        const innerResponse = await this.getCourseRegisteredByCoursePaginate(
+          innerUrl
+        )
+
+        if (!innerResponse._data.next_page_url) {
+          flag = false
+        }
+        page = innerResponse._data.current_page + 1
+
+        this.progressUser += (innerResponse._data.data.length / total) * 100
+
+        this.mapActivityUserByCourse(innerResponse)
       }
     },
 
-    mapActivityUserByCourse() {
-      const vm = this
+    mapActivityUserByCourse(items) {
+      items._data.data.forEach(user => {
+        if (user.activity_course_users.length !== 0) {
+          let state = 'ACTIVO'
+          let progress = 0
+          const activities = user.activity_course_users
+            .map(activity => {
+              if (activity) {
+                if (
+                  activity.activity.section.description === 'Renuncia' &&
+                  activity.status_moodle === 'Finalizado'
+                ) {
+                  state = 'Renunciado'.toUpperCase()
+                }
 
-      this.selectedCourses.forEach(async course => {
-        const response = await vm.fetchCourseUserByCategory(course)
+                if (
+                  activity.activity.section.description === 'Renuncia' &&
+                  activity.status_moodle === 'En curso'
+                ) {
+                  state = 'Renuncia en curso'.toUpperCase()
+                }
 
-        console.log(response)
+                let checkQualificationMoodle = ['', '-']
+                if (
+                  !checkQualificationMoodle.includes(
+                    activity.qualification_moodle
+                  ) &&
+                  activity.activity.weighing !== 0
+                ) {
+                  progress++
+                }
 
-        if (response) {
-          response._data.forEach(user => {
-            if (user.activity_course_users.length !== 0) {
-              let state = 'ACTIVO'
-              let progress = 0
-              const activities = user.activity_course_users
-                .map(activity => {
-                  if (activity) {
-                    if (
-                      activity.activity.section.description === 'Renuncia' &&
-                      activity.status_moodle === 'Finalizado'
-                    ) {
-                      state = 'Renunciado'.toUpperCase()
-                    }
+                return {
+                  qualificationMoodle: activity.qualification_moodle,
+                  statusMoodle: activity.status_moodle,
+                  description: activity.activity.description,
+                  idActivityMoodle: activity.activity.id_activity_moodle,
+                  idSection: activity.activity.section_id,
+                  section: activity.activity.section.description,
+                  type: activity.activity.type,
+                  weighing: activity.activity.weighing
+                }
+              } else {
+                return activity
+              }
+            })
+            .filter(activity => {
+              if (activity) {
+                return activity.section !== 'Formativa'
+              }
+            })
 
-                    if (
-                      activity.activity.section.description === 'Renuncia' &&
-                      activity.status_moodle === 'En curso'
-                    ) {
-                      state = 'Renuncia en curso'.toUpperCase()
-                    }
+          const totalProgress = this.sections
+            .filter(section => {
+              const filterSection = [
+                'Formativa',
+                'Renuncia',
+                'Inicio',
+                'Cierre'
+              ]
+              return !filterSection.includes(section.description)
+            })
+            .reduce(
+              (accumulator, currentValue) =>
+                accumulator + currentValue.numberActivities,
+              0
+            )
 
-                    let checkQualificationMoodle = ['', '-']
-                    if (
-                      !checkQualificationMoodle.includes(
-                        activity.qualification_moodle
-                      ) &&
-                      activity.activity.weighing !== 0
-                    ) {
-                      progress++
-                    }
+          const accumulativeProgress = Number.parseFloat(
+            (progress / totalProgress) * 100
+          ).toFixed(0)
+          user['state'] = state
+          user[
+            'fullname'
+          ] = `${user.registered_user.name} ${user.registered_user.last_name} ${user.registered_user.mother_last_name}`
 
-                    return {
-                      qualificationMoodle: activity.qualification_moodle,
-                      statusMoodle: activity.status_moodle,
-                      description: activity.activity.description,
-                      idActivityMoodle: activity.activity.id_activity_moodle,
-                      idSection: activity.activity.section_id,
-                      section: activity.activity.section.description,
-                      type: activity.activity.type,
-                      weighing: activity.activity.weighing
-                    }
-                  } else {
-                    return activity
-                  }
-                })
-                .filter(activity => {
-                  if (activity) {
-                    return activity.section !== 'Formativa'
-                  }
-                })
-
-              const totalProgress = this.sections
-                .filter(section => {
-                  const filterSection = [
-                    'Formativa',
-                    'Renuncia',
-                    'Inicio',
-                    'Cierre'
-                  ]
-                  return !filterSection.includes(section.description)
-                })
-                .reduce(
-                  (accumulator, currentValue) =>
-                    accumulator + currentValue.numberActivities,
-                  0
-                )
-
-              const accumulativeProgress = Number.parseFloat(
-                (progress / totalProgress) * 100
-              ).toFixed(0)
-              user['state'] = state
-              user[
-                'fullname'
-              ] = `${user.registered_user.name} ${user.registered_user.last_name} ${user.registered_user.mother_last_name}`
-
-              user['rut'] = `${user.registered_user.rut}`
-              user['mobile'] = `${user.registered_user.mobile}`
-              user['email'] = `${user.registered_user.email}`
-              user['classroom'] = `${user.classroom.description}`
-              user['progress'] = accumulativeProgress
-              user['activities'] = this.groupBy(activities, 'idSection')
-              vm.usersRegisteredFiltered.push(user)
-            }
-          })
-          this.loading = false
+          user['rut'] = `${user.registered_user.rut}`
+          user['mobile'] = `${user.registered_user.mobile}`
+          user['email'] = `${user.registered_user.email}`
+          user['classroom'] = `${user.classroom.description}`
+          user['progress'] = accumulativeProgress
+          user['activities'] = this.groupBy(activities, 'idSection')
+          this.usersRegisteredFiltered.push(user)
         }
       })
     },
