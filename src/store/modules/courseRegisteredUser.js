@@ -229,6 +229,25 @@ export default {
       }
     },
 
+    getCourseRegisteredByCoursePaginate: async (_, url) => {
+      try {
+        const { data } = await axios.get(url)
+
+        if (data.success) {
+          return data
+        } else {
+          console.log(data.error)
+        }
+      } catch (error) {
+        const { data } = error.response
+        console.log(error)
+        return {
+          success: data.success,
+          message: data.message
+        }
+      }
+    },
+
     getCourseRegisteredByCourse: async ({ commit }, course) => {
       const id = course.id
 
@@ -238,10 +257,10 @@ export default {
           const { data } = await axios.get(URL)
 
           if (data.success) {
-            commit('SET_COURSE_REGISTERED_USERS', data._data)
+            commit('SET_COURSE_REGISTERED_USERS', data._data.data)
             commit('SET_STORE_USERS_BY_COURSE', {
               id: id,
-              collection: data._data
+              collection: data._data.data
             })
             return data
           } else {
