@@ -1,10 +1,26 @@
 <template>
   <div>
-    <span
-      class="font-weight-bold  blueS--text overline d-flex justify-start ml-5"
-    >
-      {{ title }}
-    </span>
+    <div class="d-flex justify-space-between ml-5">
+      <span
+        class="font-weight-bold  blueS--text overline d-flex justify-start ml-5"
+      >
+        {{ title }}
+      </span>
+      <v-tooltip color="blueS" bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            color="blueS"
+            v-if="showEditButton"
+            icon
+            v-on="on"
+            @click="$emit('showEditForm')"
+          >
+            <v-icon size="40">mdi-account-edit</v-icon>
+          </v-btn>
+        </template>
+        <span>Editar</span>
+      </v-tooltip>
+    </div>
     <div class="d-flex justify-start container-divider">
       <v-divider class="blueS width-50" />
       <!--       <v-divider class="mt-1 blueS width-25" />
@@ -26,7 +42,8 @@ export default {
     title: {
       type: String,
       default: () => 'Titulo por defecto'
-    }
+    },
+    showEditButton: Boolean
   }
 }
 </script>

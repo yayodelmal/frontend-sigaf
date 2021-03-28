@@ -70,6 +70,20 @@
                   </v-icon>
                 </div>
               </v-btn>
+              <v-btn
+                large
+                depressed
+                color="blueS"
+                class="ml-3"
+                @click="openHistoricalModal"
+              >
+                <div class="d-flex flex-column">
+                  Historial
+                  <v-icon right dark class="mx-auto">
+                    mdi-history
+                  </v-icon>
+                </div>
+              </v-btn>
             </div>
           </v-toolbar>
           <div v-if="loading">
@@ -147,6 +161,13 @@
       @showSnackbar="showSnackbar"
     />
 
+    <v-dialog v-model="historicalModal" fullscreen>
+      <s-find-historical-tickets
+        @closeHistoricalModal="historicalModal = false"
+        :selectedCourse="selectedCourse"
+      />
+    </v-dialog>
+
     <sigaf-snackbar v-model="snackbar" v-bind="configSnack" />
 
     <confirm-dialog
@@ -179,6 +200,7 @@ import SigafCreateMultipleTicket from '@/components/ticket/multiple/SigafCreateM
 import STableTicket from '../components/ticket/STableTicket.vue'
 import SigafSnackbar from '../components/component/Snackbar'
 import SigafShowSingleTicket from '../components/ticket/single/SigafShowSingleTicket.vue'
+import SFindHistoricalTickets from '../components/utility/SFindHistoricalTickets.vue'
 
 /* Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
@@ -197,7 +219,8 @@ export default {
     SigafCreateMultipleTicket,
     STableTicket,
     SigafSnackbar,
-    SigafShowSingleTicket
+    SigafShowSingleTicket,
+    SFindHistoricalTickets
   },
   data() {
     return {
@@ -272,7 +295,8 @@ export default {
       overlayCreateMultipleTicket: false,
       overlayMessageCreateMultipleTicket: '',
       transition: 'scale-transition',
-      snackbar: false
+      snackbar: false,
+      historicalModal: false
     }
   },
   methods: {
@@ -307,6 +331,9 @@ export default {
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
     }),
+    openHistoricalModal() {
+      this.historicalModal = true
+    },
     showItem(ticket) {
       this.showSingleShowModal = ticket.showSingleShowModal
       setTimeout(() => {

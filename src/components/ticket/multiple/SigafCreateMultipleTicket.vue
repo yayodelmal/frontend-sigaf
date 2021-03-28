@@ -510,7 +510,6 @@ export default {
     selectedUsers: [],
     checkValidStepOne: false,
     checkValidStepTwo: false,
-    text: ``,
     completeStepOne: false,
     completeStepTwo: false,
     rulesValueStepOne: true,
@@ -538,6 +537,8 @@ export default {
     files: null,
     sender: false,
     subject: '',
+    text: '',
+    CCRecipient: '',
     overlay: false,
     opacity: 0.8
   }),
@@ -841,6 +842,7 @@ export default {
       this.$v.$touch()
 
       if (!this.$v.$invalid) {
+        this.overlay = true
         const mapUsersId = this.selectedUsers.map(user => {
           return user.id
         })
@@ -862,66 +864,58 @@ export default {
           dataStoreTicket = { ...dataStoreTicket, ...clossingDate }
         }
 
-        if (
-          this.isEmailActivated &&
-          (this.text === '' || this.subject === '')
-        ) {
-          this.$emit('showSnackbar', {
-            type: 'warning',
-            message: 'Complete campos correo electrónico.'
-          })
-        } else {
-          this.overlay = true
+        const { success, _data } = await this.postMultipleTicket(
+          dataStoreTicket
+        )
 
-          const { success, _data } = await this.postMultipleTicket(
-            dataStoreTicket
-          )
+        if (success) {
+          if (this.editedDetailTicketItem.statusDetail.id !== 0) {
+            const ticketsId = _data.map(ticket => {
+              return ticket.properties.id
+            })
 
-          if (success) {
-            if (this.editedDetailTicketItem.statusDetail.id !== 0) {
-              const ticketsId = _data.map(ticket => {
-                return ticket.properties.id
-              })
-
-              const dataDetailTicket = {
-                comment: this.editedDetailTicketItem.comment,
-                ticket_id: ticketsId,
-                status_detail_ticket_id: this.editedDetailTicketItem
-                  .statusDetail.id,
-                user_created_id: this.loggedUser.id
-              }
-
-              const response = await this.postMassiveDetailTicket(
-                dataDetailTicket
-              )
-
-              if (response.success && this.isEmailActivated) {
-                let payload = {
-                  ticketsId: JSON.stringify(ticketsId)
-                }
-
-                if (this.text !== '') {
-                  payload = {
-                    ...payload,
-                    ...{ text: this.text, subject: this.subject }
-                  }
-                }
-
-                if (this.files !== null) {
-                  payload = { ...payload, ...{ files: this.files } }
-                }
-
-                await this.postMailMultipleTicket(payload)
-
-                this.$emit('showSnackbar', {
-                  type: 'success',
-                  message: 'Tickets creados correctamente.'
-                })
-              }
+            const dataDetailTicket = {
+              comment: this.editedDetailTicketItem.comment,
+              ticket_id: ticketsId,
+              status_detail_ticket_id: this.editedDetailTicketItem.statusDetail
+                .id,
+              user_created_id: this.loggedUser.id
             }
-            this.$emit('closeModalMultiple', false)
-            this.overlay = false
+
+            const response = await this.postMassiveDetailTicket(
+              dataDetailTicket
+            )
+
+            if (response.success && this.isEmailActivated) {
+              let payload = {
+                ticketsId: JSON.stringify(ticketsId)
+              }
+
+              if (this.text !== '') {
+                payload = {
+                  ...payload,
+                  ...{ text: this.text, subject: this.subject }
+                }
+              }
+
+              if (this.files !== null) {
+                payload = { ...payload, ...{ files: this.files } }
+              }
+
+              if (this.CCRecipient !== '') {
+                payload = { ...payload, ...{ CCRecipient: this.CCRecipient } }
+              }
+
+              await this.postMailMultipleTicket(payload)
+
+              this.$emit('showSnackbar', {
+                type: 'success',
+                message: 'Tickets creados correctamente.'
+              })
+            }
           }
+          this.$emit('closeModalMultiple', false)
+          this.overlay = false
         }
       } else {
         this.$emit('showSnackbar', {
@@ -952,6 +946,7 @@ export default {
       this.text = value.text
       this.files = value.files
       this.subject = value.subject
+      this.CCRecipient = value.CCRecipient
     },
     clearTicket() {
       this.$emit('closeModalMultiple', false)

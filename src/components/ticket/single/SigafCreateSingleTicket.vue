@@ -67,13 +67,42 @@
                       <v-spacer />
                     </v-toolbar>
                   </v-col>
-                  <v-col class="d-flex text-center" cols="12" v-if="user">
-                    <sigaf-card-data-student
-                      :user="user"
-                    ></sigaf-card-data-student>
+                  <v-col
+                    class="d-flex text-center"
+                    cols="4"
+                    v-if="user.fullname"
+                  >
+                    <sigaf-container-card
+                      @showEditForm="editUserForm = !editUserForm"
+                      :showEditButton="true"
+                      title="Información alumno"
+                    >
+                      <template v-slot:content>
+                        <sigaf-card-data-student
+                          v-if="!editUserForm"
+                          :user="user"
+                        ></sigaf-card-data-student>
+                        <s-edit-user-form
+                          v-else
+                          :user="user"
+                          @userUpdate="updateUser"
+                          @cancelForm="editUserForm = false"
+                        ></s-edit-user-form>
+                      </template>
+                    </sigaf-container-card>
+                  </v-col>
+                  <v-col cols="8" v-if="user.fullname">
+                    <sigaf-container-card title="Historial de tickets">
+                      <template v-slot:content>
+                        <s-table-ticket-historical
+                          @showItem="showItem"
+                          :courseRegisteredUser="user"
+                        />
+                      </template>
+                    </sigaf-container-card>
                   </v-col>
                 </v-row>
-                <div v-if="user">
+                <div v-if="user.fullname">
                   <v-row class="justify-end">
                     <v-col cols="2" class="d-flex">
                       <v-btn
@@ -96,21 +125,29 @@
             <v-stepper-content step="2">
               <v-card elevation="0" tile class="mx-2 my-2">
                 <v-row class="bg-gray lighten-4">
-                  <v-col cols="12" md="5" xl="3" lg="4" sm="12">
-                    <v-card tile elevation="0">
-                      <v-card-title>
-                        <span
-                          class="subtitle-1 font-weight-bold  blueS--text mb-3"
-                        >
-                          Información resumen
-                        </span>
-                      </v-card-title>
-                      <v-card-text v-if="user" class="d-flex text-center">
+                  <v-col
+                    class="d-flex text-center"
+                    cols="4"
+                    v-if="user.fullname"
+                  >
+                    <sigaf-container-card
+                      @showEditForm="editUserForm = !editUserForm"
+                      :showEditButton="true"
+                      title="Información alumno"
+                    >
+                      <template v-slot:content>
                         <sigaf-card-data-student
+                          v-if="!editUserForm"
                           :user="user"
                         ></sigaf-card-data-student>
-                      </v-card-text>
-                    </v-card>
+                        <s-edit-user-form
+                          v-else
+                          :user="user"
+                          @userUpdate="updateUser"
+                          @cancelForm="editUserForm = false"
+                        ></s-edit-user-form>
+                      </template>
+                    </sigaf-container-card>
                   </v-col>
                   <v-col cols="12" md="7" xl="9" lg="8" sm="12">
                     <v-card tile elevation="0">
@@ -284,6 +321,9 @@ import SAutocompleteStatusTicket from '@/components/ticket/SAutocompleteStatusTi
 import SAutocompleteSourceTicket from '@/components/ticket/SAutocompleteSourceTicket.vue'
 import SAutocompleteTypeTicket from '@/components/ticket/SAutocompleteTypeTicket.vue'
 import SigafMailCompose from '../../utility/SigafMailCompose.vue'
+import STableTicketHistorical from '../STableTicketHistorical.vue'
+import SigafContainerCard from '../../utility/SigafContainerCard.vue'
+import SEditUserForm from '../../utility/SEditUserForm.vue'
 
 export default {
   components: {
@@ -295,7 +335,10 @@ export default {
     SAutocompleteStatusTicket,
     SAutocompleteSourceTicket,
     SAutocompleteTypeTicket,
-    SigafMailCompose
+    SigafMailCompose,
+    STableTicketHistorical,
+    SigafContainerCard,
+    SEditUserForm
   },
   mixins: [validationMixin],
   validations: {
@@ -319,7 +362,13 @@ export default {
   },
   data: () => ({
     rut: '',
-    user: null,
+    user: {
+      rut: '',
+      email: '',
+      phone: '',
+      fullname: '',
+      mobile: ''
+    },
     date: currentDate,
     editedTicketItem: {
       source: null,
@@ -352,7 +401,8 @@ export default {
     sender: false,
     subject: '',
     text: '',
-    CCRecipient: ''
+    CCRecipient: '',
+    editUserForm: false
   }),
   created() {
     this.fetchSections()
@@ -496,6 +546,20 @@ export default {
       postDetailTicket: 'detailTicket/postDetailTicket',
       postMailTicket: 'ticket/postMailTicket'
     }),
+    updateUser(item) {
+      this.$nextTick(() => {
+        this.user.registered_user.name = item.name
+        this.user.registered_user.last_name = item.last_name
+        this.user.registered_user.mother_last_name = item.mother_last_name
+        this.user.registered_user.mobile = item.mobile
+        this.user.registered_user.phone = item.phone
+        this.user.registered_user.email = item.email
+        this.editUserForm = false
+      })
+    },
+    showItem(ticket) {
+      this.$emit('showItem', ticket)
+    },
     getDay(date) {
       const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
       let i = new Date(date).getDay(date)
@@ -524,6 +588,13 @@ export default {
     async fetchUserByRut() {
       this.searchRutLoading = true
 
+      this.user = {
+        rut: '',
+        email: '',
+        phone: '',
+        fullname: '',
+        mobile: ''
+      }
       const vm = this
       setTimeout(async () => {
         const {
@@ -531,8 +602,6 @@ export default {
           statusCode,
           message
         } = await this.findRegisteredUserByRut(this.rut)
-
-        console.log('_data', _data)
 
         if (statusCode === 204) {
           vm.snackbar = true
@@ -549,8 +618,6 @@ export default {
 
             const response = await this.findSpecificUserCourse(payload)
 
-            console.log('response', response)
-
             const userCreated = response._data
 
             if (userCreated.is_sincronized === 0) {
@@ -563,6 +630,7 @@ export default {
               )
 
               this.user = Object.assign({}, mapUser(userCreated, this.sections))
+              console.log('user', this.user)
             }
           } else {
             vm.snackbar = true
@@ -620,12 +688,12 @@ export default {
           dataStoreTicket = { ...dataStoreTicket, ...clossingDate }
         }
 
-        const { success } = await this.postTicket(dataStoreTicket)
+        const { success, _data } = await this.postTicket(dataStoreTicket)
 
         if (success && this.editedDetailTicketItem.statusDetail !== null) {
           const dataDetailTicket = {
             comment: this.editedDetailTicketItem.comment,
-            ticket_id: this.savedTicket.properties.id,
+            ticket_id: _data.properties.id,
             status_detail_ticket_id: this.editedDetailTicketItem.statusDetail
               .id,
             user_created_id: this.loggedUser.id
@@ -640,7 +708,7 @@ export default {
 
         if (this.isEmailActivated) {
           let payload = {
-            ticketId: this.savedTicket.properties.id
+            ticketId: _data.properties.id
           }
 
           if (this.text === '' && this.subject === '') {

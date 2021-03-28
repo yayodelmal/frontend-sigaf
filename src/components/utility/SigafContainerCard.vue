@@ -3,7 +3,11 @@
     <v-card-text>
       <v-row>
         <v-col cols="12">
-          <sigaf-header-card :title="title" />
+          <sigaf-header-card
+            :showEditButton="showEditButton"
+            :title="title"
+            @showEditForm="$emit('showEditForm')"
+          />
         </v-col>
         <v-col cols="12">
           <v-row justify="center">
@@ -20,7 +24,8 @@ import SigafHeaderCard from './SigafHeaderCard.vue'
 export default {
   components: { SigafHeaderCard },
   props: {
-    title: String
+    title: String,
+    showEditButton: Boolean
   }
 }
 </script>

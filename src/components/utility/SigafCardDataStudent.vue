@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex text-center py-4">
+  <div v-if="user" class="d-flex text-center py-4">
     <v-hover v-slot:default="{ hover }" open-delay="200">
       <v-card
         :color="backgroundColor ? 'white' : getColorCard(user.state)"
@@ -112,7 +112,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 export default {
   name: 'SigafCardDataStudent',
   props: {
@@ -121,9 +121,7 @@ export default {
     },
     backgroundColor: Boolean
   },
-  created() {},
   methods: {
-    ...mapActions({}),
     getValueProgress(user) {
       return user.progress
     },

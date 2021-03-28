@@ -411,6 +411,36 @@ export default {
           error: 'Error grave. Contacte al Administrador.'
         }
       }
+    },
+    findTicketByUser: async (_, payload) => {
+      try {
+        const { status, data } = await axios.get(
+          `/api/v2/course-registered-user/${payload.id}/tickets`
+        )
+
+        if (status === 200) {
+          const { success, error, message, _data } = data
+
+          if (success) {
+            return _data.collections
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
     }
   }
 }

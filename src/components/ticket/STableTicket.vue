@@ -102,6 +102,12 @@ export default {
   data: () => ({
     headers: [
       {
+        text: 'Prioridad',
+        width: 80,
+        value: 'priorityTicket',
+        class: HEADER_CLASS
+      },
+      {
         text: 'Código',
         width: 130,
         sortable: false,
@@ -123,8 +129,13 @@ export default {
       },
       {
         text: 'Nombre',
-        width: 250,
+        width: 200,
         value: 'fullname',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Motivo',
+        value: 'motiveTicket',
         class: HEADER_CLASS
       },
       {
@@ -135,12 +146,6 @@ export default {
       {
         text: 'Estado',
         value: 'statusTicket',
-        class: HEADER_CLASS
-      },
-      {
-        text: 'Prioridad',
-        width: 80,
-        value: 'priorityTicket',
         class: HEADER_CLASS
       },
 
@@ -191,6 +196,7 @@ export default {
             fullname: `${user.name} ${user.last_name} ${user.mother_last_name}`,
             statusTicket: ticket.statusTicket.description,
             priorityTicket: ticket.priorityTicket.description,
+            motiveTicket: ticket.motiveTicket.description,
             typeTicket: ticket.typeTicket.description,
             closingDate: ticket.closingDate,
             createdAt: `${ticket.createdAt} ${ticket.timeCreatedAt}`,
