@@ -22,6 +22,7 @@ import detailTicket from './modules/detailTicket'
 import courseRegisteredUser from './modules/courseRegisteredUser'
 import platform from './modules/platform'
 import logEditingTicket from './modules/logEditingTicket'
+import dashboard from './modules/dashboard'
 
 Vue.use(Vuex)
 
@@ -48,10 +49,12 @@ export default new Vuex.Store({
     statusDetailTicket,
     courseRegisteredUser,
     platform,
-    logEditingTicket
+    logEditingTicket,
+    dashboard
   },
   state: {
-    drawer: null
+    drawer: null,
+    version: process.env.VUE_APP_VERSION
   },
   mutations: {
     SET_DRAWER(state, payload) {

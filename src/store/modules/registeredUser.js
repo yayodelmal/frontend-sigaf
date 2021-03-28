@@ -144,6 +144,22 @@ export default {
         }
       }
     },
+    putRegisteredUser: async (_, registeredUser) => {
+      try {
+        const { data } = await axios.put(
+          `${BASE_URL}/${registeredUser.id}/view-update`,
+          registeredUser
+        )
+        const { _data, success, message } = data
+        return { success, message, _data }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
     postRegisteredUser: async ({ commit }, registeredUser) => {
       try {
         const { data } = await axios.post(

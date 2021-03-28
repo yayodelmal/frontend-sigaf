@@ -307,27 +307,7 @@ export default {
     },
     postMailMultipleTicket: async (_, payload) => {
       try {
-        let data
-        console.log(payload)
-        if (payload.files) {
-          let formData = new FormData()
-
-          payload.files.forEach((file, index) => {
-            formData.append(`file_${index}`, file)
-          })
-
-          formData.append('text', payload.text)
-          formData.append('ticketsId', JSON.stringify(payload.ticketsId))
-          formData.append('numberOfFiles', payload.files.length)
-          formData.append('subject', payload.subject)
-
-          const config = {
-            'Content-Type': 'multipart/form-data'
-          }
-          data = await axios.post('/api/v2/mail/massive', formData, config)
-        } else {
-          data = await axios.post('/api/v2/mail/massive', payload)
-        }
+        const data = await axios.post('/api/v2/mail/massive', payload)
 
         const { _data, success, error } = data
 
@@ -345,7 +325,53 @@ export default {
         }
       }
     },
+    deleteFileEmail: async (_, payload) => {
+      try {
+        const { data } = await axios.post('/api/v2/mail/delete/file', payload)
+
+        const { _data } = data
+
+        return _data
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    uploadFileEmail: async (_, payload) => {
+      try {
+        let formData = new FormData()
+
+        formData.append(`file`, payload.file)
+
+        const config = {
+          'Content-Type': 'multipart/form-data'
+        }
+        const { data } = await axios.post(
+          '/api/v2/mail/upload/file',
+          formData,
+          config
+        )
+
+        const { _data } = data
+
+        return _data
+      } catch (error) {
+        console.log(error)
+      }
+    },
     postMailTicket: async (_, payload) => {
+      try {
+        const { data } = await axios.post('/api/v2/mail/single', payload)
+
+        console.log(data)
+      } catch (error) {
+        const { data } = error.response
+        return {
+          success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    postMailTicket_: async (_, payload) => {
       try {
         let data
         if (payload.files) {
@@ -382,6 +408,36 @@ export default {
         const { data } = error.response
         return {
           success: data.success,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
+    findTicketByUser: async (_, payload) => {
+      try {
+        const { status, data } = await axios.get(
+          `/api/v2/course-registered-user/${payload.id}/tickets`
+        )
+
+        if (status === 200) {
+          const { success, error, message, _data } = data
+
+          if (success) {
+            return _data.collections
+          } else {
+            console.log(error)
+          }
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
           error: 'Error grave. Contacte al Administrador.'
         }
       }

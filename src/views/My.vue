@@ -11,7 +11,7 @@
         <v-spacer></v-spacer>
       </v-app-bar>
 
-      <navigation-drawer-app></navigation-drawer-app>
+      <navigation-drawer-app />
       <v-container fluid>
         <router-view> </router-view>
       </v-container>
@@ -58,6 +58,9 @@ export default {
     ...mapActions({
       logoutStore: 'auth/logout'
     }),
+    test(value) {
+      console.log(value)
+    },
     setMini() {
       this.mini = !this.mini
     },

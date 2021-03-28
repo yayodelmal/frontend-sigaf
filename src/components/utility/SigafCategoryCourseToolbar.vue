@@ -38,6 +38,12 @@ import BaseSelectComponent from '../base/BaseSelect'
 import { mapGetters, mapActions } from 'vuex'
 export default {
   components: { SigafToolbar, BaseSelectComponent },
+  props: {
+    source: {
+      type: String,
+      default: () => 'Ticket'
+    }
+  },
   data: () => ({
     category: null,
     selectedCourse: null,
@@ -74,11 +80,12 @@ export default {
     async findTicketByCourse() {
       this.loadingButton = true
 
-      await this.fetchTicketsByCourse(this.selectedCourse)
-
-      this.loadingButton = false
-      this.$emit('showTable', true)
-      this.$emit('loading', false)
+      if (this.source === 'Ticket') {
+        await this.fetchTicketsByCourse(this.selectedCourse)
+        this.loadingButton = false
+        this.$emit('showTable', true)
+        this.$emit('loading', false)
+      }
       this.$emit('selectedCourse', this.selectedCourse)
     }
   }

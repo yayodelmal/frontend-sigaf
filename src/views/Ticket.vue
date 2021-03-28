@@ -70,6 +70,20 @@
                   </v-icon>
                 </div>
               </v-btn>
+              <v-btn
+                large
+                depressed
+                color="blueS"
+                class="ml-3"
+                @click="openHistoricalModal"
+              >
+                <div class="d-flex flex-column">
+                  Historial
+                  <v-icon right dark class="mx-auto">
+                    mdi-history
+                  </v-icon>
+                </div>
+              </v-btn>
             </div>
           </v-toolbar>
           <div v-if="loading">
@@ -105,6 +119,7 @@
       v-model="singleCreateModal"
       :selectedCourse="selectedCourse"
       @closeModal="closeCreatedSingleModal($event)"
+      @showSnackbar="showSnackbar"
     />
     <sigaf-edit-single-ticket
       v-if="showSingleEditModal"
@@ -113,6 +128,15 @@
       :ticket="editedTicketItem"
       :ticket-details="editedTicketDetails"
       @closeModal="closeEditedSingleModal($event)"
+      @showSnackbar="showSnackbar"
+    />
+    <sigaf-show-single-ticket
+      v-if="showSingleShowModal"
+      v-model="singleShowModal"
+      :selectedCourse="selectedCourse"
+      :ticket="editedTicketItem"
+      :ticket-details="editedTicketDetails"
+      @closeModal="closeShowSingleModal($event)"
     />
     <v-overlay
       :value="overlayCreateMultipleTicket"
@@ -136,18 +160,13 @@
       @closeModalMultiple="closeEditedMultipleModal"
       @showSnackbar="showSnackbar"
     />
-    <!-- 
-    <v-snackbar
-      @snackbar="setSnackbar($event)"
-      color="blueS"
-      v-model="snackbar"
-      :timeout="timeout"
-    >
-      {{ message }}
-      <v-btn dark text @click="snackbar = false">
-        Cerrar
-      </v-btn>
-    </v-snackbar> -->
+
+    <v-dialog v-model="historicalModal" fullscreen>
+      <s-find-historical-tickets
+        @closeHistoricalModal="historicalModal = false"
+        :selectedCourse="selectedCourse"
+      />
+    </v-dialog>
 
     <sigaf-snackbar v-model="snackbar" v-bind="configSnack" />
 
@@ -180,14 +199,16 @@ import SigafEditSingleTicket from '@/components/ticket/single/SigafEditSingleTic
 import SigafCreateMultipleTicket from '@/components/ticket/multiple/SigafCreateMultipleTicket.vue'
 import STableTicket from '../components/ticket/STableTicket.vue'
 import SigafSnackbar from '../components/component/Snackbar'
+import SigafShowSingleTicket from '../components/ticket/single/SigafShowSingleTicket.vue'
+import SFindHistoricalTickets from '../components/utility/SFindHistoricalTickets.vue'
 
-Array.prototype.forEachAsyncCustom = function(fn) {
+/* Array.prototype.forEachAsyncCustom = function(fn) {
   return this.reduce(
     (promise, n, index) => promise.then(() => fn(n, index)),
     Promise.resolve()
   )
 }
-
+ */
 export default {
   inject: ['theme'],
   components: {
@@ -197,12 +218,15 @@ export default {
     SigafEditSingleTicket,
     SigafCreateMultipleTicket,
     STableTicket,
-    SigafSnackbar
+    SigafSnackbar,
+    SigafShowSingleTicket,
+    SFindHistoricalTickets
   },
   data() {
     return {
       singleCreateModal: false,
       singleEditModal: false,
+      singleShowModal: false,
       multipleCreateModal: false,
       showMultipleCreateModal: false,
       search: '',
@@ -267,10 +291,12 @@ export default {
       editedTicketDetails: null,
       showSingleEditModal: false,
       showSingleCreateModal: false,
+      showSingleShowModal: false,
       overlayCreateMultipleTicket: false,
       overlayMessageCreateMultipleTicket: '',
       transition: 'scale-transition',
-      snackbar: false
+      snackbar: false,
+      historicalModal: false
     }
   },
   methods: {
@@ -305,8 +331,16 @@ export default {
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
     }),
+    openHistoricalModal() {
+      this.historicalModal = true
+    },
     showItem(ticket) {
-      console.log(ticket)
+      this.showSingleShowModal = ticket.showSingleShowModal
+      setTimeout(() => {
+        this.editedTicketDetails = ticket.editedTicketDetails
+        this.editedTicketItem = ticket.editedTicketItem
+        this.singleShowModal = ticket.singleShowModal
+      }, 200)
     },
     openCreateSingleModal() {
       this.showSingleCreateModal = true
@@ -474,6 +508,11 @@ export default {
       this.editedTicketItem = null
       this.singleEditModal = event
       this.showSingleEditModal = event
+    },
+    closeShowSingleModal(event) {
+      this.editedTicketItem = null
+      this.singleShowModal = event
+      this.showSingleShowModal = event
     },
     closeCreatedSingleModal(event) {
       this.singleCreateModal = event

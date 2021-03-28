@@ -76,21 +76,18 @@
           </v-toolbar>
         </v-card-text>
       </v-card>
+      <sigaf-skeleton-loader
+        v-if="loadingActivities"
+        :transition="transition"
+        :loading="loading"
+      ></sigaf-skeleton-loader>
       <v-data-table
+        v-else
         :headers="headers"
         :items="activitiesFiltered"
         class="elevation-1 grayS--text mt-3"
-        :loading="loading"
-        loading-text="Cargando... por favor espere"
         :search="search"
       >
-        <template v-slot:progress>
-          <v-progress-linear
-            color="blueS"
-            :height="3"
-            indeterminate
-          ></v-progress-linear>
-        </template>
         <template v-slot:item.actions="{ item }">
           <v-tooltip color="blueS" bottom>
             <template v-slot:activator="{ on }">
@@ -105,105 +102,62 @@
         </template>
       </v-data-table>
     </base-card>
-    <v-dialog v-model="dialog" max-width="500px" persistent>
-      <v-form>
-        <v-card :loading="loadingSave">
-          <template v-slot:progress>
-            <v-progress-linear color="blueS" indeterminate></v-progress-linear>
-          </template>
-          <v-toolbar dark color="blueS darken-1">
-            <v-toolbar-title>
-              {{ formTitle }}
-            </v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-container>
-              <v-row>
-                <v-col cols="12">
-                  <base-textfield
-                    v-model="editedItem.description"
-                    label="Nombre"
-                    required
-                    readonly
-                    @input="$v.description.$touch()"
-                    @blur="$v.description.$touch()"
-                    :error-messages="descriptionErrors"
-                  ></base-textfield>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="4">
-                  <base-textfield
-                    v-model="editedItem.weighing"
-                    label="Ponderación (%)"
-                    required
-                    clearable
-                    @input="$v.weighing.$touch()"
-                    @blur="$v.weighing.$touch()"
-                    :error-messages="weighingErrors"
-                  ></base-textfield>
-                </v-col>
-                <v-col cols="8">
-                  <base-autocomplete
-                    v-model="editedItem.section"
-                    :items="sectionItems"
-                    label="Sección"
-                    item-value="id"
-                    item-text="description"
-                    return-object
-                    @change="$v.section.$touch()"
-                    @blur="$v.section.$touch()"
-                    :error-messages="sectionErrors"
-                  >
-                  </base-autocomplete>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-divider></v-divider>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="close">
-              CANCELAR
-            </v-btn>
-            <v-btn
-              :loading="loading"
-              color="blueS"
-              dark
-              depressed
-              @click="save"
+    <sigaf-dialog
+      :dialog="dialog"
+      :form-title="formTitle"
+      :loading="loading"
+      :loading-save="loadingSave"
+      @close="close"
+      @save="save"
+    >
+      <template v-slot:default>
+        <v-row>
+          <v-col cols="12">
+            <base-textfield
+              v-model="editedItem.description"
+              label="Nombre"
+              required
+              disabled
+              @input="$v.description.$touch()"
+              @blur="$v.description.$touch()"
+              :error-messages="descriptionErrors"
+            ></base-textfield>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="4">
+            <base-textfield
+              v-model="editedItem.weighing"
+              label="Ponderación"
+              required
+              clearable
+              @input="$v.weighing.$touch()"
+              @blur="$v.weighing.$touch()"
+              :error-messages="weighingErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="8">
+            <base-autocomplete
+              v-model="editedItem.section"
+              :items="sectionItems"
+              label="Sección"
+              item-value="id"
+              item-text="description"
+              return-object
+              @change="$v.section.$touch()"
+              @blur="$v.section.$touch()"
+              :error-messages="sectionErrors"
             >
-              ACEPTAR
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-form>
-    </v-dialog>
-    <snackbar-component v-model="snackbar" :type="type" :message="message">
-    </snackbar-component>
-    <v-dialog v-model="dialogConfirm" persistent max-width="350">
-      <base-card
-        class="pt-12"
-        color="redS"
-        icon="mdi-hand-left"
-        title="¡Atención!"
-      >
-        <v-divider></v-divider>
-        <v-card-text>Eliminará un registro de forma permanente</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <base-button
-            icon="mdi-check-circle"
-            label="Aceptar"
-            @click.prevent="confirmDelete"
-          ></base-button>
-          <v-btn text color="grayS" @click="close">
-            <v-icon size="30" left>mdi-close-circle</v-icon>
-            Cancelar</v-btn
-          >
-        </v-card-actions>
-      </base-card>
-    </v-dialog>
+            </base-autocomplete>
+          </v-col>
+        </v-row>
+      </template>
+    </sigaf-dialog>
+    <sigaf-snackbar
+      v-model="snackbar"
+      :type="type"
+      :message="message"
+    ></sigaf-snackbar>
     <v-overlay :value="overlay" color="grayS" :opacity="opacity">
       <div class="text-center">
         <v-progress-circular indeterminate size="64"> </v-progress-circular>
@@ -222,14 +176,18 @@ import { required, numeric, minValue, maxValue } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 import axios from '../../services/axios'
 
-import SnackbarComponent from '../../components/component/Snackbar'
+import SigafSnackbar from '../../components/component/Snackbar'
 
 import { Snackbar } from '../../utils/constants'
+import SigafSkeletonLoader from '../../components/maintenance/SigafSkeletonLoader.vue'
+import SigafDialog from '../../components/maintenance/SigafDialog.vue'
 
 export default {
   mixins: [validationMixin],
   components: {
-    SnackbarComponent
+    SigafSnackbar,
+    SigafSkeletonLoader,
+    SigafDialog
   },
   validations: {
     description: { required },
@@ -276,6 +234,7 @@ export default {
     snackbar: false,
     timeout: 3000,
     loading: false,
+    transition: 'scale-transition',
     activitiesFiltered: [],
     category: null,
     course: null,

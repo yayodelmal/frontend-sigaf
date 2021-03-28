@@ -31,7 +31,7 @@
           color="info"
           icon="mdi-view-dashboard"
           title="Total tickets"
-          value="245"
+          :value="totalTicket"
           sub-icon="mdi-clock"
           sub-text="Just Updated"
         />
@@ -149,20 +149,84 @@
           </v-expand-transition>
         </v-hover>
       </v-col>
+      <v-col cols="12" sm="12" md="12" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center"
+            color="white"
+            :elevation="hover ? '5' : '1'"
+            width="95%"
+          >
+            <v-card-text>
+              <source-ticket-chart :height="200" :render="true" />
+            </v-card-text>
+          </v-card>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center"
+            color="white"
+            :elevation="hover ? '5' : '1'"
+            width="95%"
+          >
+            <v-card-text>
+              <priority-ticket-chart :height="200" :render="true" />
+            </v-card-text>
+          </v-card>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center"
+            color="white"
+            :elevation="hover ? '5' : '1'"
+            width="95%"
+          >
+            <v-card-text>
+              <status-ticket-chart :height="200" :render="true" />
+            </v-card-text>
+          </v-card>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="8">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center"
+            color="white"
+            :elevation="hover ? '5' : '1'"
+            max-height="300"
+          >
+            <v-card-text>
+              <status-ticket-by-user-chart :height="400" :render="true" />
+            </v-card-text>
+          </v-card>
+        </v-hover>
+      </v-col>
     </v-row>
   </base-card>
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import DoughnutChart from '../components/chart/DoughnutChart'
 import BarChart from '../components/chart/BarChart'
-import { mapActions, mapGetters } from 'vuex'
+import SourceTicketChart from '../components/dashboard/SourceTicketChart.vue'
+import PriorityTicketChart from '../components/dashboard/PriorityTicketChart.vue'
+import StatusTicketChart from '../components/dashboard/StatusTicketChart.vue'
+import StatusTicketByUserChart from '../components/dashboard/StatusTicketByUserChart.vue'
 
 export default {
   name: 'Dashboard',
   components: {
     DoughnutChart,
-    BarChart
+    BarChart,
+    SourceTicketChart,
+    PriorityTicketChart,
+    StatusTicketChart,
+    StatusTicketByUserChart
   },
   data: () => ({
     loaded: false,
@@ -250,12 +314,14 @@ export default {
     this.fetchUsers()
     this.fetchDataCategoryItems()
   },
-  mounted() {
+  async mounted() {
     this.loaded = false
     this.fetchPriorityticket().then(() => {
       this.fillChartPriorityTicket()
     })
 
+    await this.getSourcePieChart(2)
+    await this.fetchTotalTicket(2)
     this.fetchStatusTicket().then(() => {
       this.fillChartStatusTicket()
       this.fillChartStatusByOperator()
@@ -271,7 +337,8 @@ export default {
       users: 'user/users',
       courseItems: 'course/courses',
       categoryItems: 'category/categories',
-      courseByCategory: 'course/coursesByCategory'
+      courseByCategory: 'course/coursesByCategory',
+      totalTicket: 'dashboard/totalTicket'
     })
   },
   methods: {
@@ -282,7 +349,9 @@ export default {
       fetchUsers: 'user/fetchUsers',
       fetchCourseItems: 'course/fetchCourses',
       fetchCategoryItems: 'category/fetchCategories',
-      fetchCourseByCategory: 'course/getCoursesByCategory'
+      fetchCourseByCategory: 'course/getCoursesByCategory',
+      getSourcePieChart: 'dashboard/getSourcePieChart',
+      fetchTotalTicket: 'dashboard/getTotalTicket'
     }),
     fillChartStatusTicket() {
       this.statusTicket.forEach(status => {
