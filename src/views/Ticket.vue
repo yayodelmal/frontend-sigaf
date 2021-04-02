@@ -109,6 +109,7 @@
               @editTicket="editItem"
               @deleteItem="deleteItem"
               @showItem="showItem"
+              @showSnackbar="showSnackbar"
             />
           </div>
         </div>

@@ -295,6 +295,12 @@ export default {
               singleEditModal: true
             })
           }
+        } else {
+          this.$emit('showSnackbar', {
+            type: 'warning',
+            message:
+              'No se puede editar. Este ticket esta tomado por otro operador.'
+          })
         }
       }
     },
