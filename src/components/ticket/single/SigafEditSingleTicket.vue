@@ -46,11 +46,23 @@
                     sm="12"
                     class="d-flex justify-center align-stretch"
                   >
-                    <sigaf-container-card title="Datos alumno">
+                    <sigaf-container-card
+                      @showEditForm="editUserForm = !editUserForm"
+                      :showEditButton="true"
+                      title="Información alumno"
+                      :showLastSync="true"
+                    >
                       <template v-slot:content>
                         <sigaf-card-data-student
+                          v-if="!editUserForm"
                           :user="user"
                         ></sigaf-card-data-student>
+                        <s-edit-user-form
+                          v-else
+                          :user="user"
+                          @userUpdate="updateUser"
+                          @cancelForm="editUserForm = false"
+                        ></s-edit-user-form>
                       </template>
                     </sigaf-container-card>
                   </v-col>
@@ -195,11 +207,23 @@
                     sm="12"
                     class="d-flex justify-center align-center"
                   >
-                    <sigaf-container-card title="Datos alumno">
+                    <sigaf-container-card
+                      @showEditForm="editUserForm = !editUserForm"
+                      :showEditButton="true"
+                      title="Información alumno"
+                      :showLastSync="true"
+                    >
                       <template v-slot:content>
                         <sigaf-card-data-student
+                          v-if="!editUserForm"
                           :user="user"
                         ></sigaf-card-data-student>
+                        <s-edit-user-form
+                          v-else
+                          :user="user"
+                          @userUpdate="updateUser"
+                          @cancelForm="editUserForm = false"
+                        ></s-edit-user-form>
                       </template>
                     </sigaf-container-card>
                   </v-col>
@@ -335,6 +359,7 @@ import SAutocompleteSourceTicket from '@/components/ticket/SAutocompleteSourceTi
 import SAutocompleteTypeTicket from '@/components/ticket/SAutocompleteTypeTicket.vue'
 import SigafMailCompose from '../../utility/SigafMailCompose.vue'
 import SigafContainerCard from '../../utility/SigafContainerCard.vue'
+import SEditUserForm from '../../utility/SEditUserForm.vue'
 
 export default {
   components: {
@@ -348,7 +373,8 @@ export default {
     SAutocompleteSourceTicket,
     SAutocompleteTypeTicket,
     SigafMailCompose,
-    SigafContainerCard
+    SigafContainerCard,
+    SEditUserForm
   },
   mixins: [validationMixin],
   validations: {
@@ -387,6 +413,7 @@ export default {
       courseRegisteredUser: null,
       createdAt: currentDate
     },
+    editUserForm: false,
     editedDetailTicketItem: {
       statusDetail: null,
       comment: null
@@ -548,6 +575,17 @@ export default {
       })
     }, */
 
+    updateUser(item) {
+      this.$nextTick(() => {
+        this.user.registered_user.name = item.name
+        this.user.registered_user.last_name = item.last_name
+        this.user.registered_user.mother_last_name = item.mother_last_name
+        this.user.registered_user.mobile = item.mobile
+        this.user.registered_user.phone = item.phone
+        this.user.registered_user.email = item.email
+        this.editUserForm = false
+      })
+    },
     getDay(date) {
       const daysOfWeek = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
       let i = new Date(date).getDay(date)

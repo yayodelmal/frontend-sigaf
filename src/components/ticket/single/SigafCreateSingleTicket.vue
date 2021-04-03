@@ -76,6 +76,7 @@
                       @showEditForm="editUserForm = !editUserForm"
                       :showEditButton="true"
                       title="Información alumno"
+                      :showLastSync="true"
                     >
                       <template v-slot:content>
                         <sigaf-card-data-student
@@ -134,6 +135,7 @@
                       @showEditForm="editUserForm = !editUserForm"
                       :showEditButton="true"
                       title="Información alumno"
+                      :showLastSync="true"
                     >
                       <template v-slot:content>
                         <sigaf-card-data-student
