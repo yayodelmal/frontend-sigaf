@@ -7,9 +7,13 @@ export default {
   state: {
     courseRegisteredUsers: [],
     countUsersByCourses: [],
-    storeUsersByCourse: []
+    storeUsersByCourse: [],
+    lastDateSync: ''
   },
   mutations: {
+    SET_LAST_DATE_SYNC: (state, payload) => {
+      state.lastDateSync = payload
+    },
     SET_COURSE_REGISTERED_USERS: (state, courseRegisteredUsers) => {
       state.courseRegisteredUsers = courseRegisteredUsers
     },
@@ -58,6 +62,7 @@ export default {
     }
   },
   getters: {
+    lastDateSync: state => state.lastDateSync,
     courseRegisteredUsers: state => {
       return state.courseRegisteredUsers
     },
@@ -304,6 +309,17 @@ export default {
           success: data.success,
           message: data.message
         }
+      }
+    },
+    getLastSyncDate: async ({ commit }, course) => {
+      try {
+        const URL = `/api/v2/course-registered-users/${course.id}/last-sync`
+
+        const { data } = await axios.get(URL)
+
+        commit('SET_LAST_DATE_SYNC', data._data)
+      } catch (error) {
+        console.log(error)
       }
     }
   }

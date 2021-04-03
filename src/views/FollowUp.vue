@@ -6,10 +6,16 @@
     title="Seguimiento de estudiantes"
   >
     <sigaf-category-course-toolbar
-      v-if="isAdmin || isDeveloper"
+      v-if="!isTutor"
       @selectedCourse="selectedCourse = $event"
     ></sigaf-category-course-toolbar>
-    <div v-else>data full</div>
+    <!--    //TODO crear logica para mostrar alumnos asignados a un tutor -->
+    <div v-if="showTable" class="d-flex">
+      <div class="ml-auto mt-3 mb-n3">
+        <p class="subtitle">Última sincronización el {{ lastDateSync }}</p>
+      </div>
+    </div>
+
     <div v-if="showTable">
       <v-progress-linear
         v-if="progressUser !== 100"
@@ -346,7 +352,8 @@ export default {
       sections: 'section/sections',
       isAdmin: 'auth/isAdmin',
       isDeveloper: 'auth/isDeveloper',
-      isTutor: 'auth/isTutor'
+      isTutor: 'auth/isTutor',
+      lastDateSync: 'courseRegisteredUser/lastDateSync'
     }),
     sectionFiltered() {
       return this.sections.filter(
@@ -464,7 +471,8 @@ export default {
         'courseRegisteredUser/getCourseRegisteredByCourse',
       fetchSections: 'section/fetchSections',
       getCourseRegisteredByCoursePaginate:
-        'courseRegisteredUser/getCourseRegisteredByCoursePaginate'
+        'courseRegisteredUser/getCourseRegisteredByCoursePaginate',
+      getLastSyncDate: ' courseRegisteredUser/getLastSyncDate'
     }),
     getValueProgress(user) {
       return user.progress
