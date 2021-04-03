@@ -70,18 +70,28 @@
     <template v-slot:item.actions="{ item }">
       <v-tooltip color="blueS" bottom>
         <template v-slot:activator="{ on }">
-          <v-icon v-on="on" class="mr-2" @click.prevent="editItem(item)">
-            {{ showIconSearch(item) }}
-          </v-icon>
+          <v-btn
+            v-on="on"
+            :loading="loadingEditingButton"
+            class="mr-2"
+            icon
+            @click.prevent="editItem(item)"
+          >
+            <v-icon>
+              {{ showIconSearch(item) }}
+            </v-icon>
+          </v-btn>
         </template>
         <span>{{ showTooltipSearch(item) }}</span>
       </v-tooltip>
 
       <v-tooltip v-if="showDeleteButton(item)" color="blueS" bottom>
         <template v-slot:activator="{ on }">
-          <v-icon v-on="on" @click.prevent="deleteItem(item)">
-            mdi-delete
-          </v-icon>
+          <v-btn icon v-on="on" @click.prevent="deleteItem(item)">
+            <v-icon>
+              mdi-delete
+            </v-icon>
+          </v-btn>
         </template>
         <span>Eliminar ticket</span>
       </v-tooltip>
@@ -118,7 +128,7 @@ export default {
         text: 'Opciones',
         value: 'actions',
         sortable: false,
-        width: 90,
+        width: 120,
         class: HEADER_CLASS
       },
       {
@@ -176,8 +186,17 @@ export default {
         value: 'attemptOfContact',
         class: HEADER_CLASS
       }
-    ]
+    ],
+    loadingEditingButton: false
   }),
+  created() {
+    const lenght = this.tickets.length
+    console.log(lenght)
+
+    for (let index = 0; index < lenght.length; index++) {
+      this.loadingEditingButton[index] = false
+    }
+  },
   computed: {
     ...mapGetters({
       loggedUser: 'auth/user'
@@ -257,6 +276,8 @@ export default {
       return item.close ? 'Ver ticket' : 'Agregar contacto'
     },
     async editItem({ immutableTicket, close }) {
+      this.loadingEditingButton = true
+
       if (close) {
         const url = immutableTicket.relationships.links.href
 
@@ -268,6 +289,9 @@ export default {
           showSingleShowModal: true,
           singleShowModal: true
         })
+        setTimeout(() => {
+          this.loadingEditingButton = false
+        }, 2000)
       } else {
         const ticket = immutableTicket.properties
         const response = await this.findLogEditingTicketByTicket(ticket.id)
@@ -294,14 +318,20 @@ export default {
               showSingleEditModal: true,
               singleEditModal: true
             })
+
+            setTimeout(() => {
+              this.loadingEditingButton = false
+            }, 2000)
           }
         } else {
           this.$emit('showSnackbar', {
             type: 'warning',
-            message:
-              'No se puede editar. Este ticket esta tomado por otro operador.'
+            message: 'No se puede editar. Este ticket se ha bloqueado.'
           })
         }
+        setTimeout(() => {
+          this.loadingEditingButton = false
+        }, 2000)
       }
     },
     deleteItem({ immutableTicket }) {

@@ -75,17 +75,20 @@ export default {
     ...mapActions({
       fetchCategories: 'category/fetchCategories',
       fetchCourseByCategory: 'course/getCoursesByCategory',
-      fetchTicketsByCourse: 'ticket/findTicketByCourse'
+      fetchTicketsByCourse: 'ticket/findTicketByCourse',
+      getLastSyncDate: 'courseRegisteredUser/getLastSyncDate'
     }),
     async findTicketByCourse() {
       this.loadingButton = true
 
       if (this.source === 'Ticket') {
         await this.fetchTicketsByCourse(this.selectedCourse)
+
         this.loadingButton = false
         this.$emit('showTable', true)
         this.$emit('loading', false)
       }
+      await this.getLastSyncDate(this.selectedCourse)
       this.$emit('selectedCourse', this.selectedCourse)
     }
   }

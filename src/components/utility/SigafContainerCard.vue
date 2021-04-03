@@ -14,18 +14,35 @@
             <slot name="content" />
           </v-row>
         </v-col>
+        <v-col class="d-flex" v-if="showLastSync" cols="12">
+          <div class="mx-auto">
+            <v-chip color="blueS" dark class="mr-2">
+              <v-icon left>
+                mdi-cloud-sync
+              </v-icon>
+              {{ lastDateSync }}
+            </v-chip>
+          </div>
+        </v-col>
       </v-row>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import SigafHeaderCard from './SigafHeaderCard.vue'
 export default {
   components: { SigafHeaderCard },
   props: {
     title: String,
-    showEditButton: Boolean
+    showEditButton: Boolean,
+    showLastSync: Boolean
+  },
+  computed: {
+    ...mapGetters({
+      lastDateSync: 'courseRegisteredUser/lastDateSync'
+    })
   }
 }
 </script>

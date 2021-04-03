@@ -327,7 +327,8 @@ export default {
         'logEditingTicket/findLogEditingTicketByTicket',
       postLogEditingTicket: 'logEditingTicket/postLogEditingTicket',
       findTicketDetailByTicket: 'ticket/findTicketDetailByTicket',
-      numberOfUsersByCourse: 'courseRegisteredUser/numberOfUsersByCourse'
+      numberOfUsersByCourse: 'courseRegisteredUser/numberOfUsersByCourse',
+      getLastSyncDate: 'courseRegisteredUser/getLastSyncDate'
     }),
     ...mapMutations({
       PUT_TICKET: 'ticket/PUT_TICKET'
