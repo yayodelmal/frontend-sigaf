@@ -120,7 +120,6 @@ export default {
       {
         text: 'Código',
         width: 130,
-        sortable: false,
         value: 'code',
         class: HEADER_CLASS
       },

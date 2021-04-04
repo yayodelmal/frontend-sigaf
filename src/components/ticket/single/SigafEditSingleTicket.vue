@@ -626,6 +626,7 @@ export default {
           this.editedTicketItem.priority = editedTicket.priorityTicket
           this.editedTicketItem.operator = editedTicket.userAssigned
           this.editedTicketItem.status = editedTicket.statusTicket
+          this.editedTicketItem.userCreated = editedTicket.userCreated
           this.editedTicketItem.courseRegisteredUser =
             editedTicket.courseRegisteredUser
           this.editedTicketItem.createdAt = editedTicket.createdAt
@@ -657,8 +658,8 @@ export default {
           status_ticket_id: this.editedTicketItem.status.id,
           priority_ticket_id: this.editedTicketItem.priority.id,
           motive_ticket_id: this.editedTicketItem.motive.id,
-          user_create_id: this.loggedUser.id,
-          user_assigned_id: this.editedTicketItem.operator.id
+          user_assigned_id: this.editedTicketItem.operator.id,
+          user_create_id: this.editedTicketItem.userCreated.id
         }
 
         if (this.editedTicketItem.status.description === 'Cerrado') {
