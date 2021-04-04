@@ -52,7 +52,7 @@
 
     <v-list dense nav shaped>
       <v-list-group
-        v-for="(link, index) in links.secondary"
+        v-for="(link, index) in getPrivilegesSettingLinks"
         :key="index"
         no-action
         :prepend-icon="link.icon"
@@ -160,6 +160,7 @@ export default {
         {
           name: 'Mantenedor',
           icon: 'mdi-hammer-wrench',
+          privileges: ['Administrador', 'Developer'],
           links: [
             {
               name: 'Aula',
@@ -184,7 +185,7 @@ export default {
             {
               name: 'Motivo ticket',
               to: { name: 'MotiveTicket' },
-              privileges: ['Developer']
+              privileges: ['Developer', 'Administrador']
             },
             {
               name: 'Prioridad ticket',
@@ -236,6 +237,7 @@ export default {
         {
           name: 'Configuración',
           icon: 'mdi-cog-outline',
+          privileges: ['Administrador', 'Developer'],
           links: [
             {
               name: 'Matrícula',
@@ -309,6 +311,11 @@ export default {
     },
     getPrivilegesMainLinks() {
       return this.links.main.filter(link =>
+        link.privileges.includes(this.role.description)
+      )
+    },
+    getPrivilegesSettingLinks() {
+      return this.links.secondary.filter(link =>
         link.privileges.includes(this.role.description)
       )
     },
