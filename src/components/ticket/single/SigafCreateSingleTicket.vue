@@ -236,12 +236,7 @@
                       </v-card>
                     </v-expand-transition>
                     <v-expand-transition>
-                      <v-card
-                        class="mt-3"
-                        v-show="showContactAttemp"
-                        tile
-                        elevation="0"
-                      >
+                      <v-card class="mt-3" tile elevation="0">
                         <v-card-text>
                           <v-row>
                             <v-col cols="12">
@@ -268,6 +263,7 @@
                                 @blur="
                                   $v.editedDetailTicketItem.comment.$touch()
                                 "
+                                :errors="commentErrors[0]"
                               >
                               </base-textarea>
                             </v-col>
@@ -409,7 +405,7 @@ export default {
   created() {
     this.fetchSections()
   },
-  watch: {
+  /*   watch: {
     type() {
       this.handleKeepDataStatus()
       this.showContactAttemp = false
@@ -430,7 +426,7 @@ export default {
         this.showContactAttemp = true
       }
     }
-  },
+  }, */
   computed: {
     ...mapGetters({
       sections: 'section/sections',
@@ -653,22 +649,17 @@ export default {
 
       this.$v.validationGroup.editedTicketItem.$reset()
       this.$v.validationGroup.editedTicketItem.$touch()
+      this.$v.validationGroup.editedDetailTicketItem.$reset()
+      this.$v.validationGroup.editedDetailTicketItem.$touch()
 
-      if (this.showContactAttemp) {
-        this.$v.validationGroup.editedDetailTicketItem.$reset()
-        this.$v.validationGroup.editedDetailTicketItem.$touch()
+      if (this.$v.validationGroup.editedDetailTicketItem.$invalid) {
+        this.rulesValueStepTwo = false
+        this.checkValidStepTwo = false
+      }
 
-        if (this.$v.validationGroup.editedDetailTicketItem.$invalid) {
-          this.rulesValueStepTwo = false
-          this.checkValidStepTwo = false
-        }
-      } else {
-        this.editedDetailTicketItem.statusDetail = null
-        this.editedDetailTicketItem.comment = ''
-        if (this.$v.validationGroup.editedTicketItem.$invalid) {
-          this.rulesValueStepTwo = false
-          this.checkValidStepTwo = false
-        }
+      if (this.$v.validationGroup.editedTicketItem.$invalid) {
+        this.rulesValueStepTwo = false
+        this.checkValidStepTwo = false
       }
 
       if (this.checkValidStepTwo) {
