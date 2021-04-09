@@ -209,6 +209,11 @@ export default {
         class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
       },
       {
+        text: 'Id moodle',
+        value: 'idActivityMoodle',
+        class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
+      },
+      {
         text: 'Ponderación',
         value: 'weighing',
         class: ['redS--text', 'text-subtitle-2', 'font-weight-bold']
@@ -393,6 +398,7 @@ export default {
 
         this.activitiesItems.forEach(activity => {
           if (activity.course.id === this.course.id) {
+            console.log(activity)
             this.activitiesFiltered.push(activity)
           }
         })

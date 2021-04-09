@@ -101,7 +101,9 @@
             ></v-skeleton-loader>
           </div>
           <div v-else class="mt-5">
-            <span class="subtitle-1 gray--text mb-2">Lista de tickets</span>
+            <span class="subtitle-1 gray--text mb-2"
+              >Tickets encontrados: {{ tickets.length }}</span
+            >
             <s-table-ticket
               :loading="loading"
               :tickets="tickets"

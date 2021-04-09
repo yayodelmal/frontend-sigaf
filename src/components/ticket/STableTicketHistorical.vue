@@ -75,6 +75,9 @@
                 <th class="text-left">
                   Fecha
                 </th>
+                <th class="text-left">
+                  Operador
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -92,6 +95,9 @@
                       timeZone: 'America/Santiago'
                     })
                   }}
+                </td>
+                <td>
+                  {{ detail.user_created.name }}
                 </td>
               </tr>
             </tbody>
@@ -178,6 +184,8 @@ export default {
         const ticket = properties
         const attemptOfContact = relationships.numberOfElements
 
+        console.log(relationships.array)
+
         return {
           id: ticket.id,
           code: ticket.ticketCode,
@@ -208,11 +216,10 @@ export default {
           if (properties.typeTicket.description === 'Correo electrónico')
             return 'mdi-email-receive-outline'
           return 'mdi-phone-incoming'
-
         case 'Saliente':
           if (properties.typeTicket.description === 'Contacto telefónico')
-            return 'mdi-email-send-outline'
-          return 'mdi-phone-outgoing'
+            return 'mdi-phone-outgoing'
+          return 'mdi-email-send-outline'
       }
     },
     showPosition(ticket) {
