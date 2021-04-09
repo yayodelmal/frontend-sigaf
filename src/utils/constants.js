@@ -86,7 +86,15 @@ export const mapUser = (user, sections) => {
 
     const totalProgress = sections
       .filter(section => {
-        const filterSection = ['Formativa', 'Renuncia', 'Inicio', 'Cierre']
+        const filterSection = [
+          'Formativa',
+          'Renuncia',
+          'Pre Test A',
+          'Pre Test B',
+          'Post Test A',
+          'Post Test B',
+          'Encuesta satisfacción'
+        ]
         return !filterSection.includes(section.description)
       })
       .reduce(
