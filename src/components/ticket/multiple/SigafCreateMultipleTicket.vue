@@ -540,7 +540,11 @@ export default {
     text: '',
     CCRecipient: '',
     overlay: false,
-    opacity: 0.8
+    opacity: 0.8,
+    preTestA: false,
+    preTestB: false,
+    postTestA: false,
+    postTestB: false
   }),
 
   async mounted() {
@@ -550,10 +554,41 @@ export default {
     await this.fetchCourses()
   },
   watch: {
-    selectedActivities() {
+    selectedActivities(value) {
       this.userRegisteredFiltered = []
+      this.preTestA = false
+      this.preTestB = false
+      this.postTestA = false
+      this.postTestB = false
       if (this.selectedActivities.length === 0) {
         this.userRegisteredFiltered = this.courseRegisteredUsers
+      } else {
+        console.log('value', value[0])
+
+        const filterSection = [
+          'Pre Test A',
+          'Pre Test B',
+          'Post Test A',
+          'Post Test B'
+        ]
+
+        if (filterSection.includes(value[0].section.description)) {
+          switch (value[0].section.description) {
+            case 'Pre Test A':
+              this.preTestA = true
+              break
+            case 'Pre Test B':
+              this.preTestB = true
+              break
+            case 'Post Test A':
+              this.postTestA = true
+              break
+            case 'Post Test B':
+              this.postTestB = true
+              break
+          }
+          console.log('selecciono pre test')
+        }
       }
     },
     type() {
@@ -585,11 +620,13 @@ export default {
     }),
     filterActivities() {
       return this.activityItems
-        .filter(
-          activity =>
-            activity.weighing > 0 &&
-            this.selectedCourse.id === activity.course.id
-        )
+        .filter(activity => {
+          const excludeSection = ['Formativa', 'Renuncia']
+          return (
+            this.selectedCourse.id === activity.course.id &&
+            !excludeSection.includes(activity.section.description)
+          )
+        })
         .sort((a, b) => {
           const sortA = a.section.description.split(' ')[1]
           const sortB = b.section.description.split(' ')[1]
@@ -765,7 +802,26 @@ export default {
 
       const { data } = await this.findUsersByPendingActivity(payload)
 
-      this.userRegisteredFiltered = data.usersWithPendingActivities
+      this.userRegisteredFiltered = data.usersWithPendingActivities.filter(
+        user => {
+          const rut = user.registered_user.rut
+          const split = rut.split('-')
+          if (this.preTestA || this.postTestA) {
+            if (split[1] % 2 === 0 || split[1] === 0) {
+              return user
+            }
+          } else if (this.preTestB || this.postTestB) {
+            if (split[1] % 2 !== 0 || split[1] === 'K') {
+              return user
+            }
+          } else {
+            return user
+          }
+        }
+      )
+
+      console.log(this.userRegisteredFiltered)
+      console.log(this.selectedActivities)
 
       this.loading = false
     },

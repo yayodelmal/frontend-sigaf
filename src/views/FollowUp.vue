@@ -154,9 +154,7 @@
                             {{ getValueProgress(user) }}%
                           </v-progress-circular>
                         </v-avatar>
-                        <h3 class="font-weight-bold mb-2">
-                          {{ user.registered_user.rut }}
-                        </h3>
+
                         <h3 class="title mb-2">
                           {{ user.registered_user.name }}
                         </h3>
@@ -230,6 +228,9 @@
                         </v-col>
 
                         <v-col cols="12">
+                          <h3 class="font-weight-bold mb-2">
+                            {{ user.registered_user.rut }}
+                          </h3>
                           <span class="font-weight-bold">
                             <v-icon class="mr-2">
                               mdi-clock
@@ -359,7 +360,13 @@ export default {
       return this.sections.filter(
         section =>
           section.description !== 'Formativa' &&
-          section.description !== 'Renuncia'
+          section.description !== 'Renuncia' &&
+          section.description !== 'Pre Test A' &&
+          section.description !== 'Pre Test B' &&
+          section.description !== 'Post Test A' &&
+          section.description !== 'Post Test B' &&
+          section.description !== 'Unidad 5' &&
+          section.description !== 'Encuesta satisfacción'
       )
     },
     arrayCourseByCategory() {
@@ -601,8 +608,11 @@ export default {
               const filterSection = [
                 'Formativa',
                 'Renuncia',
-                'Inicio',
-                'Cierre'
+                'Pre Test A',
+                'Pre Test B',
+                'Post Test A',
+                'Post Test B',
+                'Encuesta satisfacción'
               ]
               return !filterSection.includes(section.description)
             })

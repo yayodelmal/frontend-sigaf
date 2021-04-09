@@ -124,10 +124,22 @@ export default {
         class: HEADER_CLASS
       },
       {
+        text: 'Intentos',
+        align: 'center',
+        value: 'attemptOfContact',
+        class: HEADER_CLASS
+      },
+      {
         text: 'Opciones',
         value: 'actions',
         sortable: false,
         width: 120,
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Aula',
+        value: 'classroom',
+        width: 100,
         class: HEADER_CLASS
       },
       {
@@ -178,12 +190,6 @@ export default {
         width: 130,
         value: 'operator',
         class: HEADER_CLASS
-      },
-      {
-        text: 'Intentos',
-        align: 'center',
-        value: 'attemptOfContact',
-        class: HEADER_CLASS
       }
     ],
     loadingEditingButton: false
@@ -205,6 +211,7 @@ export default {
       return this.tickets.map(
         ({ properties, relationships, links, showDeleteButton, close }) => {
           const ticket = properties
+          console.log(ticket)
           const attemptOfContact = relationships.numberOfElements
           const user = properties.courseRegisteredUser.registered_user
           return {
@@ -212,6 +219,7 @@ export default {
             code: ticket.ticketCode,
             rut: user.rut,
             fullname: `${user.name} ${user.last_name} ${user.mother_last_name}`,
+            classroom: ticket.courseRegisteredUser.classroom.description,
             statusTicket: ticket.statusTicket.description,
             priorityTicket: ticket.priorityTicket.description,
             motiveTicket: ticket.motiveTicket.description,

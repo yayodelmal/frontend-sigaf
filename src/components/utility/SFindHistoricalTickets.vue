@@ -128,6 +128,13 @@ export default {
       this.$emit('showItem', ticket)
     },
     closeModal() {
+      this.user = {
+        rut: '',
+        email: '',
+        phone: '',
+        fullname: '',
+        mobile: ''
+      }
       this.$emit('closeHistoricalModal')
     },
     updateUser(item) {
