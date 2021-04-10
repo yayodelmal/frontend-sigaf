@@ -52,6 +52,15 @@ const routes = [
         meta: { requiresAuth: true },
         children: [
           {
+            path: 'ticket-bloqueados',
+            name: 'BlockingTicket',
+            component: () =>
+              import(
+                /* webpackChunkName: "Aula" */ '../views/maintenance/BlockingTicket.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
             path: 'aula',
             name: 'Classroom',
             component: () =>

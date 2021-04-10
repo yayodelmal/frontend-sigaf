@@ -31,7 +31,8 @@ export default {
         return {
           id: properties.id,
           ticket: properties.ticket,
-          user: properties.user
+          user: properties.user,
+          createdAt: properties.createdAt
         }
       })
     },
