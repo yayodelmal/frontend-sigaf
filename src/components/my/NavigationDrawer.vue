@@ -141,7 +141,7 @@ export default {
           name: 'Estadística',
           icon: 'mdi-view-dashboard',
           to: { name: 'Dashboard' },
-          privileges: ['Administrador', 'Developer']
+          privileges: ['Administrador', 'Developer', 'Operador']
         },
         {
           name: 'Seguimiento',
@@ -162,6 +162,11 @@ export default {
           icon: 'mdi-hammer-wrench',
           privileges: ['Administrador', 'Developer'],
           links: [
+            {
+              name: 'Tickets bloqueados',
+              to: { name: 'BlockingTicket' },
+              privileges: ['Administrador', 'Developer']
+            },
             {
               name: 'Aula',
               to: { name: 'Classroom' },
