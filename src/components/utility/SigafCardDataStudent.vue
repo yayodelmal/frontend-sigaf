@@ -60,11 +60,11 @@
                 :key="section.id"
                 class="d-flex flex-row"
               >
-                <div class="px-3 py-2 title-section">
+                <div class="pl-2 py-1 title-section">
                   <h6 class="text-overline">{{ section.description }}:</h6>
                 </div>
                 <div
-                  class="px-1 py-2"
+                  class="mr-1 mt-2 justify-space-between"
                   v-for="grade in getGrades(section, user.activities)"
                   :key="grade.idActivityMoodle"
                 >
@@ -72,7 +72,8 @@
                     <template v-slot:activator="{ on }">
                       <h4 v-on="on">
                         <kbd>{{
-                          grade.qualificationMoodle === ''
+                          grade.qualificationMoodle === '' ||
+                          grade.qualificationMoodle === '-'
                             ? 'S/I'
                             : grade.qualificationMoodle
                         }}</kbd>
@@ -128,10 +129,8 @@ export default {
     getGrades(section, activities) {
       if (activities && section) {
         if (typeof activities[section.id] !== 'undefined') {
-          console.log('undefined', section.id)
-          console.log(activities[section.id])
           return activities[section.id].filter(activity => {
-            return activity.qualificationMoodle !== '-'
+            return activity
           })
         }
       }
@@ -165,12 +164,38 @@ export default {
     ...mapGetters({
       sections: 'section/sections'
     }),
+    formA() {
+      const rut = this.user.registered_user.rut
+      const split = rut.split('-')
+
+      return split[1] % 2 === 0
+    },
+    formB() {
+      const rut = this.user.registered_user.rut
+      const split = rut.split('-')
+
+      return split[1] % 2 !== 0 || split[1] === 'K'
+    },
     sectionFiltered() {
-      return this.sections.filter(
-        section =>
-          section.description !== 'Formativa' &&
-          section.description !== 'Renuncia'
-      )
+      return this.sections.filter(section => {
+        if (this.formA) {
+          return (
+            section.description !== 'Formativa' &&
+            section.description !== 'Pre Test B' &&
+            section.description !== 'Post Test B' &&
+            section.description !== 'Unidad 5' &&
+            section.description !== 'Renuncia'
+          )
+        } else if (this.formB) {
+          return (
+            section.description !== 'Formativa' &&
+            section.description !== 'Pre Test A' &&
+            section.description !== 'Post Test A' &&
+            section.description !== 'Unidad 5' &&
+            section.description !== 'Renuncia'
+          )
+        }
+      })
     }
   }
 }
@@ -187,7 +212,7 @@ export default {
   width: 100%;
 }
 .title-section {
-  width: 100px;
+  width: 140px;
   text-align: left;
 }
 </style>
