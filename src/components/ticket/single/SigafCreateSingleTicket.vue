@@ -127,9 +127,12 @@
               <v-card elevation="0" tile class="mx-2 my-2">
                 <v-row class="bg-gray lighten-4">
                   <v-col
-                    class="d-flex text-center"
-                    cols="4"
-                    v-if="user.fullname"
+                    cols="12"
+                    md="5"
+                    xl="4"
+                    lg="4"
+                    sm="12"
+                    class="d-flex justify-center align-center"
                   >
                     <sigaf-container-card
                       @showEditForm="editUserForm = !editUserForm"
@@ -287,6 +290,7 @@
                       color="blueS"
                       depressed
                       @click="saveTicket()"
+                      :loading="loadingCreateTicket"
                     >
                       Guardar
                       <v-icon class="ml-3">mdi-arrow-right-bold-circle</v-icon>
@@ -400,7 +404,8 @@ export default {
     subject: '',
     text: '',
     CCRecipient: '',
-    editUserForm: false
+    editUserForm: false,
+    loadingCreateTicket: false
   }),
   created() {
     this.fetchSections()
@@ -644,6 +649,7 @@ export default {
     },
     async saveTicket() {
       this.sender = true
+      this.loadingCreateTicket = true
       this.rulesValueStepTwo = true
       this.checkValidStepTwo = true
 
@@ -732,6 +738,7 @@ export default {
           type: 'success',
           message: 'El ticket se ha creado correctamente.'
         })
+        this.loadingCreateTicket = false
         this.clearTicket()
       } else {
         this.$emit('showSnackbar', {
@@ -742,6 +749,7 @@ export default {
         setTimeout(() => {
           this.$v.validationGroup.editedTicketItem.$reset()
           this.$v.validationGroup.editedDetailTicketItem.$reset()
+          this.loadingCreateTicket = false
         }, 3000)
       }
     },
