@@ -366,7 +366,7 @@ export default {
           section.description !== 'Post Test A' &&
           section.description !== 'Post Test B' &&
           section.description !== 'Unidad 5' &&
-          section.description !== 'Encuesta satisfacción'
+          section.description !== 'Encuesta'
       )
     },
     arrayCourseByCategory() {
@@ -612,7 +612,7 @@ export default {
                 'Pre Test B',
                 'Post Test A',
                 'Post Test B',
-                'Encuesta satisfacción'
+                'Encuesta'
               ]
               return !filterSection.includes(section.description)
             })

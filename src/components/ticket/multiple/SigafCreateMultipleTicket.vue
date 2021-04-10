@@ -207,12 +207,16 @@
                             type="table-tfoot"
                           ></v-skeleton-loader>
                         </div>
-                        <table-user
-                          v-else
-                          v-model="selectedUsers"
-                          :items="filteredUser"
-                          :search="searchMassiveTicket"
-                        ></table-user>
+                        <div v-else>
+                          <span class="subtitle ml-3 font-weight-bold"
+                            >Seleccionados: {{ selectedUsers.length }}</span
+                          >
+                          <table-user
+                            v-model="selectedUsers"
+                            :items="filteredUser"
+                            :search="searchMassiveTicket"
+                          ></table-user>
+                        </div>
                       </v-card>
                     </v-col>
                   </v-row>

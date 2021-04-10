@@ -93,7 +93,7 @@ export const mapUser = (user, sections) => {
           'Pre Test B',
           'Post Test A',
           'Post Test B',
-          'Encuesta satisfacción'
+          'Encuesta'
         ]
         return !filterSection.includes(section.description)
       })
