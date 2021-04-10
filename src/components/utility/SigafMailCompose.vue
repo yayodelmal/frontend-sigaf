@@ -130,6 +130,7 @@
               </v-col>
               <v-col cols="4">
                 <v-btn
+                  :loading="loadingFile"
                   block
                   color="blueS"
                   dark
@@ -168,7 +169,8 @@ export default {
     duration: 1000,
     offset: 300,
     filesUploadedRef: null,
-    CCRecipient: ''
+    CCRecipient: '',
+    loadingFile: false
   }),
   mounted() {},
   watch: {
@@ -201,6 +203,7 @@ export default {
       deleteFileEmail: 'ticket/deleteFileEmail'
     }),
     async handleUploadFile() {
+      this.loadingFile = true
       const uploadedFile = await this.uploadFileEmail({ file: this.file })
 
       /**
@@ -213,6 +216,7 @@ export default {
 
       this.uploadedFiles.push(uploadedFile)
       this.file = null
+      this.loadingFile = false
     },
     async handleDeleteFile(file) {
       const deleteFile = await this.deleteFileEmail({ name: file.name })
