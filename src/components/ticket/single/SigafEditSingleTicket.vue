@@ -326,6 +326,7 @@
                       :dark="!ticketClose"
                       :disabled="ticketClose"
                       @click="editTicket"
+                      :loading="loadingEditingButton"
                     >
                       Guardar
                       <v-icon class="ml-3">mdi-arrow-right-bold-circle</v-icon>
@@ -443,7 +444,8 @@ export default {
       text: '',
       files: [],
       CCRecipient: ''
-    }
+    },
+    loadingEditingButton: false
   }),
   watch: {
     ticket() {
@@ -642,6 +644,7 @@ export default {
       }
     },
     async editTicket() {
+      this.loadingEditingButton = true
       this.rulesValueStepThree = true
       this.checkValidStepThree = true
       this.sender = true
@@ -683,7 +686,7 @@ export default {
           const { _data } = await this.findTicket(this.editedTicketItem)
           this.PUT_TICKET(_data)
 
-          if (this.isEmailActivated) {
+          if (this.isEmailActivated && this.activateEmail) {
             this.emailData = Object.assign(this.emailData, {
               ticketId: this.editedTicketItem.id
             })
@@ -696,6 +699,7 @@ export default {
             type: 'success',
             message: 'El ticket se ha editado correctamente.'
           })
+          this.loadingEditingButton = false
         }
       } else {
         this.$emit('showSnackbar', {
@@ -705,6 +709,7 @@ export default {
 
         setTimeout(() => {
           this.$v.validationGroup.editedDetailTicketItem.$reset()
+          this.loadingEditingButton = false
         }, 3000)
       }
     },
