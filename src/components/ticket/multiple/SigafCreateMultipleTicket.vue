@@ -558,6 +558,10 @@ export default {
     await this.fetchCourses()
   },
   watch: {
+    selectedUsers(value) {
+      console.log(value)
+      console.log(this.selectedUsers)
+    },
     selectedActivities(value) {
       this.userRegisteredFiltered = []
       this.preTestA = false
@@ -774,23 +778,33 @@ export default {
       return
     },
     filterQuitUser(userActivities) {
-      if (userActivities.length === 0) return
-      const filterActivity = userActivities.filter(activity => {
-        return activity.activity.section.description !== 'Renuncia'
-      })
-
-      return filterActivity.length !== 0
+      if (userActivities.length !== 0) {
+        let flag = true
+        userActivities.forEach(activity => {
+          if (
+            activity.activity.section.description === 'Renuncia' &&
+            (activity.status_moodle === 'Finalizado' ||
+              activity.status_moodle === 'En curso')
+          ) {
+            console.log(flag)
+            flag = false
+          }
+        })
+        return flag
+      } else {
+        return false
+      }
     },
     filterNeverUser(user) {
       if (this.never) return user.last_access_registered_moodle === 'Nunca'
-      return user
+      return true
     },
     filterClassrooms(user) {
       const classroomIds = this.selectedClassrooms.map(
         classroom => classroom.id
       )
-      if (classroomIds.length === 0) return user
-      else if (classroomIds.includes(user.classroom.id)) return user
+      if (classroomIds.length === 0) return true
+      else if (classroomIds.includes(user.classroom.id)) return true
     },
     async findUserByActivityFiltered() {
       this.loading = true

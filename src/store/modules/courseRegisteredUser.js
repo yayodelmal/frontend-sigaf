@@ -257,15 +257,15 @@ export default {
       const id = course.id
 
       if (course.idCourseMoodle !== null) {
-        const URL = `${BASE_URL}/${id}/users`
+        const URL = `${BASE_URL}/${id}/users/all`
         try {
           const { data } = await axios.get(URL)
 
           if (data.success) {
-            commit('SET_COURSE_REGISTERED_USERS', data._data.data)
+            commit('SET_COURSE_REGISTERED_USERS', data._data)
             commit('SET_STORE_USERS_BY_COURSE', {
               id: id,
-              collection: data._data.data
+              collection: data._data
             })
             return data
           } else {
