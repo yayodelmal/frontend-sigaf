@@ -163,8 +163,13 @@ export default {
           privileges: ['Administrador', 'Developer'],
           links: [
             {
-              name: 'Tickets bloqueados',
+              name: 'Desbloqueo ticket',
               to: { name: 'BlockingTicket' },
+              privileges: ['Administrador', 'Developer']
+            },
+            {
+              name: 'Administración ticket',
+              to: { name: 'ManageTicket' },
               privileges: ['Administrador', 'Developer']
             },
             {
