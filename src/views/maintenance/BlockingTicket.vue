@@ -4,7 +4,7 @@
       color="blueS"
       class="px-5 py-3"
       icon="mdi-message-text-lock-outline"
-      title="Ticket bloqueados"
+      title="Desbloqueo ticket"
     >
       <sigaf-skeleton-loader
         v-if="loading"

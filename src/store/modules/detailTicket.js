@@ -36,6 +36,30 @@ export default {
         return { success, error, message }
       }
     },
+    deleteDetailTicket: async (_, detailTicket) => {
+      try {
+        const { status, data } = await axios.delete(
+          `${BASE_URL}/${detailTicket.id}`
+        )
+
+        if (status === 200) {
+          const { success, message } = data
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
 
     postMassiveDetailTicket: async (_, detailTicket) => {
       try {

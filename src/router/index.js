@@ -52,7 +52,16 @@ const routes = [
         meta: { requiresAuth: true },
         children: [
           {
-            path: 'ticket-bloqueados',
+            path: 'administracion-ticket',
+            name: 'ManageTicket',
+            component: () =>
+              import(
+                /* webpackChunkName: "Aula" */ '../views/maintenance/ManageTicket.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            path: 'desbloqueo-ticket',
             name: 'BlockingTicket',
             component: () =>
               import(

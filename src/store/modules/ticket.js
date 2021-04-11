@@ -7,7 +7,8 @@ export default {
   state: {
     tickets: [],
     ticket: null,
-    ticketDetails: []
+    ticketDetails: [],
+    manageTickets: []
   },
   mutations: {
     SET_TICKETS: (state, tickets) => {
@@ -15,6 +16,9 @@ export default {
     },
     SET_TICKET: (state, ticket) => {
       state.ticket = ticket
+    },
+    SET_MANAGE_TICKET: (state, ticket) => {
+      state.manageTickets = ticket
     },
     SET_TICKET_DETAILS: (state, ticketDetails) => {
       state.ticketDetails = ticketDetails
@@ -26,7 +30,9 @@ export default {
       const editedIndex = state.tickets.findIndex(
         find => find.properties.id === ticket.properties.id
       )
-      Object.assign(state.tickets[editedIndex], ticket)
+      if (editedIndex !== -1) {
+        Object.assign(state.tickets[editedIndex], ticket)
+      }
     },
     DELETE_TICKET: (state, ticket) => {
       const editedIndex = state.tickets.findIndex(find => {
@@ -124,7 +130,8 @@ export default {
         accumulator[key].push(object)
         return accumulator
       }, {})
-    }
+    },
+    getManageTicket: state => state.manageTickets
   },
   actions: {
     fetchTicketDetails: async ({ commit }, ticket) => {
@@ -185,6 +192,53 @@ export default {
         return { success, error, message }
       }
     },
+    findTicketByCode: async ({ commit }, code) => {
+      commit('SET_MANAGE_TICKET', [])
+      const response = await axios.get(`${BASE_URL}/code/${code}`)
+
+      const { _data, success, error, message } = response.data
+
+      if (success) {
+        commit('SET_MANAGE_TICKET', _data)
+
+        return { success, error, message, _data }
+      } else {
+        console.log(error)
+        return { success, error, message }
+      }
+    },
+    findTicketByOperator: async ({ commit }, operator) => {
+      commit('SET_MANAGE_TICKET', [])
+      const response = await axios.get(`${BASE_URL}/operator/${operator}`)
+
+      const { _data, success, error, message } = response.data
+
+      if (success) {
+        commit('SET_MANAGE_TICKET', _data)
+
+        return { success, error, message, _data }
+      } else {
+        console.log(error)
+        return { success, error, message }
+      }
+    },
+    findTicketByRangeOfDates: async ({ commit }, rangeOfDates) => {
+      commit('SET_MANAGE_TICKET', [])
+      const response = await axios.get(
+        `${BASE_URL}/dates/${rangeOfDates[0]}/${rangeOfDates[1]}`
+      )
+
+      const { _data, success, error, message } = response.data
+
+      if (success) {
+        commit('SET_MANAGE_TICKET', _data)
+
+        return { success, error, message, _data }
+      } else {
+        console.log(error)
+        return { success, error, message }
+      }
+    },
     fetchTickets: async ({ commit }) => {
       const response = await axios.get(BASE_URL)
 
@@ -215,7 +269,7 @@ export default {
             console.log(error)
           }
 
-          return { success, message }
+          return { success, message, _data }
         } else {
           return {
             success: data.success,
@@ -223,9 +277,9 @@ export default {
           }
         }
       } catch (error) {
-        const { data } = error.response
+        console.log(error)
         return {
-          success: data.success,
+          success: false,
           error: 'Error grave. Contacte al Administrador.'
         }
       }
