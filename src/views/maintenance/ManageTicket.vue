@@ -102,13 +102,16 @@
         :loading="loading"
       ></sigaf-skeleton-loader>
       <v-data-table
+        v-else
+        item-key="properties.id"
+        v-model="selected"
         :search="search"
         :headers="headers"
         :items="manageTickets.collections"
         :items-per-page="10"
-        :loading="loading"
         class="elevation-1"
         loading-text="Cargando... por favor espere"
+        show-select
       >
         <template v-slot:progress>
           <v-progress-linear
@@ -132,6 +135,17 @@
                   label="Buscar"
                 ></v-text-field>
               </v-col>
+              <v-spacer />
+              <v-col cols="2" class="d-flex">
+                <v-btn
+                  class="ml-auto"
+                  large
+                  color="blueS"
+                  v-if="selected.length > 0"
+                  @click="deleteItem"
+                  >Eliminar</v-btn
+                >
+              </v-col>
             </v-row>
           </v-toolbar>
         </template>
@@ -145,16 +159,6 @@
               </v-btn>
             </template>
             <span>Editar</span>
-          </v-tooltip>
-          <v-tooltip color="blueS" bottom>
-            <template v-slot:activator="{ on }">
-              <v-btn icon text v-on="on">
-                <v-icon @click.prevent="deleteItem(item)">
-                  mdi-delete
-                </v-icon>
-              </v-btn>
-            </template>
-            <span>Eliminar</span>
           </v-tooltip>
         </template>
       </v-data-table>
@@ -181,7 +185,7 @@
     >
       <template v-slot:content>
         <h3 class="text-body-1">
-          Eliminará un registro de forma permanente
+          Se eliminarán registros de forma permanente
         </h3>
       </template>
     </confirm-dialog>
@@ -228,8 +232,8 @@ export default {
         class: HEADER_CLASS
       },
       {
-        text: 'Motivo',
-        value: 'properties.motiveTicket.description',
+        text: 'Fecha creación',
+        value: 'properties.createdAt',
         class: HEADER_CLASS
       },
       {
@@ -238,18 +242,18 @@ export default {
         class: HEADER_CLASS
       },
       {
-        text: 'Tipo',
-        value: 'properties.typeTicket.description',
-        class: HEADER_CLASS
-      },
-      {
         text: 'Estado',
         value: 'properties.statusTicket.description',
         class: HEADER_CLASS
       },
       {
-        text: 'Fecha creación',
-        value: 'properties.createdAt',
+        text: 'Tipo',
+        value: 'properties.typeTicket.description',
+        class: HEADER_CLASS
+      },
+      {
+        text: 'Motivo',
+        value: 'properties.motiveTicket.description',
         class: HEADER_CLASS
       },
       {
@@ -283,11 +287,11 @@ export default {
     editedTicketIndex: -1,
     editedTicketItem: {},
     defaultTicketItem: {},
-    showModalEditTicket: false
+    showModalEditTicket: false,
+    selected: []
   }),
   computed: {
     ...mapGetters({
-      items: 'motiveTicket/motiveTickets',
       manageTickets: 'ticket/getManageTicket'
     }),
     dateRangeText() {
@@ -320,15 +324,7 @@ export default {
       return this.editedItem.description
     }
   },
-  async created() {
-    this.loading = true
-    if (this.items.length === 0) {
-      const { success } = await this.fetchItems()
-      this.loading = !success
-    } else {
-      this.loading = false
-    }
-  },
+
   methods: {
     ...mapActions({
       fetchItems: 'motiveTicket/fetchMotiveTickets',
@@ -336,26 +332,28 @@ export default {
       fetchManageTicketByCode: 'ticket/findTicketByCode',
       fetchManageTicketsByRangeOfDates: 'ticket/findTicketByRangeOfDates',
       fetchManageTicketByOperator: 'ticket/findTicketByOperator',
-      removeTicket: 'ticket/deleteTicket'
+      removeTickets: 'ticket/deleteMultipleTicket'
     }),
     async handleFindByCode() {
+      this.loading = true
       this.loadingCode = true
-      const response = await this.fetchManageTicketByCode(this.searchByCode)
+      await this.fetchManageTicketByCode(this.searchByCode)
       this.loadingCode = false
-      console.log(response)
+      this.loading = false
     },
     async handleFindByRangeOfDates() {
       this.loadingDates = true
-      const response = await this.fetchManageTicketsByRangeOfDates(this.dates)
+      this.loading = true
+      await this.fetchManageTicketsByRangeOfDates(this.dates)
       this.loadingDates = false
-      console.log(response)
+      this.loading = false
     },
     async handleFindByOperator() {
       this.loadingOperator = true
-      console.log(this.operator)
-      const response = await this.fetchManageTicketByOperator(this.operator.id)
+      this.loading = true
+      await this.fetchManageTicketByOperator(this.operator.id)
       this.loadingOperator = false
-      console.log(response)
+      this.loading = false
     },
     createItem() {
       this.dialog = true
@@ -381,22 +379,27 @@ export default {
         this.modalEditTicket = true
       }, 200)
     },
-    deleteItem(item) {
-      console.log(item)
-      this.editedTicketIndex = this.manageTickets.collections.indexOf(item)
+    deleteItem() {
+      this.dialogConfirm = true
+      /*      this.editedTicketIndex = this.manageTickets.collections.indexOf(item)
       setTimeout(() => {
         this.editedTicketItem = Object.assign({}, item)
-        this.dialogConfirm = true
-      }, 200)
+      }, 200) */
     },
     async confirmDeleteTicket() {
-      const { success } = await this.removeTicket(
-        this.editedTicketItem.properties
-      )
+      const ticketIds = this.selected.map(ticket => {
+        return ticket.properties.id
+      })
+      const { success } = await this.removeTickets(ticketIds)
 
       if (success) {
-        this.responseSuccessMessage()
-        this.manageTickets.collections.splice(this.editedTicketIndex, 1)
+        this.selected.forEach(ticket => {
+          this.editedTicketIndex = this.manageTickets.collections.indexOf(
+            ticket
+          )
+          this.manageTickets.collections.splice(this.editedTicketIndex, 1)
+        })
+        this.selected = []
       } else {
         this.resposeErrorMessage()
       }

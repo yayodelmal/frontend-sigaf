@@ -333,6 +333,31 @@ export default {
         }
       }
     },
+    deleteMultipleTicket: async (_, tickets) => {
+      try {
+        let ids = JSON.stringify(tickets)
+        const { status, data } = await axios.delete(
+          `${BASE_URL}/multiple/${ids}`
+        )
+
+        if (status === 200) {
+          const { success, message } = data
+
+          return { success, message }
+        } else {
+          return {
+            success: data.success,
+            error: 'No se ha podido realizar la operación'
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          error: 'Error grave. Contacte al Administrador.'
+        }
+      }
+    },
     clearDetailTickets: ({ commit }) => {
       commit('SET_TICKET_DETAILS', [])
     },
