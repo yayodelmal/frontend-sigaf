@@ -1,5 +1,5 @@
 <template>
-  <div v-if="user" class="d-flex text-center py-4">
+  <div v-if="user.rut" class="d-flex text-center py-4">
     <v-hover v-slot:default="{ hover }" open-delay="200">
       <v-card
         :color="backgroundColor ? 'white' : getColorCard(user.state)"
@@ -52,7 +52,7 @@
           <div
             v-if="hover"
             class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
-            style="height: 75%;"
+            style="height: 79%;"
           >
             <div class="d-flex flex-column">
               <div
@@ -71,12 +71,10 @@
                   <v-tooltip color="white" bottom>
                     <template v-slot:activator="{ on }">
                       <h4 v-on="on">
-                        <kbd>{{
-                          grade.qualificationMoodle === '' ||
-                          grade.qualificationMoodle === '-'
-                            ? 'S/I'
-                            : grade.qualificationMoodle
-                        }}</kbd>
+                        <kbd
+                          style="width: 40px; display: inline-block;"
+                          v-html="parseGrade(grade)"
+                        ></kbd>
                       </h4>
                     </template>
                     <span class="blueS--text darken-2">{{
@@ -123,6 +121,54 @@ export default {
     backgroundColor: Boolean
   },
   methods: {
+    parseGrade(grade) {
+      const DONE = `R`
+      const UNREALIZED = `N/R`
+      const list = ['Pre Test A', 'Pre Test B', 'Post Test A', 'Post Test B']
+      switch (grade.type) {
+        case 'Tareas':
+          if (grade.statusMoodle === 'Sin entrega') {
+            return UNREALIZED
+          } else if (grade.statusMoodle === 'Enviado para calificar') {
+            return DONE
+          } else {
+            return grade.qualificationMoodle
+          }
+        case 'Foros':
+          if (grade.statusMoodle === 'No') {
+            return UNREALIZED
+          } else if (
+            grade.qualificationMoodle === '-' ||
+            grade.qualificationMoodle === ''
+          ) {
+            return DONE
+          } else {
+            return grade.qualificationMoodle
+          }
+        case 'Cuestionarios':
+          if (
+            list.includes(grade.section) &&
+            grade.statusMoodle === 'Finalizado'
+          ) {
+            return DONE
+          } else if (
+            list.includes(grade.section) &&
+            grade.statusMoodle !== 'Finalizado'
+          ) {
+            return UNREALIZED
+          } else {
+            return grade.qualificationMoodle
+          }
+        case 'Encuestas':
+          if (grade.statusMoodle !== '') {
+            return DONE
+          } else {
+            return UNREALIZED
+          }
+        default:
+          return 'Error'
+      }
+    },
     getValueProgress(user) {
       return user.progress
     },
@@ -176,6 +222,7 @@ export default {
 
       return split[1] % 2 !== 0 || split[1] === 'K'
     },
+
     sectionFiltered() {
       return this.sections.filter(section => {
         if (this.formA) {
@@ -204,7 +251,7 @@ export default {
 <style scoped>
 .v-card--reveal {
   align-items: flex-start;
-  bottom: 25%;
+  bottom: 21%;
   padding: 0.2em;
   justify-content: left;
   opacity: 0.9;
@@ -212,7 +259,7 @@ export default {
   width: 100%;
 }
 .title-section {
-  width: 140px;
+  width: 110px;
   text-align: left;
 }
 </style>
