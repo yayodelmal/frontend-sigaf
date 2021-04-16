@@ -1,6 +1,6 @@
 <template>
   <base-autocomplete
-    :items="items"
+    :items="filterOperator"
     label="Operador"
     :value="value"
     item-value="id"
@@ -35,7 +35,12 @@ export default {
   computed: {
     ...mapGetters({
       items: 'user/users'
-    })
+    }),
+    filterOperator() {
+      return this.items.filter(item => {
+        return item.id !== 2
+      })
+    }
   }
 }
 </script>

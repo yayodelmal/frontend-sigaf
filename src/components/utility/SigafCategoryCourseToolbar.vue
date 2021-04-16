@@ -90,6 +90,7 @@ export default {
       }
       await this.getLastSyncDate(this.selectedCourse)
       this.$emit('selectedCourse', this.selectedCourse)
+      this.loadingButton = false
     }
   }
 }

@@ -26,7 +26,7 @@
               {{ getValueProgress(user) }}%
             </v-progress-circular>
           </v-avatar>
-          <h3 class="font-weight-bold mb-2">
+          <h3 v-if="source === 'Ticket'" class="font-weight-bold mb-2">
             {{ user.registered_user.rut }}
           </h3>
           <h3 class="title mb-2">
@@ -52,7 +52,7 @@
           <div
             v-if="hover"
             class="d-flex transition-fast-in-fast-out blueS darken-2 v-card--reveal white--text rounded-t-xl"
-            style="height: 79%;"
+            :style="tooltipCss"
           >
             <div class="d-flex flex-column">
               <div
@@ -88,6 +88,11 @@
         </v-expand-transition>
         <v-divider class="mb-3"></v-divider>
         <v-row class="text-center">
+          <v-col v-if="source === 'FollowUp'" class="mb-n6" cols="12">
+            <h3 class="font-weight-bold mb-2">
+              {{ user.registered_user.rut }}
+            </h3>
+          </v-col>
           <v-col cols="6" class="mx-auto">
             <v-card :color="getColorState(user.state)" flat dark class="py-1"
               ><span>
@@ -95,7 +100,7 @@
               </span></v-card
             >
           </v-col>
-          <v-col cols="12" class="mb-2">
+          <v-col cla cols="12" class="mb-2">
             <span class="font-weight-bold">
               <v-icon class="mr-2">
                 mdi-clock
@@ -118,7 +123,11 @@ export default {
     user: {
       type: Object
     },
-    backgroundColor: Boolean
+    backgroundColor: Boolean,
+    source: {
+      type: String,
+      default: () => 'Ticket'
+    }
   },
   methods: {
     parseGrade(grade) {
@@ -210,6 +219,21 @@ export default {
     ...mapGetters({
       sections: 'section/sections'
     }),
+    tooltipCss() {
+      if (this.source === 'Ticket') {
+        return {
+          height: '79%',
+          bottom: '21%'
+        }
+      } else if (this.source === 'FollowUp') {
+        return {
+          height: '71%',
+          bottom: '29%'
+        }
+      } else {
+        return {}
+      }
+    },
     formA() {
       const rut = this.user.registered_user.rut
       const split = rut.split('-')
@@ -251,7 +275,6 @@ export default {
 <style scoped>
 .v-card--reveal {
   align-items: flex-start;
-  bottom: 21%;
   padding: 0.2em;
   justify-content: left;
   opacity: 0.9;
