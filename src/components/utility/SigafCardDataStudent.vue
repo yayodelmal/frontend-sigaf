@@ -205,9 +205,9 @@ export default {
     getColorCard(state) {
       switch (state) {
         case 'RENUNCIADO':
-          return 'warning lighten-5'
+          return 'grey lighten-4'
         case 'RENUNCIA EN CURSO':
-          return 'warning lighten-5'
+          return 'grey lighten-4'
         case 'Sin actividades sincronizadas':
           return 'grey lighten-4'
         default:
