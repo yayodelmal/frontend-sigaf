@@ -741,6 +741,7 @@ export default {
         .filter(user => this.filterQuitUser(user.activity_course_users))
         .filter(user => this.filterClassrooms(user))
         .filter(user => this.filterNeverUser(user))
+        .filter(user => this.filterStudent(user))
     },
     currentClassrooms() {
       return this.classroomItems.filter(classroom =>
@@ -798,6 +799,9 @@ export default {
     filterNeverUser(user) {
       if (this.never) return user.last_access_registered_moodle === 'Nunca'
       return true
+    },
+    filterStudent(user) {
+      return user.profile.description === 'Estudiante'
     },
     filterClassrooms(user) {
       const classroomIds = this.selectedClassrooms.map(
