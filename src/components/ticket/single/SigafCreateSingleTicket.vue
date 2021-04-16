@@ -303,6 +303,7 @@
         </v-stepper>
       </v-card-text>
     </v-card>
+    <sigaf-snackbar v-model="snackbar" v-bind="configSnack" />
   </v-dialog>
 </template>
 
@@ -326,6 +327,7 @@ import SigafMailCompose from '../../utility/SigafMailCompose.vue'
 import STableTicketHistorical from '../STableTicketHistorical.vue'
 import SigafContainerCard from '../../utility/SigafContainerCard.vue'
 import SEditUserForm from '../../utility/SEditUserForm.vue'
+import SigafSnackbar from '../../component/Snackbar.vue'
 
 export default {
   components: {
@@ -340,7 +342,8 @@ export default {
     SigafMailCompose,
     STableTicketHistorical,
     SigafContainerCard,
-    SEditUserForm
+    SEditUserForm,
+    SigafSnackbar
   },
   mixins: [validationMixin],
   validations: {
@@ -405,7 +408,13 @@ export default {
     text: '',
     CCRecipient: '',
     editUserForm: false,
-    loadingCreateTicket: false
+    loadingCreateTicket: false,
+    configSnack: {
+      type: '',
+      active: false,
+      message: ''
+    },
+    snackbar: false
   }),
   created() {
     this.fetchSections()
@@ -598,20 +607,26 @@ export default {
         fullname: '',
         mobile: ''
       }
-      const vm = this
+
       setTimeout(async () => {
-        const {
-          _data,
-          statusCode,
-          message
-        } = await this.findRegisteredUserByRut(this.rut)
+        const { _data, statusCode } = await this.findRegisteredUserByRut(
+          this.rut
+        )
 
         if (statusCode === 204) {
-          vm.snackbar = true
-          vm.message = message
+          this.snackbar = true
+          this.configSnack = {
+            type: 'warning',
+            active: true,
+            message: 'El alumnno no se encuentra registrado.'
+          }
         } else if (statusCode === 406) {
-          vm.snackbar = true
-          vm.message = message
+          this.snackbar = true
+          this.configSnack = {
+            type: 'error',
+            active: true,
+            message: 'El RUT no es válido.'
+          }
         } else if (statusCode === 200) {
           if (_data !== null) {
             const payload = {
@@ -620,24 +635,40 @@ export default {
             }
 
             const response = await this.findSpecificUserCourse(payload)
+            if (response._data) {
+              const userCreated = response._data
 
-            const userCreated = response._data
+              if (userCreated.is_sincronized === 0) {
+                this.$emit('showSnackbar', {
+                  type: 'warning',
+                  message: 'El alumnno no se encuentra registrado.'
+                })
+              } else {
+                this.editedTicketItem.courseRegisteredUser = Object.assign(
+                  {},
+                  userCreated
+                )
 
-            if (userCreated.is_sincronized === 0) {
-              vm.snackbar = true
-              vm.message = 'El estudiante no se encuentra registrado'
+                this.user = Object.assign(
+                  {},
+                  mapUser(userCreated, this.sections)
+                )
+              }
             } else {
-              this.editedTicketItem.courseRegisteredUser = Object.assign(
-                {},
-                userCreated
-              )
-
-              this.user = Object.assign({}, mapUser(userCreated, this.sections))
-              console.log('user', this.user)
+              this.snackbar = true
+              this.configSnack = {
+                type: 'warning',
+                active: true,
+                message: 'El alumnno no pertenece a este curso.'
+              }
             }
           } else {
-            vm.snackbar = true
-            vm.message = 'El estudiantes no se encuentra registrado'
+            this.snackbar = true
+            this.configSnack = {
+              type: 'warning',
+              active: true,
+              message: 'El alumnno no pertenece a este curso.'
+            }
           }
         }
         this.searchRutLoading = false

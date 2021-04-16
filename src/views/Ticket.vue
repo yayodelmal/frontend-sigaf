@@ -27,7 +27,7 @@
               label="Buscar"
             ></v-text-field>
             <v-divider class="mx-4" vertical></v-divider>
-            <div class="d-flex flex-column">
+            <!--          <div class="d-flex flex-column">
               <v-checkbox
                 class="mt-5"
                 v-model="openTicket"
@@ -38,8 +38,8 @@
                 v-model="closeTicket"
                 label="Cerrado"
               ></v-checkbox>
-            </div>
-            <v-divider class="mx-4" vertical></v-divider>
+            </div> 
+            <v-divider class="mx-4" vertical></v-divider>-->
             <div class="d-none d-sm-flex">
               <v-btn
                 large
