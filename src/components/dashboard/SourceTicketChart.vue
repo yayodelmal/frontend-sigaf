@@ -3,21 +3,21 @@
     <figcaption>
       Origen Ticket
     </figcaption>
-    <pie-chart
+    <doughnut-chart
       v-if="loaded"
       :style="classHeight"
       :chart-data="chartData"
       :options="options"
-    ></pie-chart>
+    ></doughnut-chart>
   </figure>
 </template>
 
 <script>
 import { mapActions } from 'vuex'
-import PieChart from '../chart/PieChart'
+import DoughnutChart from '../chart/DoughnutChart'
 export default {
   components: {
-    PieChart
+    DoughnutChart
   },
   data: () => ({
     chartData: {},
@@ -45,15 +45,14 @@ export default {
         this.loaded = false
         const { chartData } = await this.getSourcePieChart(2)
 
-        console.log('chartData ', chartData)
-
         this.chartData = chartData
         this.options = {
           responsive: true,
           maintainAspectRatio: false,
           layout: { padding: { right: 10 } },
           legend: {
-            display: true
+            display: true,
+            position: 'bottom'
           }
         }
 
