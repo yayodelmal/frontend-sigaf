@@ -14,20 +14,6 @@
         </h3>
       </div>
     </template>
-
-    <v-col cols="12" class="px-0">
-      <v-divider />
-    </v-col>
-
-    <v-icon :color="subIconColor" size="16" class="ml-2 mr-1">
-      {{ subIcon }}
-    </v-icon>
-
-    <span
-      :class="subTextColor"
-      class="caption grey--text font-weight-light"
-      v-text="subText"
-    />
   </base-material-card>
 </template>
 
@@ -66,7 +52,7 @@ export default {
       default: undefined
     },
     value: {
-      type: Number,
+      type: String,
       default: undefined
     },
     smallValue: {

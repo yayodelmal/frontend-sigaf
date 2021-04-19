@@ -1,9 +1,9 @@
 <template>
   <horizontal-bar-chart
-    style="height: 200px; width: 600px; position:relative;"
     v-if="loaded"
     :chart-data="chartData"
     :options="options"
+    :style="classHeight"
   ></horizontal-bar-chart>
 </template>
 
@@ -25,11 +25,10 @@ export default {
   },
   async mounted() {
     await this.getChartStatusTicketbyOperator()
-    console.log(this.$ref.canvas)
   },
   computed: {
     classHeight() {
-      return `height: 200px;`
+      return `height: ${this.height}px;`
     }
   },
   methods: {
