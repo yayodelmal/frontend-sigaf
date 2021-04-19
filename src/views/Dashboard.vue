@@ -7,33 +7,19 @@
   >
     <v-row>
       <v-col cols="12">
-        <v-toolbar dark color="blueS darken-1" class="mb-1">
-          <v-select
-            v-model="category"
-            :items="categoryItems"
-            label="Curso"
-            item-value="id"
-            item-text="description"
-            color="blueS"
-            flat
-            solo-inverted
-            hide-details
-            return-object
-            prepend-inner-icon="mdi-filter-outline"
-          >
-          </v-select>
-        </v-toolbar>
+        <sigaf-category-course-toolbar
+          @selectedCourse="selectedCourse = $event"
+          source="Dashboard"
+        />
       </v-col>
     </v-row>
-    <v-row v-if="loaded">
+    <v-row v-if="selectedCourse">
       <v-col cols="12" sm="6" md="6" lg="3">
         <base-material-stats-card
           color="info"
           icon="mdi-view-dashboard"
           title="Total tickets"
-          :value="totalTicket"
-          sub-icon="mdi-clock"
-          sub-text="Just Updated"
+          :value="'' + totalTicket"
         />
       </v-col>
       <v-col cols="12" sm="6" md="6" lg="3">
@@ -41,9 +27,7 @@
           color="warning"
           icon="mdi-view-dashboard"
           title="Nuevos tickets"
-          value="+24"
-          sub-icon="mdi-clock"
-          sub-text="Just Updated"
+          :value="'+' + lastDayTicket"
         />
       </v-col>
       <v-col cols="12" sm="6" md="6" lg="3">
@@ -51,9 +35,7 @@
           color="redS"
           icon="mdi-view-dashboard"
           title="Ticket abiertos"
-          value="45"
-          sub-icon="mdi-clock"
-          sub-text="Just Updated"
+          :value="'' + openTickets"
         />
       </v-col>
       <v-col cols="12" sm="6" md="6" lg="3">
@@ -61,115 +43,18 @@
           color="success"
           icon="mdi-view-dashboard"
           title="Ticket cerrados"
-          value="200"
-          sub-icon="mdi-clock"
-          sub-text="Just Updated"
+          :value="'' + closeTickets"
         />
       </v-col>
     </v-row>
-    <v-row v-if="loaded">
-      <v-col cols="12" sm="12" md="12" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-expand-transition>
-            <v-card class="d-flex flex-column text-center">
-              <div class="spacer-chart">
-                <v-btn>Actualizar</v-btn>
-              </div>
-              <v-card
-                color="white"
-                class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                :class="{ 'v-card--reveal': hover }"
-                width="95%"
-              >
-                <doughnut-chart
-                  v-if="loaded"
-                  :chartData="chartData"
-                  :options="options"
-                >
-                </doughnut-chart>
-              </v-card>
-              <div class="title font-weight-light margin-custom">
-                Estado Tickets
-              </div>
-            </v-card>
-          </v-expand-transition>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-expand-transition>
-            <v-card class="d-flex flex-column text-center">
-              <div class="spacer-chart">
-                <v-btn>Actualizar</v-btn>
-              </div>
-              <v-card
-                class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                color="white"
-                :class="{ 'v-card--reveal': hover }"
-                width="95%"
-              >
-                <bar-chart
-                  v-if="loaded"
-                  :chartData="chartDataBar"
-                  :options="optionsBar"
-                >
-                </bar-chart>
-              </v-card>
-              <div class="title font-weight-light margin-custom">
-                Estado Ticket por Operador
-              </div>
-            </v-card>
-          </v-expand-transition>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-expand-transition>
-            <v-card class="d-flex flex-column text-center">
-              <div class="spacer-chart">
-                <v-btn>Actualizar</v-btn>
-              </div>
-              <v-card
-                class="first v-sheet--offset transition-fast-in-fast-out mx-auto"
-                color="white"
-                :class="{ 'v-card--reveal': hover }"
-                width="95%"
-              >
-                <doughnut-chart
-                  v-if="loaded"
-                  :chartData="chartDataPriority"
-                  :options="optionsPriority"
-                >
-                </doughnut-chart>
-              </v-card>
-              <div class="title font-weight-light margin-custom">
-                Prioridad Ticket
-              </div>
-            </v-card>
-          </v-expand-transition>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="4">
+    <v-row no-gutters v-if="selectedCourse">
+      <v-col cols="12" sm="12" md="12" lg="3">
         <v-hover v-slot:default="{ hover }">
           <v-card
-            class="d-flex text-center"
-            color="white"
-            :elevation="hover ? '5' : '1'"
-            width="95%"
-          >
-            <v-card-text>
-              <source-ticket-chart :height="200" :render="true" />
-            </v-card-text>
-          </v-card>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center"
-            color="white"
-            :elevation="hover ? '5' : '1'"
-            width="95%"
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            outlined
           >
             <v-card-text>
               <priority-ticket-chart :height="200" :render="true" />
@@ -177,13 +62,32 @@
           </v-card>
         </v-hover>
       </v-col>
-      <v-col cols="12" sm="12" md="12" lg="4">
+      <v-col cols="12" sm="12" md="12" lg="6">
         <v-hover v-slot:default="{ hover }">
           <v-card
-            class="d-flex text-center"
-            color="white"
-            :elevation="hover ? '5' : '1'"
-            width="95%"
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            outlined
+          >
+            <v-card-text>
+              <base-polar-chart
+                :render="isLoadedTypeChart"
+                :chartData="motivePieChart"
+                title="Motivo de ticket"
+                :height="200"
+              />
+            </v-card-text>
+          </v-card>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="3">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            outlined
           >
             <v-card-text>
               <status-ticket-chart :height="200" :render="true" />
@@ -191,44 +95,137 @@
           </v-card>
         </v-hover>
       </v-col>
-      <v-col cols="12" sm="12" md="12" lg="8">
+
+      <v-col cols="12" sm="12" md="12" lg="6">
         <v-hover v-slot:default="{ hover }">
           <v-card
-            class="d-flex text-center"
-            color="white"
-            :elevation="hover ? '5' : '1'"
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            outlined
             max-height="300"
           >
             <v-card-text>
-              <status-ticket-by-user-chart :height="400" :render="true" />
+              <base-horizontal-bar-chart
+                :render="isLoadedStatusMotive"
+                :chartData="statusTicketByMotiveChart"
+                title="Estado por motivo"
+                :height="200"
+              />
+            </v-card-text> </v-card
+        ></v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="3">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            max-height="300"
+          >
+            <v-card-text>
+              <base-doughnut-chart
+                :render="isLoadedTypeChart"
+                :chartData="typePieChart"
+                title="Tipo de ticket"
+                :height="200"
+            /></v-card-text> </v-card
+        ></v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="3">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            max-height="300"
+          >
+            <v-card-text>
+              <source-ticket-chart :height="200" :render="true" />
+            </v-card-text> </v-card
+        ></v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="6">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            max-height="300"
+          >
+            <v-card-text>
+              <status-ticket-by-user-chart :height="200" :render="true" />
             </v-card-text>
           </v-card>
         </v-hover>
       </v-col>
+      <v-col cols="12" sm="12" md="12" lg="3">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            max-height="300"
+          >
+            <v-card-text>
+              <base-doughnut-chart
+                :render="isLoadedStatusUserChart"
+                :chartData="statusUserChart"
+                title="Estado alumnos"
+                :height="200"
+              />
+            </v-card-text> </v-card
+        ></v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="12" lg="3">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            max-height="300"
+          >
+            <v-card-text>
+              <base-doughnut-chart
+                :render="isLoadedTimeLoggedUserChart"
+                :chartData="timeLoggedUserChart"
+                title="Último acceso alumnos"
+                :height="200"
+              />
+            </v-card-text> </v-card
+        ></v-hover>
+      </v-col>
     </v-row>
+    <v-row v-if="loaded"> </v-row>
   </base-card>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import DoughnutChart from '../components/chart/DoughnutChart'
-import BarChart from '../components/chart/BarChart'
 import SourceTicketChart from '../components/dashboard/SourceTicketChart.vue'
 import PriorityTicketChart from '../components/dashboard/PriorityTicketChart.vue'
 import StatusTicketChart from '../components/dashboard/StatusTicketChart.vue'
 import StatusTicketByUserChart from '../components/dashboard/StatusTicketByUserChart.vue'
+import SigafCategoryCourseToolbar from '../components/utility/SigafCategoryCourseToolbar.vue'
+import BaseHorizontalBarChart from '../components/dashboard/base/BaseHorizontalBarChart.vue'
+import BaseDoughnutChart from '../components/dashboard/base/BaseDoughnutChart.vue'
+import BasePolarChart from '../components/dashboard/base/BasePolarChart.vue'
 
 export default {
   name: 'Dashboard',
   components: {
-    DoughnutChart,
-    BarChart,
     SourceTicketChart,
     PriorityTicketChart,
     StatusTicketChart,
-    StatusTicketByUserChart
+    StatusTicketByUserChart,
+    SigafCategoryCourseToolbar,
+    BaseHorizontalBarChart,
+    BaseDoughnutChart,
+    BasePolarChart
   },
   data: () => ({
+    selectedCourse: null,
+    motiveStatusChartData: null,
     loaded: false,
     category: null,
     chartData: {
@@ -328,6 +325,19 @@ export default {
       this.loaded = true
     })
   },
+  watch: {
+    async selectedCourse() {
+      await this.getLastDayTicket(this.selectedCourse.id)
+      await this.getOpenTicket(this.selectedCourse.id)
+      await this.getCloseTicket(this.selectedCourse.id)
+      await this.fetchTotalTicket(this.selectedCourse.id)
+      await this.getStatusTicketMotiveChart(this.selectedCourse.id)
+      await this.getTypePieChart(this.selectedCourse.id)
+      await this.getMotivePieChart(this.selectedCourse.id)
+      await this.getStatusUserChart(this.selectedCourse.id)
+      await this.getTimeLoggedUserChart(this.selectedCourse.id)
+    }
+  },
   computed: {
     ...mapGetters({
       ticketsByStatus: 'ticket/getStatusTicket',
@@ -338,7 +348,19 @@ export default {
       courseItems: 'course/courses',
       categoryItems: 'category/categories',
       courseByCategory: 'course/coursesByCategory',
-      totalTicket: 'dashboard/totalTicket'
+      totalTicket: 'dashboard/totalTicket',
+      lastDayTicket: 'dashboard/lastDayTicket',
+      openTickets: 'dashboard/openTickets',
+      closeTickets: 'dashboard/closeTickets',
+      statusTicketByMotiveChart: 'dashboard/statusTicketByMotiveChart',
+      isLoadedStatusMotive: 'dashboard/isLoadedStatusMotive',
+      isLoadedTypeChart: 'dashboard/isLoadedTypeChart',
+      isLoadedStatusUserChart: 'dashboard/isLoadedStatusUserChart',
+      isLoadedTimeLoggedUserChart: 'dashboard/isLoadedStatusUserChart',
+      typePieChart: 'dashboard/typePieChart',
+      motivePieChart: 'dashboard/motivePieChart',
+      statusUserChart: 'dashboard/statusUserChart',
+      timeLoggedUserChart: 'dashboard/timeLoggedUserChart'
     })
   },
   methods: {
@@ -351,7 +373,15 @@ export default {
       fetchCategoryItems: 'category/fetchCategories',
       fetchCourseByCategory: 'course/getCoursesByCategory',
       getSourcePieChart: 'dashboard/getSourcePieChart',
-      fetchTotalTicket: 'dashboard/getTotalTicket'
+      fetchTotalTicket: 'dashboard/getTotalTicket',
+      getLastDayTicket: 'dashboard/getLastDayTicket',
+      getOpenTicket: 'dashboard/getOpenTicket',
+      getCloseTicket: 'dashboard/getCloseTicket',
+      getStatusTicketMotiveChart: 'dashboard/getStatusTicketMotiveChart',
+      getTypePieChart: 'dashboard/getTypePieChart',
+      getMotivePieChart: 'dashboard/getMotivePieChart',
+      getStatusUserChart: 'dashboard/getStatusUserChart',
+      getTimeLoggedUserChart: 'dashboard/getTimeLoggedUserChart'
     }),
     fillChartStatusTicket() {
       this.statusTicket.forEach(status => {
