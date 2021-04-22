@@ -48,18 +48,18 @@
       </v-list-item>
     </v-list>
 
-    <v-divider></v-divider>
-
-    <v-list dense nav shaped>
+    <v-list dense nav shaped class="ml-n2 mt-n3">
       <v-list-group
         v-for="(link, index) in getPrivilegesSettingLinks"
         :key="index"
         no-action
-        :prepend-icon="link.icon"
         color
       >
         <template v-slot:activator>
           <v-list-item>
+            <v-list-item-icon>
+              <v-icon>{{ link.icon }}</v-icon>
+            </v-list-item-icon>
             <v-list-item-title>{{ link.name }}</v-list-item-title>
           </v-list-item>
         </template>
@@ -69,6 +69,9 @@
           :to="internalLink.to"
           link
         >
+          <!--           <v-list-item-icon class="ml-n6">
+            <v-icon>mdi-toggle-switch</v-icon>
+          </v-list-item-icon> -->
           <v-list-item-content>
             <v-list-item-title>{{ internalLink.name }}</v-list-item-title>
           </v-list-item-content>
@@ -157,6 +160,18 @@ export default {
         }
       ],
       secondary: [
+        {
+          name: 'Reportes',
+          icon: 'mdi-clipboard-edit-outline',
+          privileges: ['Administrador', 'Developer'],
+          links: [
+            {
+              name: 'Ticket',
+              to: { name: 'TicketReport' },
+              privileges: ['Administrador', 'Developer']
+            }
+          ]
+        },
         {
           name: 'Mantenedor',
           icon: 'mdi-hammer-wrench',

@@ -18,7 +18,7 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       {
-        path: 'dashboard',
+        path: 'estadistica',
         name: 'Dashboard',
         component: () =>
           import(
@@ -27,7 +27,7 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
-        path: 'followUp',
+        path: 'seguimiento-alumnos',
         name: 'FollowUp',
         component: () =>
           import(/* webpackChunkName: "Seguimiento" */ '../views/FollowUp.vue'),
@@ -42,6 +42,25 @@ const routes = [
         meta: { requiresAuth: true },
         props: true
       },
+      {
+        path: 'reportes',
+        name: 'Reports',
+        component: () =>
+          import(/* webpackChunkName: "Ticket" */ '../views/report/Index.vue'),
+        meta: { requiresAuth: true },
+        children: [
+          {
+            name: 'TicketReport',
+            path: 'reporte-ticket',
+            component: () =>
+              import(
+                /* webpackChunkName: "CargarEstudiantes" */ '../views/report/TicketReport.vue'
+              ),
+            meta: { requiresAuth: true }
+          }
+        ]
+      },
+
       {
         path: 'mantenedor',
         name: 'Mantenedor',
