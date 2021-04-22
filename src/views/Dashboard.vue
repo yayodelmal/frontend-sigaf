@@ -3,7 +3,7 @@
     color="blueS"
     class="px-5 py-3"
     icon="mdi-view-dashboard"
-    title="Dashboard"
+    title="Estadística"
   >
     <v-row>
       <v-col cols="12">
@@ -57,7 +57,12 @@
             outlined
           >
             <v-card-text>
-              <priority-ticket-chart :height="200" :render="true" />
+              <base-doughnut-chart
+                :render="isLoadedPriorityChart"
+                :chartData="priorityPieChart"
+                title="Prioridad de ticket"
+                :height="200"
+              />
             </v-card-text>
           </v-card>
         </v-hover>
@@ -90,7 +95,12 @@
             outlined
           >
             <v-card-text>
-              <status-ticket-chart :height="200" :render="true" />
+              <base-doughnut-chart
+                :render="isLoadedStatusChart"
+                :chartData="statusPieChart"
+                title="Estado de ticket"
+                :height="200"
+              />
             </v-card-text>
           </v-card>
         </v-hover>
@@ -141,7 +151,12 @@
             max-height="300"
           >
             <v-card-text>
-              <source-ticket-chart :height="200" :render="true" />
+              <base-doughnut-chart
+                :render="isLoadedSourceChart"
+                :chartData="sourcePieChart"
+                title="Origen de ticket"
+                :height="200"
+              />
             </v-card-text> </v-card
         ></v-hover>
       </v-col>
@@ -154,7 +169,12 @@
             max-height="300"
           >
             <v-card-text>
-              <status-ticket-by-user-chart :height="200" :render="true" />
+              <base-horizontal-bar-chart
+                :render="isLoadedStatusTicketByOperator"
+                :chartData="statusTicketByOperatorChart"
+                title="Estado ticket por operador"
+                :height="200"
+              />
             </v-card-text>
           </v-card>
         </v-hover>
@@ -202,10 +222,6 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import SourceTicketChart from '../components/dashboard/SourceTicketChart.vue'
-import PriorityTicketChart from '../components/dashboard/PriorityTicketChart.vue'
-import StatusTicketChart from '../components/dashboard/StatusTicketChart.vue'
-import StatusTicketByUserChart from '../components/dashboard/StatusTicketByUserChart.vue'
 import SigafCategoryCourseToolbar from '../components/utility/SigafCategoryCourseToolbar.vue'
 import BaseHorizontalBarChart from '../components/dashboard/base/BaseHorizontalBarChart.vue'
 import BaseDoughnutChart from '../components/dashboard/base/BaseDoughnutChart.vue'
@@ -214,10 +230,6 @@ import BasePolarChart from '../components/dashboard/base/BasePolarChart.vue'
 export default {
   name: 'Dashboard',
   components: {
-    SourceTicketChart,
-    PriorityTicketChart,
-    StatusTicketChart,
-    StatusTicketByUserChart,
     SigafCategoryCourseToolbar,
     BaseHorizontalBarChart,
     BaseDoughnutChart,
@@ -334,8 +346,12 @@ export default {
       await this.getStatusTicketMotiveChart(this.selectedCourse.id)
       await this.getTypePieChart(this.selectedCourse.id)
       await this.getMotivePieChart(this.selectedCourse.id)
+      await this.getSourcePieChart(this.selectedCourse.id)
+      await this.getPriorityPieChart(this.selectedCourse.id)
+      await this.getStatusPieChart(this.selectedCourse.id)
       await this.getStatusUserChart(this.selectedCourse.id)
       await this.getTimeLoggedUserChart(this.selectedCourse.id)
+      await this.getStatusTicketByOperatorChart(this.selectedCourse.id)
     }
   },
   computed: {
@@ -355,12 +371,20 @@ export default {
       statusTicketByMotiveChart: 'dashboard/statusTicketByMotiveChart',
       isLoadedStatusMotive: 'dashboard/isLoadedStatusMotive',
       isLoadedTypeChart: 'dashboard/isLoadedTypeChart',
+      isLoadedSourceChart: 'dashboard/isLoadedSourceChart',
+      isLoadedStatusChart: 'dashboard/isLoadedStatusChart',
+      isLoadedPriorityChart: 'dashboard/isLoadedPriorityChart',
       isLoadedStatusUserChart: 'dashboard/isLoadedStatusUserChart',
       isLoadedTimeLoggedUserChart: 'dashboard/isLoadedStatusUserChart',
       typePieChart: 'dashboard/typePieChart',
       motivePieChart: 'dashboard/motivePieChart',
+      sourcePieChart: 'dashboard/sourcePieChart',
+      statusPieChart: 'dashboard/statusPieChart',
+      priorityPieChart: 'dashboard/priorityPieChart',
       statusUserChart: 'dashboard/statusUserChart',
-      timeLoggedUserChart: 'dashboard/timeLoggedUserChart'
+      timeLoggedUserChart: 'dashboard/timeLoggedUserChart',
+      statusTicketByOperatorChart: 'dashboard/statusTicketByOperatorChart',
+      isLoadedStatusTicketByOperator: 'dashboard/isLoadedStatusTicketByOperator'
     })
   },
   methods: {
@@ -380,8 +404,11 @@ export default {
       getStatusTicketMotiveChart: 'dashboard/getStatusTicketMotiveChart',
       getTypePieChart: 'dashboard/getTypePieChart',
       getMotivePieChart: 'dashboard/getMotivePieChart',
+      getStatusPieChart: 'dashboard/getStatusPieChart',
+      getPriorityPieChart: 'dashboard/getPriorityPieChart',
       getStatusUserChart: 'dashboard/getStatusUserChart',
-      getTimeLoggedUserChart: 'dashboard/getTimeLoggedUserChart'
+      getTimeLoggedUserChart: 'dashboard/getTimeLoggedUserChart',
+      getStatusTicketByOperatorChart: 'dashboard/getStatusTicketByOperatorChart'
     }),
     fillChartStatusTicket() {
       this.statusTicket.forEach(status => {

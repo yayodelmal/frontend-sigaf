@@ -19,7 +19,11 @@ export default {
     isLoadingStatusMotive: false,
     isLoadedTypeChart: false,
     isLoadedMotiveChart: false,
+    isLoadedStatusChart: false,
+    isLoadedSourceChart: false,
+    isLoadedPriorityChart: false,
     isLoadedStatusUserChart: false,
+    isLoadedStatusTicketByOperator: false,
     isLoadedTimeLoggedUserChart: false
   },
   mutations: {
@@ -50,6 +54,15 @@ export default {
     SET_LOADED_TYPE_CHART: (state, isLoadedTypeChart) => {
       state.isLoadedTypeChart = isLoadedTypeChart
     },
+    SET_LOADED_PRIORITY_CHART: (state, payload) => {
+      state.isLoadedPriorityChart = payload
+    },
+    SET_LOADED_STATUS_CHART: (state, isLoadedStatusChart) => {
+      state.isLoadedStatusChart = isLoadedStatusChart
+    },
+    SET_LOADED_SOURCE_CHART: (state, isLoadedSourceChart) => {
+      state.isLoadedSourceChart = isLoadedSourceChart
+    },
     SET_STATUS_USER_CHART: (state, statusUserChart) => {
       state.statusUserChart = statusUserChart
     },
@@ -61,6 +74,12 @@ export default {
     },
     SET_LOADED_TIME_LOGGED_USER_CHART: (state, isLoadedTimeLoggedUserChart) => {
       state.isLoadedTimeLoggedUserChart = isLoadedTimeLoggedUserChart
+    },
+    SET_LOADED_STATUS_TICKET_BY_OPERATOR: (
+      state,
+      isLoadedStatusTicketByOperator
+    ) => {
+      state.isLoadedStatusTicketByOperator = isLoadedStatusTicketByOperator
     },
     SET_MOTIVE_CHART: (state, motivePieChart) => {
       state.motivePieChart = motivePieChart
@@ -90,24 +109,21 @@ export default {
     isLoadedStatusMotive: state => state.isLoadingStatusMotive,
     typePieChart: state => state.typePieChart,
     isLoadedTypeChart: state => state.isLoadedTypeChart,
+    isLoadedSourceChart: state => state.isLoadedSourceChart,
+    isLoadedStatusChart: state => state.isLoadedStatusChart,
+    isLoadedPriorityChart: state => state.isLoadedPriorityChart,
     motivePieChart: state => state.motivePieChart,
     isLoadedMotiveChart: state => state.isLoadedMotiveChart,
     statusUserChart: state => state.statusUserChart,
     isLoadedStatusUserChart: state => state.isLoadedStatusUserChart,
     timeLoggedUserChart: state => state.timeLoggedUserChart,
     isLoadedTimeLoggedUserChart: state => state.isLoadedTimeLoggedUserChart,
-    sourcePieChart: state => {
-      return state.sourcePieChart
-    },
-    priorityPieChart: state => {
-      return state.priorityPieChart
-    },
-    statusPieChart: state => {
-      return state.statusPieChart
-    },
-    statusTicketByOperatorChart: state => {
-      return state.statusTicketByOperatorChart
-    }
+    isLoadedStatusTicketByOperator: state =>
+      state.isLoadedStatusTicketByOperator,
+    sourcePieChart: state => state.sourcePieChart,
+    priorityPieChart: state => state.priorityPieChart,
+    statusPieChart: state => state.statusPieChart,
+    statusTicketByOperatorChart: state => state.statusTicketByOperatorChart
   },
   actions: {
     getTotalTicket: async ({ commit }, payload) => {
@@ -150,6 +166,7 @@ export default {
     },
     getSourcePieChart: async ({ commit }, payload) => {
       try {
+        commit('SET_LOADED_SOURCE_CHART', false)
         const { data } = await axios.get(
           `/api/v2/tickets/${payload}/source-chart`
         )
@@ -158,6 +175,7 @@ export default {
 
         if (success) {
           commit('SET_SOURCE_PIE_CHART', _data.chartData)
+          commit('SET_LOADED_SOURCE_CHART', true)
 
           return { chartData: _data.chartData }
         } else {
@@ -262,6 +280,8 @@ export default {
     },
     getStatusTicketByOperatorChart: async ({ commit }, payload) => {
       try {
+        commit('SET_LOADED_STATUS_TICKET_BY_OPERATOR', false)
+
         const { data } = await axios.get(
           `/api/v2/tickets/${payload}/status-operator-chart`
         )
@@ -270,6 +290,7 @@ export default {
 
         if (success) {
           commit('SET_STATUS_TICKET_BY_OPERATOR_CHART', _data.chartData)
+          commit('SET_LOADED_STATUS_TICKET_BY_OPERATOR', true)
 
           return { chartData: _data.chartData }
         } else {
@@ -303,8 +324,9 @@ export default {
         console.log(error)
       }
     },
-    getPriorityDoughnutChart: async ({ commit }, payload) => {
+    getPriorityPieChart: async ({ commit }, payload) => {
       try {
+        commit('SET_LOADED_PRIORITY_CHART', false)
         const { data } = await axios.get(
           `/api/v2/tickets/${payload}/priority-chart`
         )
@@ -313,7 +335,7 @@ export default {
 
         if (success) {
           commit('SET_PRIORITY_PIE_CHART', _data.chartData)
-
+          commit('SET_LOADED_PRIORITY_CHART', true)
           return { chartData: _data.chartData }
         } else {
           console.log(error)
@@ -326,6 +348,7 @@ export default {
     },
     getStatusPieChart: async ({ commit }, payload) => {
       try {
+        commit('SET_LOADED_STATUS_CHART', false)
         const { data } = await axios.get(
           `/api/v2/tickets/${payload}/status-chart`
         )
@@ -334,7 +357,7 @@ export default {
 
         if (success) {
           commit('SET_STATUS_PIE_CHART', _data.chartData)
-
+          commit('SET_LOADED_STATUS_CHART', true)
           return { chartData: _data.chartData }
         } else {
           console.log(error)
