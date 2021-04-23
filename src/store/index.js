@@ -23,6 +23,7 @@ import courseRegisteredUser from './modules/courseRegisteredUser'
 import platform from './modules/platform'
 import logEditingTicket from './modules/logEditingTicket'
 import dashboard from './modules/dashboard'
+import report from './modules/report'
 
 Vue.use(Vuex)
 
@@ -50,7 +51,8 @@ export default new Vuex.Store({
     courseRegisteredUser,
     platform,
     logEditingTicket,
-    dashboard
+    dashboard,
+    report
   },
   state: {
     drawer: null,
