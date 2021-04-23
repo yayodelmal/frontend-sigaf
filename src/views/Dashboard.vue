@@ -16,20 +16,21 @@
     <v-row v-if="selectedCourse">
       <v-col cols="12" sm="6" md="6" lg="3">
         <base-material-stats-card
-          color="info"
+          color="warning"
           icon="mdi-view-dashboard"
-          title="Total tickets"
-          :value="'' + totalTicket"
+          title="Tickets nuevos"
+          :value="'+' + lastDayTicket"
         />
       </v-col>
       <v-col cols="12" sm="6" md="6" lg="3">
         <base-material-stats-card
-          color="warning"
+          color="info"
           icon="mdi-view-dashboard"
-          title="Nuevos tickets"
-          :value="'+' + lastDayTicket"
+          title="Tickets totales"
+          :value="'' + totalTicket"
         />
       </v-col>
+
       <v-col cols="12" sm="6" md="6" lg="3">
         <base-material-stats-card
           color="redS"

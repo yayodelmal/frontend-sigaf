@@ -66,7 +66,6 @@
               v-model="model"
               class="pa-4"
               show-arrows
-              mandatory
               center-active
             >
               <v-slide-item
@@ -80,7 +79,10 @@
                   height="50"
                   width="150"
                   outlined
-                  @click="toggle"
+                  @click="
+                    toggle()
+                    handleChart()
+                  "
                 >
                   <v-row class="fill-height" align="center" justify="center">
                     <v-scale-transition>
@@ -105,8 +107,166 @@
 
             <v-expand-transition>
               <v-sheet v-if="model != null" height="200" tile>
-                <v-row class="fill-height" align="center" justify="center">
-                  <h3 class="title">Selected {{ transformDates[model] }}</h3>
+                <v-row>
+                  <v-col cols="3">
+                    <v-row>
+                      <v-col cols="12">
+                        <base-material-stats-card
+                          color="warning"
+                          icon="mdi-view-dashboard"
+                          title="Tickets nuevos"
+                          :value="'+' + '10'"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <base-material-stats-card
+                          color="warning"
+                          icon="mdi-view-dashboard"
+                          title="Tickets totales"
+                          :value="'+' + '10'"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <base-material-stats-card
+                          color="warning"
+                          icon="mdi-view-dashboard"
+                          title="Tickets abiertos"
+                          :value="'+' + '10'"
+                        />
+                      </v-col>
+                      <v-col cols="12">
+                        <base-material-stats-card
+                          color="warning"
+                          icon="mdi-view-dashboard"
+                          title="Tickets cerrados"
+                          :value="'+' + '10'"
+                        />
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                  <v-col cols="9">
+                    <v-row class="fill-height" align="center" justify="center">
+                      <v-col cols="12">
+                        <v-simple-table dense>
+                          <template v-slot:default>
+                            <thead>
+                              <tr>
+                                <th class="text-left">
+                                  Operador
+                                </th>
+                                <th class="text-left">
+                                  Ticket trabajados
+                                </th>
+                                <th class="text-left">
+                                  Ticket resueltos
+                                </th>
+                                <th class="text-left">
+                                  Intentos realizados
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr
+                                v-for="item in tableOperator"
+                                :key="item.operator"
+                              >
+                                <td>{{ item.operator }}</td>
+                                <td>{{ item.tickets }}</td>
+                                <td>{{ item.close }}</td>
+                                <td>{{ item.attemps }}</td>
+                              </tr>
+                            </tbody>
+                          </template>
+                        </v-simple-table>
+                      </v-col>
+
+                      <v-col cols="12" sm="12" md="12" lg="4">
+                        <v-hover v-slot:default="{ hover }">
+                          <v-card
+                            class="d-flex text-center ma-1"
+                            color="grey lighten-4"
+                            :elevation="hover ? '5' : '0'"
+                            max-height="300"
+                          >
+                            <v-card-text>
+                              <base-doughnut-chart
+                                :render="renderChart"
+                                :chartData="chart.priority.chartData"
+                                title="Prioridad de ticket"
+                                :height="200"
+                            /></v-card-text> </v-card
+                        ></v-hover>
+                      </v-col>
+                      <v-col cols="12" sm="12" md="12" lg="4">
+                        <v-hover v-slot:default="{ hover }">
+                          <v-card
+                            class="d-flex text-center ma-1"
+                            color="grey lighten-4"
+                            :elevation="hover ? '5' : '0'"
+                            max-height="300"
+                          >
+                            <v-card-text>
+                              <base-doughnut-chart
+                                :render="renderChart"
+                                :chartData="chart.source.chartData"
+                                title="Origen de ticket"
+                                :height="200"
+                            /></v-card-text> </v-card
+                        ></v-hover>
+                      </v-col>
+                      <v-col cols="12" sm="12" md="12" lg="4">
+                        <v-hover v-slot:default="{ hover }">
+                          <v-card
+                            class="d-flex text-center ma-1"
+                            color="grey lighten-4"
+                            :elevation="hover ? '5' : '0'"
+                            max-height="300"
+                          >
+                            <v-card-text>
+                              <base-doughnut-chart
+                                :render="renderChart"
+                                :chartData="chart.type.chartData"
+                                title="Tipo de ticket"
+                                :height="200"
+                            /></v-card-text> </v-card
+                        ></v-hover>
+                      </v-col>
+                      <v-col cols="12" sm="12" md="12" lg="4">
+                        <v-hover v-slot:default="{ hover }">
+                          <v-card
+                            class="d-flex text-center ma-1"
+                            color="grey lighten-4"
+                            :elevation="hover ? '5' : '0'"
+                            max-height="300"
+                          >
+                            <v-card-text>
+                              <base-doughnut-chart
+                                :render="renderChart"
+                                :chartData="chart.motive.chartData"
+                                title="Motivo de ticket"
+                                :height="200"
+                            /></v-card-text> </v-card
+                        ></v-hover>
+                      </v-col>
+                      <v-col cols="12" sm="12" md="12" lg="4">
+                        <v-hover v-slot:default="{ hover }">
+                          <v-card
+                            class="d-flex text-center ma-1"
+                            color="grey lighten-4"
+                            :elevation="hover ? '5' : '0'"
+                            max-height="300"
+                          >
+                            <v-card-text>
+                              <base-doughnut-chart
+                                :render="renderChart"
+                                :chartData="chart.status.chartData"
+                                title="Estado de ticket"
+                                :height="200"
+                            /></v-card-text> </v-card
+                        ></v-hover>
+                      </v-col>
+                    </v-row>
+                  </v-col>
                 </v-row>
               </v-sheet>
             </v-expand-transition>
@@ -119,17 +279,47 @@
 
 <script>
 import moment from 'moment'
+import { mapActions, mapGetters } from 'vuex'
 import SigafCategoryCourseToolbar from '../../components/utility/SigafCategoryCourseToolbar.vue'
+import BaseDoughnutChart from '../../components/dashboard/base/BaseDoughnutChart.vue'
 export default {
-  components: { SigafCategoryCourseToolbar },
+  components: { SigafCategoryCourseToolbar, BaseDoughnutChart },
   data: () => ({
     model: null,
     modalDates: false,
     dates: [],
     transformDates: [],
-    loadingDates: false
+    loadingDates: false,
+    selectedCourse: null,
+    renderChart: false,
+    desserts: [
+      {
+        name: 'Frozen Yogurt',
+        calories: 159
+      },
+      {
+        name: 'Ice cream sandwich',
+        calories: 237
+      },
+      {
+        name: 'Eclair',
+        calories: 262
+      },
+      {
+        name: 'Cupcake',
+        calories: 305
+      },
+      {
+        name: 'Gingerbread',
+        calories: 356
+      }
+    ]
   }),
   computed: {
+    ...mapGetters({
+      chart: 'report/chartData',
+      tableOperator: 'report/tableOperator'
+    }),
     dateRangeText() {
       if (this.dates) {
         let array = [...this.dates]
@@ -146,6 +336,23 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      fetchChartByDate: 'report/fetchChartByDate',
+      fetchTableOperatorByDate: 'report/fetchTableOperatorByDate'
+    }),
+    async handleChart() {
+      await this.fetchChartByDate({
+        course: this.selectedCourse.id,
+        date: this.transformDates[this.model]
+      })
+      await this.fetchTableOperatorByDate({
+        course: this.selectedCourse.id,
+        date: this.transformDates[this.model]
+      })
+      this.$nextTick(() => {
+        this.renderChart = true
+      })
+    },
     handleFindByRangeOfDates() {
       if (this.dates.length === 2) {
         const firstDay = moment(this.dates[0])
