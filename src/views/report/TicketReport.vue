@@ -1,67 +1,80 @@
 <template>
-  <div>
-    <base-card
-      color="blueS"
-      class="px-5 py-3"
-      icon="mdi-clipboard-edit-outline"
-      title="Reportes de ticket"
+  <base-card
+    color="blueS"
+    class="px-5 py-3"
+    icon="mdi-clipboard-edit-outline"
+    title="Reportes de ticket"
+  >
+    <sigaf-category-course-toolbar
+      @selectedCourse="selectedCourse = $event"
+      source="Reports"
     >
-      <v-card>
-        <sigaf-category-course-toolbar
-          @selectedCourse="selectedCourse = $event"
-          source="Reports"
-        ></sigaf-category-course-toolbar>
-        <v-card-text>
-          <v-row justify="center">
-            <v-col cols="12" sm="4">
-              <div class="d-flex">
-                <v-dialog
-                  ref="dialog"
-                  v-model="modalDates"
-                  :return-value.sync="dates"
-                  persistent
-                  width="290px"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
-                      v-model="dateRangeText"
-                      label="Rango de fechas"
-                      prepend-inner-icon="mdi-calendar"
-                      color="blueS"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                      outlined
-                      dense
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker v-model="dates" range>
-                    <v-spacer></v-spacer>
-                    <v-btn text color="primary" @click="modalDates = false">
-                      Cancelar
-                    </v-btn>
-                    <v-btn
-                      text
-                      color="primary"
-                      @click="$refs.dialog.save(dates)"
-                    >
-                      Aceptar
-                    </v-btn>
-                  </v-date-picker>
-                </v-dialog>
-                <v-btn
-                  class="ml-2"
-                  color="blueS"
-                  dark
-                  @click="handleFindByRangeOfDates"
-                  :loading="loadingDates"
-                >
-                  <v-icon>mdi-magnify</v-icon>
-                </v-btn>
-              </div>
-            </v-col>
-          </v-row>
-          <v-sheet class="mx-auto" elevation="8">
+    </sigaf-category-course-toolbar>
+
+    <v-card v-if="selectedCourse" class="mt-3">
+      <v-card-text>
+        <div class="d-flex">
+          <v-tooltip top color="blueS">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                class="mx-auto"
+                color="blueS"
+                dark
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon left> mdi-file-excel</v-icon>
+                Descargar reporte
+              </v-btn>
+            </template>
+            <span>Descargar reporte</span>
+          </v-tooltip>
+        </div>
+        <v-row justify="center" align="center" no-gutters>
+          <v-col cols="12" sm="4" class="mt-8">
+            <div class="d-flex">
+              <v-dialog
+                ref="dialog"
+                v-model="modalDates"
+                :return-value.sync="dates"
+                persistent
+                width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="dateRangeText"
+                    label="Rango de fechas"
+                    prepend-inner-icon="mdi-calendar"
+                    color="blueS"
+                    readonly
+                    v-bind="attrs"
+                    v-on="on"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="dates" range>
+                  <v-spacer></v-spacer>
+                  <v-btn text color="primary" @click="modalDates = false">
+                    Cancelar
+                  </v-btn>
+                  <v-btn text color="primary" @click="$refs.dialog.save(dates)">
+                    Aceptar
+                  </v-btn>
+                </v-date-picker>
+              </v-dialog>
+              <v-btn
+                class="ml-2"
+                color="blueS"
+                dark
+                @click="handleFindByRangeOfDates"
+                :loading="loadingDates"
+              >
+                <v-icon>mdi-magnify</v-icon>
+              </v-btn>
+            </div>
+          </v-col>
+          <v-col cols="12" sm="7">
             <v-slide-group
               v-model="model"
               class="pa-4"
@@ -75,9 +88,9 @@
               >
                 <v-card
                   :color="active ? 'blueS' : 'grey lighten-2'"
-                  class="ma-4"
+                  class="mx-4"
                   height="50"
-                  width="150"
+                  width="125"
                   outlined
                   @click="
                     toggle()
@@ -104,49 +117,21 @@
                 </v-card>
               </v-slide-item>
             </v-slide-group>
-
-            <v-expand-transition>
-              <v-sheet v-if="model != null" height="200" tile>
-                <v-row>
-                  <v-col cols="3">
-                    <v-row>
-                      <v-col cols="12">
-                        <base-material-stats-card
-                          color="warning"
-                          icon="mdi-view-dashboard"
-                          title="Tickets nuevos"
-                          :value="'+' + '10'"
-                        />
-                      </v-col>
-                      <v-col cols="12">
-                        <base-material-stats-card
-                          color="warning"
-                          icon="mdi-view-dashboard"
-                          title="Tickets totales"
-                          :value="'+' + '10'"
-                        />
-                      </v-col>
-                      <v-col cols="12">
-                        <base-material-stats-card
-                          color="warning"
-                          icon="mdi-view-dashboard"
-                          title="Tickets abiertos"
-                          :value="'+' + '10'"
-                        />
-                      </v-col>
-                      <v-col cols="12">
-                        <base-material-stats-card
-                          color="warning"
-                          icon="mdi-view-dashboard"
-                          title="Tickets cerrados"
-                          :value="'+' + '10'"
-                        />
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                  <v-col cols="9">
-                    <v-row class="fill-height" align="center" justify="center">
-                      <v-col cols="12">
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+    <v-card class="mt-6" elevation="0">
+      <v-expand-transition>
+        <v-sheet v-if="model != null" tile>
+          <v-row>
+            <v-col cols="12">
+              <v-card>
+                <v-card-title>Producción del día:</v-card-title>
+                <v-card-text>
+                  <v-row>
+                    <v-col cols="8">
+                      <v-card outlined>
                         <v-simple-table dense>
                           <template v-slot:default>
                             <thead>
@@ -161,7 +146,7 @@
                                   Ticket resueltos
                                 </th>
                                 <th class="text-left">
-                                  Intentos realizados
+                                  Intentos de contacto
                                 </th>
                               </tr>
                             </thead>
@@ -178,103 +163,169 @@
                             </tbody>
                           </template>
                         </v-simple-table>
-                      </v-col>
+                      </v-card>
+                    </v-col>
+                    <v-col cols="4" class="mt-n10">
+                      <v-hover v-slot:default="{ hover }">
+                        <v-card
+                          class="d-flex text-center ma-1"
+                          color="grey lighten-4"
+                          :elevation="hover ? '5' : '0'"
+                        >
+                          <v-card-text>
+                            <base-polar-chart
+                              :render="renderChart"
+                              :chartData="operatorChart"
+                              title="Intentos según estado"
+                              :height="150"
+                          /></v-card-text> </v-card
+                      ></v-hover>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
+            </v-col>
+            <v-col cols="12">
+              <v-card>
+                <v-card-title>Actualización del día:</v-card-title>
+                <v-card-text class="mt-5">
+                  <v-row>
+                    <v-col cols="12">
+                      <v-row v-if="dataCard">
+                        <v-col cols="3">
+                          <base-material-stats-card
+                            color="warning"
+                            icon="mdi-view-dashboard"
+                            title="Tickets nuevos"
+                            :value="'+' + dataCard.newTicket"
+                          />
+                        </v-col>
+                        <v-col cols="3">
+                          <base-material-stats-card
+                            color="warning"
+                            icon="mdi-view-dashboard"
+                            title="Tickets totales"
+                            :value="'' + dataCard.total"
+                          />
+                        </v-col>
+                        <v-col cols="3">
+                          <base-material-stats-card
+                            color="warning"
+                            icon="mdi-view-dashboard"
+                            title="Tickets abiertos"
+                            :value="'' + dataCard.open"
+                          />
+                        </v-col>
+                        <v-col cols="3">
+                          <base-material-stats-card
+                            color="warning"
+                            icon="mdi-view-dashboard"
+                            title="Tickets cerrados"
+                            :value="'' + dataCard.close"
+                          />
+                        </v-col>
+                      </v-row>
+                    </v-col>
 
-                      <v-col cols="12" sm="12" md="12" lg="4">
-                        <v-hover v-slot:default="{ hover }">
-                          <v-card
-                            class="d-flex text-center ma-1"
-                            color="grey lighten-4"
-                            :elevation="hover ? '5' : '0'"
-                            max-height="300"
-                          >
-                            <v-card-text>
-                              <base-doughnut-chart
-                                :render="renderChart"
-                                :chartData="chart.priority.chartData"
-                                title="Prioridad de ticket"
-                                :height="200"
-                            /></v-card-text> </v-card
-                        ></v-hover>
-                      </v-col>
-                      <v-col cols="12" sm="12" md="12" lg="4">
-                        <v-hover v-slot:default="{ hover }">
-                          <v-card
-                            class="d-flex text-center ma-1"
-                            color="grey lighten-4"
-                            :elevation="hover ? '5' : '0'"
-                            max-height="300"
-                          >
-                            <v-card-text>
-                              <base-doughnut-chart
-                                :render="renderChart"
-                                :chartData="chart.source.chartData"
-                                title="Origen de ticket"
-                                :height="200"
-                            /></v-card-text> </v-card
-                        ></v-hover>
-                      </v-col>
-                      <v-col cols="12" sm="12" md="12" lg="4">
-                        <v-hover v-slot:default="{ hover }">
-                          <v-card
-                            class="d-flex text-center ma-1"
-                            color="grey lighten-4"
-                            :elevation="hover ? '5' : '0'"
-                            max-height="300"
-                          >
-                            <v-card-text>
-                              <base-doughnut-chart
-                                :render="renderChart"
-                                :chartData="chart.type.chartData"
-                                title="Tipo de ticket"
-                                :height="200"
-                            /></v-card-text> </v-card
-                        ></v-hover>
-                      </v-col>
-                      <v-col cols="12" sm="12" md="12" lg="4">
-                        <v-hover v-slot:default="{ hover }">
-                          <v-card
-                            class="d-flex text-center ma-1"
-                            color="grey lighten-4"
-                            :elevation="hover ? '5' : '0'"
-                            max-height="300"
-                          >
-                            <v-card-text>
-                              <base-doughnut-chart
-                                :render="renderChart"
-                                :chartData="chart.motive.chartData"
-                                title="Motivo de ticket"
-                                :height="200"
-                            /></v-card-text> </v-card
-                        ></v-hover>
-                      </v-col>
-                      <v-col cols="12" sm="12" md="12" lg="4">
-                        <v-hover v-slot:default="{ hover }">
-                          <v-card
-                            class="d-flex text-center ma-1"
-                            color="grey lighten-4"
-                            :elevation="hover ? '5' : '0'"
-                            max-height="300"
-                          >
-                            <v-card-text>
-                              <base-doughnut-chart
-                                :render="renderChart"
-                                :chartData="chart.status.chartData"
-                                title="Estado de ticket"
-                                :height="200"
-                            /></v-card-text> </v-card
-                        ></v-hover>
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                </v-row>
-              </v-sheet>
-            </v-expand-transition>
-          </v-sheet>
-        </v-card-text>
-      </v-card>
-    </base-card>
-  </div>
+                    <v-col v-if="renderChart" cols="12">
+                      <v-row>
+                        <v-col cols="4">
+                          <v-hover v-slot:default="{ hover }">
+                            <v-card
+                              class="d-flex text-center ma-1"
+                              color="grey lighten-4"
+                              :elevation="hover ? '5' : '0'"
+                              max-height="300"
+                            >
+                              <v-card-text>
+                                <base-doughnut-chart
+                                  :render="renderChart"
+                                  :chartData="chart.status.chartData"
+                                  title="Ticket según estado"
+                                  :height="200"
+                              /></v-card-text> </v-card
+                          ></v-hover>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-hover v-slot:default="{ hover }">
+                            <v-card
+                              class="d-flex text-center ma-1"
+                              color="grey lighten-4"
+                              :elevation="hover ? '5' : '0'"
+                              max-height="300"
+                            >
+                              <v-card-text>
+                                <base-doughnut-chart
+                                  :render="renderChart"
+                                  :chartData="chart.source.chartData"
+                                  title="Ticket según origen"
+                                  :height="200"
+                              /></v-card-text> </v-card
+                          ></v-hover>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-hover v-slot:default="{ hover }">
+                            <v-card
+                              class="d-flex text-center ma-1"
+                              color="grey lighten-4"
+                              :elevation="hover ? '5' : '0'"
+                              max-height="300"
+                            >
+                              <v-card-text>
+                                <base-doughnut-chart
+                                  :render="renderChart"
+                                  :chartData="chart.type.chartData"
+                                  title="Ticket según tipo"
+                                  :height="200"
+                              /></v-card-text> </v-card
+                          ></v-hover>
+                        </v-col>
+                        <v-col cols="4">
+                          <v-hover v-slot:default="{ hover }">
+                            <v-card
+                              class="d-flex text-center ma-1"
+                              color="grey lighten-4"
+                              :elevation="hover ? '5' : '0'"
+                              max-height="300"
+                            >
+                              <v-card-text>
+                                <base-doughnut-chart
+                                  :render="renderChart"
+                                  :chartData="chart.priority.chartData"
+                                  title="Ticket según prioridad"
+                                  :height="200"
+                              /></v-card-text> </v-card
+                          ></v-hover>
+                        </v-col>
+
+                        <v-col cols="4">
+                          <v-hover v-slot:default="{ hover }">
+                            <v-card
+                              class="d-flex text-center ma-1"
+                              color="grey lighten-4"
+                              :elevation="hover ? '5' : '0'"
+                              max-height="300"
+                            >
+                              <v-card-text>
+                                <base-doughnut-chart
+                                  :render="renderChart"
+                                  :chartData="chart.motive.chartData"
+                                  title="Ticket según motivo"
+                                  :height="200"
+                              /></v-card-text> </v-card
+                          ></v-hover>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-sheet>
+      </v-expand-transition>
+    </v-card>
+  </base-card>
 </template>
 
 <script>
@@ -282,8 +333,9 @@ import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
 import SigafCategoryCourseToolbar from '../../components/utility/SigafCategoryCourseToolbar.vue'
 import BaseDoughnutChart from '../../components/dashboard/base/BaseDoughnutChart.vue'
+import BasePolarChart from '../../components/dashboard/base/BasePolarChart.vue'
 export default {
-  components: { SigafCategoryCourseToolbar, BaseDoughnutChart },
+  components: { SigafCategoryCourseToolbar, BaseDoughnutChart, BasePolarChart },
   data: () => ({
     model: null,
     modalDates: false,
@@ -318,7 +370,9 @@ export default {
   computed: {
     ...mapGetters({
       chart: 'report/chartData',
-      tableOperator: 'report/tableOperator'
+      tableOperator: 'report/tableOperator',
+      dataCard: 'report/dataCard',
+      operatorChart: 'report/operatorChart'
     }),
     dateRangeText() {
       if (this.dates) {
@@ -338,7 +392,8 @@ export default {
   methods: {
     ...mapActions({
       fetchChartByDate: 'report/fetchChartByDate',
-      fetchTableOperatorByDate: 'report/fetchTableOperatorByDate'
+      fetchTableOperatorByDate: 'report/fetchTableOperatorByDate',
+      fetchSideCardReportData: 'report/fetchSideCardReportData'
     }),
     async handleChart() {
       await this.fetchChartByDate({
@@ -346,6 +401,10 @@ export default {
         date: this.transformDates[this.model]
       })
       await this.fetchTableOperatorByDate({
+        course: this.selectedCourse.id,
+        date: this.transformDates[this.model]
+      })
+      await this.fetchSideCardReportData({
         course: this.selectedCourse.id,
         date: this.transformDates[this.model]
       })
