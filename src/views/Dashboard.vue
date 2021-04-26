@@ -49,45 +49,7 @@
       </v-col>
     </v-row>
     <v-row no-gutters v-if="selectedCourse">
-      <v-col cols="12" sm="12" md="12" lg="3">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            outlined
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedPriorityChart"
-                :chartData="priorityPieChart"
-                title="Prioridad de ticket"
-                :height="200"
-              />
-            </v-card-text>
-          </v-card>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="6">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            outlined
-          >
-            <v-card-text>
-              <base-polar-chart
-                :render="isLoadedTypeChart"
-                :chartData="motivePieChart"
-                title="Motivo de ticket"
-                :height="200"
-              />
-            </v-card-text>
-          </v-card>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="3">
+      <v-col cols="12" sm="12" md="6" lg="4">
         <v-hover v-slot:default="{ hover }">
           <v-card
             class="d-flex text-center ma-1"
@@ -99,15 +61,88 @@
               <base-doughnut-chart
                 :render="isLoadedStatusChart"
                 :chartData="statusPieChart"
-                title="Estado de ticket"
+                title="Ticket según estado"
                 :height="200"
               />
             </v-card-text>
           </v-card>
         </v-hover>
       </v-col>
+      <v-col cols="12" sm="12" md="4" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            max-height="300"
+          >
+            <v-card-text>
+              <base-doughnut-chart
+                :render="isLoadedSourceChart"
+                :chartData="sourcePieChart"
+                title="Ticket según origen"
+                :height="200"
+              />
+            </v-card-text> </v-card
+        ></v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="4" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            max-height="300"
+          >
+            <v-card-text>
+              <base-doughnut-chart
+                :render="isLoadedTypeChart"
+                :chartData="typePieChart"
+                title="Tipo según tipo"
+                :height="200"
+            /></v-card-text> </v-card
+        ></v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="4" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            outlined
+          >
+            <v-card-text>
+              <base-doughnut-chart
+                :render="isLoadedPriorityChart"
+                :chartData="priorityPieChart"
+                title="Ticket según prioridad"
+                :height="200"
+              />
+            </v-card-text>
+          </v-card>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="4" lg="8">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            outlined
+            max-height="300"
+          >
+            <v-card-text>
+              <base-bar-chart
+                :render="isLoadedAgeChart"
+                :chartData="agePieChart"
+                title="Ticket según antigüedad"
+                :height="200"
+              />
+            </v-card-text> </v-card
+        ></v-hover>
+      </v-col>
 
-      <v-col cols="12" sm="12" md="12" lg="6">
+      <v-col cols="12" sm="12" md="4" lg="6">
         <v-hover v-slot:default="{ hover }">
           <v-card
             class="d-flex text-center ma-1"
@@ -120,42 +155,7 @@
               <base-horizontal-bar-chart
                 :render="isLoadedStatusMotive"
                 :chartData="statusTicketByMotiveChart"
-                title="Estado por motivo"
-                :height="200"
-              />
-            </v-card-text> </v-card
-        ></v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="3">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            max-height="300"
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedTypeChart"
-                :chartData="typePieChart"
-                title="Tipo de ticket"
-                :height="200"
-            /></v-card-text> </v-card
-        ></v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="3">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            max-height="300"
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedSourceChart"
-                :chartData="sourcePieChart"
-                title="Origen de ticket"
+                title="Estado de ticket según motivo"
                 :height="200"
               />
             </v-card-text> </v-card
@@ -173,14 +173,33 @@
               <base-horizontal-bar-chart
                 :render="isLoadedStatusTicketByOperator"
                 :chartData="statusTicketByOperatorChart"
-                title="Estado ticket por operador"
+                title="Estado de ticket según operador"
                 :height="200"
               />
             </v-card-text>
           </v-card>
         </v-hover>
       </v-col>
-      <v-col cols="12" sm="12" md="12" lg="3">
+      <v-col cols="12" sm="12" md="4" lg="4">
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            class="d-flex text-center ma-1"
+            color="grey lighten-4"
+            :elevation="hover ? '5' : '0'"
+            outlined
+          >
+            <v-card-text>
+              <base-polar-chart
+                :render="isLoadedTypeChart"
+                :chartData="motivePieChart"
+                title="Ticket según motivo"
+                :height="200"
+              />
+            </v-card-text>
+          </v-card>
+        </v-hover>
+      </v-col>
+      <v-col cols="12" sm="12" md="4" lg="4">
         <v-hover v-slot:default="{ hover }">
           <v-card
             class="d-flex text-center ma-1"
@@ -192,13 +211,13 @@
               <base-doughnut-chart
                 :render="isLoadedStatusUserChart"
                 :chartData="statusUserChart"
-                title="Estado alumnos"
+                title="Alumnos según estado"
                 :height="200"
               />
             </v-card-text> </v-card
         ></v-hover>
       </v-col>
-      <v-col cols="12" sm="12" md="12" lg="3">
+      <v-col cols="12" sm="12" md="4" lg="4">
         <v-hover v-slot:default="{ hover }">
           <v-card
             class="d-flex text-center ma-1"
@@ -210,7 +229,7 @@
               <base-doughnut-chart
                 :render="isLoadedTimeLoggedUserChart"
                 :chartData="timeLoggedUserChart"
-                title="Último acceso alumnos"
+                title="Alumnos según último acceso"
                 :height="200"
               />
             </v-card-text> </v-card
@@ -227,6 +246,7 @@ import SigafCategoryCourseToolbar from '../components/utility/SigafCategoryCours
 import BaseHorizontalBarChart from '../components/dashboard/base/BaseHorizontalBarChart.vue'
 import BaseDoughnutChart from '../components/dashboard/base/BaseDoughnutChart.vue'
 import BasePolarChart from '../components/dashboard/base/BasePolarChart.vue'
+import BaseBarChart from '../components/dashboard/base/BaseBarChart.vue'
 
 export default {
   name: 'Dashboard',
@@ -234,7 +254,8 @@ export default {
     SigafCategoryCourseToolbar,
     BaseHorizontalBarChart,
     BaseDoughnutChart,
-    BasePolarChart
+    BasePolarChart,
+    BaseBarChart
   },
   data: () => ({
     selectedCourse: null,
@@ -347,6 +368,7 @@ export default {
       await this.getStatusTicketMotiveChart(this.selectedCourse.id)
       await this.getTypePieChart(this.selectedCourse.id)
       await this.getMotivePieChart(this.selectedCourse.id)
+      await this.getAgeTicketPieChart(this.selectedCourse.id)
       await this.getSourcePieChart(this.selectedCourse.id)
       await this.getPriorityPieChart(this.selectedCourse.id)
       await this.getStatusPieChart(this.selectedCourse.id)
@@ -373,12 +395,14 @@ export default {
       isLoadedStatusMotive: 'dashboard/isLoadedStatusMotive',
       isLoadedTypeChart: 'dashboard/isLoadedTypeChart',
       isLoadedSourceChart: 'dashboard/isLoadedSourceChart',
+      isLoadedAgeChart: 'dashboard/isLoadedAgeChart',
       isLoadedStatusChart: 'dashboard/isLoadedStatusChart',
       isLoadedPriorityChart: 'dashboard/isLoadedPriorityChart',
       isLoadedStatusUserChart: 'dashboard/isLoadedStatusUserChart',
       isLoadedTimeLoggedUserChart: 'dashboard/isLoadedStatusUserChart',
       typePieChart: 'dashboard/typePieChart',
       motivePieChart: 'dashboard/motivePieChart',
+      agePieChart: 'dashboard/agePieChart',
       sourcePieChart: 'dashboard/sourcePieChart',
       statusPieChart: 'dashboard/statusPieChart',
       priorityPieChart: 'dashboard/priorityPieChart',
@@ -405,6 +429,7 @@ export default {
       getStatusTicketMotiveChart: 'dashboard/getStatusTicketMotiveChart',
       getTypePieChart: 'dashboard/getTypePieChart',
       getMotivePieChart: 'dashboard/getMotivePieChart',
+      getAgeTicketPieChart: 'dashboard/getAgeTicketPieChart',
       getStatusPieChart: 'dashboard/getStatusPieChart',
       getPriorityPieChart: 'dashboard/getPriorityPieChart',
       getStatusUserChart: 'dashboard/getStatusUserChart',

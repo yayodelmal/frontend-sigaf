@@ -24,7 +24,7 @@ export default {
       maintainAspectRatio: false,
       layout: { padding: { right: 10 } },
       legend: {
-        display: true
+        display: false
       }
     }
   }),

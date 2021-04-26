@@ -8,6 +8,7 @@ export default {
     statusPieChart: {},
     priorityPieChart: {},
     motivePieChart: {},
+    agePieChart: {},
     statusUserChart: {},
     timeLoggedUserChart: {},
     statusTicketByOperatorChart: {},
@@ -19,6 +20,7 @@ export default {
     isLoadingStatusMotive: false,
     isLoadedTypeChart: false,
     isLoadedMotiveChart: false,
+    isLoadedAgeChart: false,
     isLoadedStatusChart: false,
     isLoadedSourceChart: false,
     isLoadedPriorityChart: false,
@@ -87,6 +89,12 @@ export default {
     SET_LOADED_MOTIVE_CHART: (state, isLoadedMotiveChart) => {
       state.isLoadedMotiveChart = isLoadedMotiveChart
     },
+    SET_AGE_CHART: (state, payload) => {
+      state.agePieChart = payload
+    },
+    SET_LOADED_AGE_CHART: (state, payload) => {
+      state.isLoadedAgeChart = payload
+    },
     SET_STATUS_PIE_CHART: (state, statusPieChart) => {
       state.statusPieChart = statusPieChart
     },
@@ -113,7 +121,9 @@ export default {
     isLoadedStatusChart: state => state.isLoadedStatusChart,
     isLoadedPriorityChart: state => state.isLoadedPriorityChart,
     motivePieChart: state => state.motivePieChart,
+    agePieChart: state => state.agePieChart,
     isLoadedMotiveChart: state => state.isLoadedMotiveChart,
+    isLoadedAgeChart: state => state.isLoadedAgeChart,
     statusUserChart: state => state.statusUserChart,
     isLoadedStatusUserChart: state => state.isLoadedStatusUserChart,
     timeLoggedUserChart: state => state.timeLoggedUserChart,
@@ -336,6 +346,26 @@ export default {
         if (success) {
           commit('SET_PRIORITY_PIE_CHART', _data.chartData)
           commit('SET_LOADED_PRIORITY_CHART', true)
+          return { chartData: _data.chartData }
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    getAgeTicketPieChart: async ({ commit }, payload) => {
+      try {
+        commit('SET_LOADED_AGE_CHART', false)
+        const { data } = await axios.get(`/api/v2/tickets/${payload}/age-chart`)
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('SET_AGE_CHART', _data.chartData)
+          commit('SET_LOADED_AGE_CHART', true)
           return { chartData: _data.chartData }
         } else {
           console.log(error)
