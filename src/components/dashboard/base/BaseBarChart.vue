@@ -3,20 +3,20 @@
     <figcaption class="font-weight-bold">
       {{ title }}
     </figcaption>
-    <horizontal-bar-chart
+    <bar-chart
       v-if="render"
       :chart-data="chartData"
       :options="options"
       :style="classHeight"
-    ></horizontal-bar-chart>
+    ></bar-chart>
   </figure>
 </template>
 
 <script>
-import HorizontalBarChart from '../../chart/HorizontalBarChart'
+import BarChart from '../../chart/BarChart'
 export default {
   components: {
-    HorizontalBarChart
+    BarChart
   },
   data: () => ({
     options: {

@@ -1,6 +1,6 @@
 <template>
   <figure>
-    <figcaption>
+    <figcaption class="font-weight-bold">
       {{ title }}
     </figcaption>
     <doughnut-chart
@@ -24,7 +24,7 @@ export default {
       maintainAspectRatio: false,
       layout: { padding: { right: 10 } },
       legend: {
-        display: true,
+        display: false,
         position: 'bottom'
       }
     }
