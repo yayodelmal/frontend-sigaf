@@ -22,6 +22,7 @@
                 dark
                 v-bind="attrs"
                 v-on="on"
+                @click="handleDownloadReport"
               >
                 <v-icon left> mdi-file-excel</v-icon>
                 Descargar reporte
@@ -330,6 +331,7 @@
 
 <script>
 import moment from 'moment'
+import axios from '../../services/axios'
 import { mapActions, mapGetters } from 'vuex'
 import SigafCategoryCourseToolbar from '../../components/utility/SigafCategoryCourseToolbar.vue'
 import BaseDoughnutChart from '../../components/dashboard/base/BaseDoughnutChart.vue'
@@ -395,6 +397,29 @@ export default {
       fetchTableOperatorByDate: 'report/fetchTableOperatorByDate',
       fetchSideCardReportData: 'report/fetchSideCardReportData'
     }),
+    async handleDownloadReport() {
+      const { data } = await axios.get(
+        `/api/v2/reports/courses/${this.selectedCourse.id}/excel`
+      )
+
+      if (data.success) {
+        const config = {
+          responseType: 'blob' // o blob o arraybuffer
+        }
+
+        const response = await axios.get(
+          `/api/v2/reports/courses/${this.selectedCourse.id}/excel-download`,
+          config
+        )
+
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'file.xlsx')
+        document.body.appendChild(link)
+        link.click()
+      }
+    },
     async handleChart() {
       await this.fetchChartByDate({
         course: this.selectedCourse.id,
