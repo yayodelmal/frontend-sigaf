@@ -78,6 +78,45 @@
         </v-row>
       </v-card-text>
     </v-card>
+    <v-card v-if="isLoadedFollowStudentByClassroom">
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" sm="6" md="6" lg="3">
+            <base-material-stats-card
+              color="warning"
+              icon="mdi-view-dashboard"
+              title="Matrícula inicial"
+              :value="'' + total"
+            />
+          </v-col>
+          <v-col cols="12" sm="6" md="6" lg="3">
+            <base-material-stats-card
+              color="info"
+              icon="mdi-view-dashboard"
+              title="Renuncias"
+              :value="'' + resign"
+            />
+          </v-col>
+
+          <v-col cols="12" sm="6" md="6" lg="3">
+            <base-material-stats-card
+              color="redS"
+              icon="mdi-view-dashboard"
+              title="Activos"
+              :value="'' + active"
+            />
+          </v-col>
+          <v-col cols="12" sm="6" md="6" lg="3">
+            <base-material-stats-card
+              color="success"
+              icon="mdi-view-dashboard"
+              title="Inactivos"
+              :value="'' + inactive"
+            />
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
   </base-card>
 </template>
 
@@ -100,6 +139,7 @@ export default {
   }),
   watch: {
     selectedCourse(value) {
+      console.log(value)
       this.findSectionByCourse(value.id)
       this.findClassroomByCourse(value.id)
     }
@@ -107,8 +147,27 @@ export default {
   computed: {
     ...mapGetters({
       sectionByCourse: 'section/sectionByCourse',
-      classroomByCourse: 'classroom/classroomByCourse'
+      classroomByCourse: 'classroom/classroomByCourse',
+      followStudentByClassroom: 'report/followStudentByClassroom',
+      isLoadedFollowStudentByClassroom:
+        'report/isLoadedFollowStudentByClassroom'
     }),
+    resign() {
+      if (!this.followStudentByClassroom) return ''
+      return this.followStudentByClassroom.resign
+    },
+    active() {
+      if (!this.followStudentByClassroom) return ''
+      return this.followStudentByClassroom.active
+    },
+    inactive() {
+      if (!this.followStudentByClassroom) return ''
+      return this.followStudentByClassroom.inactive
+    },
+    total() {
+      if (!this.followStudentByClassroom) return ''
+      return this.followStudentByClassroom.total
+    },
     sections() {
       if (!this.sectionByCourse) return []
       const arraySections = Object.keys(
@@ -143,9 +202,16 @@ export default {
   methods: {
     ...mapActions({
       findSectionByCourse: 'section/findSectionByCourse',
-      findClassroomByCourse: 'classroom/findClassroomByCourse'
+      findClassroomByCourse: 'classroom/findClassroomByCourse',
+      getFollowStudentByClassroom: 'report/getFollowStudentByClassroom'
     }),
-    handleDownloadReport() {}
+    handleDownloadReport() {},
+    async handleChart() {
+      await this.getFollowStudentByClassroom({
+        course: this.selectedCourse.id,
+        classroom: this.classrooms[this.model]
+      })
+    }
   }
 }
 </script>

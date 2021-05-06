@@ -8,7 +8,9 @@ export default {
     chart: null,
     tableOperator: [],
     dataCard: null,
-    operatorChart: null
+    operatorChart: null,
+    followStudentByClassroom: null,
+    isLoadedFollowStudentByClassroom: null
   },
   mutations: {
     SET_CHART: (state, payload) => {
@@ -22,6 +24,12 @@ export default {
     },
     SET_OPERATOR_CHART: (state, payload) => {
       state.operatorChart = payload
+    },
+    SET_LOADED_FOLLOW_STUDENT_CLASSROOM: (state, payload) => {
+      state.isLoadedFollowStudentByClassroom = payload
+    },
+    SET_FOLLOW_STUDENT_CLASSROOM: (state, payload) => {
+      state.followStudentByClassroom = payload
     }
   },
   getters: {
@@ -32,7 +40,10 @@ export default {
       return state.tableOperator
     },
     dataCard: state => state.dataCard,
-    operatorChart: state => state.operatorChart
+    operatorChart: state => state.operatorChart,
+    followStudentByClassroom: state => state.followStudentByClassroom,
+    isLoadedFollowStudentByClassroom: state =>
+      state.isLoadedFollowStudentByClassroom
   },
   actions: {
     fetchChartByDate: async ({ commit }, payload) => {
@@ -84,6 +95,28 @@ export default {
 
         if (success) {
           commit('SET_DATA_CARD', _data)
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    getFollowStudentByClassroom: async ({ commit }, payload) => {
+      try {
+        commit('SET_LOADED_FOLLOW_STUDENT_CLASSROOM', false)
+        const { data } = await axios.get(
+          `api/v2/course-registered-users/${payload.course}/classrooms/${payload.classroom}/follow-student-classroom`
+        )
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('SET_FOLLOW_STUDENT_CLASSROOM', _data)
+          commit('SET_LOADED_FOLLOW_STUDENT_CLASSROOM', true)
+          return { chartData: _data.chartData }
         } else {
           console.log(error)
         }
