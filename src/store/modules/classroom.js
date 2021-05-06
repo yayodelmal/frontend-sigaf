@@ -5,11 +5,15 @@ const BASE_URL = '/api/v2/classrooms'
 export default {
   namespaced: true,
   state: {
-    classrooms: []
+    classrooms: [],
+    classroomByCourse: null
   },
   mutations: {
     SET_CLASSROOMS: (state, classrooms) => {
       state.classrooms = classrooms
+    },
+    SET_CLASSROOMS_BY_COURSE: (state, payload) => {
+      state.classroomByCourse = payload
     },
     POST_CLASSROOM: (state, classroom) => {
       state.classrooms.push(classroom)
@@ -35,9 +39,31 @@ export default {
           description: properties.description
         }
       })
+    },
+    classroomByCourse: state => {
+      if (!state.classroomByCourse) return null
+      return state.classroomByCourse.map(classroom => {
+        return classroom.properties.classroom
+      })
     }
   },
   actions: {
+    findClassroomByCourse: async ({ commit }, payload) => {
+      try {
+        const URL = `/api/v2/courses/${payload}/registered-users`
+
+        const { data } = await axios.get(URL)
+
+        console.log('data', data)
+
+        const { success, _data } = data
+
+        commit('SET_CLASSROOMS_BY_COURSE', _data.relationships.collection.data)
+        return { success, data }
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
     fetchClassrooms: async ({ commit }) => {
       try {
         const { data } = await axios.get(BASE_URL)

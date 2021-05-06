@@ -345,29 +345,7 @@ export default {
     transformDates: [],
     loadingDates: false,
     selectedCourse: null,
-    renderChart: false,
-    desserts: [
-      {
-        name: 'Frozen Yogurt',
-        calories: 159
-      },
-      {
-        name: 'Ice cream sandwich',
-        calories: 237
-      },
-      {
-        name: 'Eclair',
-        calories: 262
-      },
-      {
-        name: 'Cupcake',
-        calories: 305
-      },
-      {
-        name: 'Gingerbread',
-        calories: 356
-      }
-    ]
+    renderChart: false
   }),
   computed: {
     ...mapGetters({

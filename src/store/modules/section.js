@@ -5,11 +5,15 @@ const BASE_URL = '/api/v2/sections'
 export default {
   namespaced: true,
   state: {
-    sections: []
+    sections: [],
+    sectionByCourse: null
   },
   mutations: {
     SET_SECTIONS: (state, sections) => {
       state.sections = sections
+    },
+    SET_SECTIONS_BY_COURSE: (state, payload) => {
+      state.sectionByCourse = payload
     },
     POST_SECTION: (state, section) => {
       state.sections.push(section)
@@ -37,9 +41,31 @@ export default {
           numberActivities: properties.activities.length
         }
       })
+    },
+    sectionByCourse: state => {
+      if (!state.sectionByCourse) return null
+      return state.sectionByCourse.map(section => {
+        return section.properties.section
+      })
     }
   },
   actions: {
+    findSectionByCourse: async ({ commit }, payload) => {
+      try {
+        const URL = `/api/v2/courses/${payload}/activities`
+
+        const { data } = await axios.get(URL)
+
+        console.log('data', data)
+
+        const { success, _data } = data
+
+        commit('SET_SECTIONS_BY_COURSE', _data.relationships.collection.data)
+        return { success, data }
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
     fetchSections: async ({ commit }) => {
       try {
         const { data } = await axios.get(BASE_URL)

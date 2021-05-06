@@ -26,7 +26,13 @@ export default {
     isLoadedPriorityChart: false,
     isLoadedStatusUserChart: false,
     isLoadedStatusTicketByOperator: false,
-    isLoadedTimeLoggedUserChart: false
+    isLoadedTimeLoggedUserChart: false,
+    dataCardFollowStudent: null,
+    isDataCardFollowStudent: false,
+    progressStudentSection: null,
+    isLoadedProgressStudentSection: false,
+    avanceProgressStudentSection: null,
+    isLoadedAvanceProgressStudentSection: false
   },
   mutations: {
     SET_LOADED_STATUS_MOTIVE: (state, isLoadingStatusMotive) => {
@@ -95,6 +101,24 @@ export default {
     SET_LOADED_AGE_CHART: (state, payload) => {
       state.isLoadedAgeChart = payload
     },
+    SET_PROGRESS_STUDENT_SECTION: (state, payload) => {
+      state.progressStudentSection = payload
+    },
+    SET_LOADED_PROGRESS_STUDENT_SECTION: (state, payload) => {
+      state.isLoadedProgressStudentSection = payload
+    },
+    SET_AVANCE_PROGRESS_STUDENT_SECTION: (state, payload) => {
+      state.avanceProgressStudentSection = payload
+    },
+    SET_LOADED_AVANCE_PROGRESS_STUDENT_SECTION: (state, payload) => {
+      state.isLoadedAvanceProgressStudentSection = payload
+    },
+    SET_DATACARD_FOLLOW_STUDENT: (state, payload) => {
+      state.dataCardFollowStudent = payload
+    },
+    SET_LOADED_DATACARD_FOLLOW_STUDENT: (state, payload) => {
+      state.isDataCardFollowStudent = payload
+    },
     SET_STATUS_PIE_CHART: (state, statusPieChart) => {
       state.statusPieChart = statusPieChart
     },
@@ -133,7 +157,15 @@ export default {
     sourcePieChart: state => state.sourcePieChart,
     priorityPieChart: state => state.priorityPieChart,
     statusPieChart: state => state.statusPieChart,
-    statusTicketByOperatorChart: state => state.statusTicketByOperatorChart
+    statusTicketByOperatorChart: state => state.statusTicketByOperatorChart,
+    dataCardFollowStudent: state => state.dataCardFollowStudent,
+    isDataCardFollowStudent: state => state.isDataCardFollowStudent,
+    progressStudentSection: state => state.progressStudentSection,
+    isLoadedProgressStudentSection: state =>
+      state.isLoadedProgressStudentSection,
+    avanceProgressStudentSection: state => state.avanceProgressStudentSection,
+    isLoadedAvanceProgressStudentSection: state =>
+      state.isLoadedAvanceProgressStudentSection
   },
   actions: {
     getTotalTicket: async ({ commit }, payload) => {
@@ -388,6 +420,72 @@ export default {
         if (success) {
           commit('SET_STATUS_PIE_CHART', _data.chartData)
           commit('SET_LOADED_STATUS_CHART', true)
+          return { chartData: _data.chartData }
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    getDataCardFollowStudent: async ({ commit }, payload) => {
+      try {
+        commit('SET_LOADED_DATACARD_FOLLOW_STUDENT', false)
+        const { data } = await axios.get(
+          `/api/v2/course-registered-users/${payload}/follow-student-card`
+        )
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('SET_DATACARD_FOLLOW_STUDENT', _data)
+          commit('SET_LOADED_DATACARD_FOLLOW_STUDENT', true)
+          return { chartData: _data.chartData }
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    getProgressStudentBySection: async ({ commit }, payload) => {
+      try {
+        commit('SET_LOADED_PROGRESS_STUDENT_SECTION', false)
+        const { data } = await axios.get(
+          `/api/v2/course-registered-users/${payload}/progress-chart`
+        )
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('SET_PROGRESS_STUDENT_SECTION', _data.chartData)
+          commit('SET_LOADED_PROGRESS_STUDENT_SECTION', true)
+          return { chartData: _data.chartData }
+        } else {
+          console.log(error)
+        }
+
+        return { success, message }
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    getAvanceProgressStudentBySection: async ({ commit }, payload) => {
+      try {
+        commit('SET_LOADED_AVANCE_PROGRESS_STUDENT_SECTION', false)
+        const { data } = await axios.get(
+          `/api/v2/course-registered-users/${payload}/progress-chart-avance`
+        )
+
+        const { _data, success, error, message } = data
+
+        if (success) {
+          commit('SET_AVANCE_PROGRESS_STUDENT_SECTION', _data.chartData)
+          commit('SET_LOADED_AVANCE_PROGRESS_STUDENT_SECTION', true)
           return { chartData: _data.chartData }
         } else {
           console.log(error)
