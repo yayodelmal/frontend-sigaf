@@ -46,7 +46,9 @@ const routes = [
         path: 'reportes',
         name: 'Reports',
         component: () =>
-          import(/* webpackChunkName: "Ticket" */ '../views/report/Index.vue'),
+          import(
+            /* webpackChunkName: "Reportes" */ '../views/report/Index.vue'
+          ),
         meta: { requiresAuth: true },
         children: [
           {
@@ -54,7 +56,16 @@ const routes = [
             path: 'reporte-ticket',
             component: () =>
               import(
-                /* webpackChunkName: "CargarEstudiantes" */ '../views/report/TicketReport.vue'
+                /* webpackChunkName: "ReporteTicket" */ '../views/report/TicketReport.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'FollowStudentReport',
+            path: 'reporte-seguimiento-alumnos',
+            component: () =>
+              import(
+                /* webpackChunkName: "ReporteSeguimientoAlumnos" */ '../views/report/FollowStudentReport.vue'
               ),
             meta: { requiresAuth: true }
           }
@@ -75,7 +86,7 @@ const routes = [
             name: 'ManageTicket',
             component: () =>
               import(
-                /* webpackChunkName: "Aula" */ '../views/maintenance/ManageTicket.vue'
+                /* webpackChunkName: "AdministracionTicket" */ '../views/maintenance/ManageTicket.vue'
               ),
             meta: { requiresAuth: true }
           },
@@ -84,7 +95,7 @@ const routes = [
             name: 'BlockingTicket',
             component: () =>
               import(
-                /* webpackChunkName: "Aula" */ '../views/maintenance/BlockingTicket.vue'
+                /* webpackChunkName: "BloqueoTicket" */ '../views/maintenance/BlockingTicket.vue'
               ),
             meta: { requiresAuth: true }
           },

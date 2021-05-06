@@ -169,6 +169,11 @@ export default {
               name: 'Ticket',
               to: { name: 'TicketReport' },
               privileges: ['Administrador', 'Developer']
+            },
+            {
+              name: 'Seguimiento alumnos',
+              to: { name: 'FollowStudentReport' },
+              privileges: ['Administrador', 'Developer']
             }
           ]
         },

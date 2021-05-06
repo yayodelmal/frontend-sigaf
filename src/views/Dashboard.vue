@@ -5,238 +5,337 @@
     icon="mdi-view-dashboard"
     title="Estadística"
   >
-    <v-row>
-      <v-col cols="12">
-        <sigaf-category-course-toolbar
-          @selectedCourse="selectedCourse = $event"
-          source="Dashboard"
-        />
-      </v-col>
-    </v-row>
-    <v-row v-if="selectedCourse">
-      <v-col cols="12" sm="6" md="6" lg="3">
-        <base-material-stats-card
-          color="warning"
-          icon="mdi-view-dashboard"
-          title="Tickets nuevos"
-          :value="'+' + lastDayTicket"
-        />
-      </v-col>
-      <v-col cols="12" sm="6" md="6" lg="3">
-        <base-material-stats-card
-          color="info"
-          icon="mdi-view-dashboard"
-          title="Tickets totales"
-          :value="'' + totalTicket"
-        />
-      </v-col>
+    <v-container>
+      <v-row>
+        <v-col cols="12">
+          <sigaf-category-course-toolbar
+            @selectedCourse="selectedCourse = $event"
+            source="Dashboard"
+          />
+        </v-col>
+      </v-row>
+      <v-card v-if="selectedCourse" class="mt-3">
+        <v-card-title class="mb-2">
+          <span
+            class="font-weight-bold  blueS--text overline d-flex justify-start ml-5"
+          >
+            Tickets
+          </span></v-card-title
+        >
+        <v-card-text>
+          <v-container fluid>
+            <v-row>
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="warning"
+                  icon="mdi-view-dashboard"
+                  title="Tickets nuevos"
+                  :value="'+' + lastDayTicket"
+                />
+              </v-col>
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="info"
+                  icon="mdi-view-dashboard"
+                  title="Tickets totales"
+                  :value="'' + totalTicket"
+                />
+              </v-col>
 
-      <v-col cols="12" sm="6" md="6" lg="3">
-        <base-material-stats-card
-          color="redS"
-          icon="mdi-view-dashboard"
-          title="Ticket abiertos"
-          :value="'' + openTickets"
-        />
-      </v-col>
-      <v-col cols="12" sm="6" md="6" lg="3">
-        <base-material-stats-card
-          color="success"
-          icon="mdi-view-dashboard"
-          title="Ticket cerrados"
-          :value="'' + closeTickets"
-        />
-      </v-col>
-    </v-row>
-    <v-row no-gutters v-if="selectedCourse">
-      <v-col cols="12" sm="12" md="6" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            outlined
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedStatusChart"
-                :chartData="statusPieChart"
-                title="Ticket según estado"
-                :height="200"
-              />
-            </v-card-text>
-          </v-card>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            max-height="300"
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedSourceChart"
-                :chartData="sourcePieChart"
-                title="Ticket según origen"
-                :height="200"
-              />
-            </v-card-text> </v-card
-        ></v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            max-height="300"
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedTypeChart"
-                :chartData="typePieChart"
-                title="Tipo según tipo"
-                :height="200"
-            /></v-card-text> </v-card
-        ></v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            outlined
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedPriorityChart"
-                :chartData="priorityPieChart"
-                title="Ticket según prioridad"
-                :height="200"
-              />
-            </v-card-text>
-          </v-card>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" lg="8">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            outlined
-            max-height="300"
-          >
-            <v-card-text>
-              <base-bar-chart
-                :render="isLoadedAgeChart"
-                :chartData="agePieChart"
-                title="Ticket según antigüedad"
-                :height="200"
-              />
-            </v-card-text> </v-card
-        ></v-hover>
-      </v-col>
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="redS"
+                  icon="mdi-view-dashboard"
+                  title="Ticket abiertos"
+                  :value="'' + openTickets"
+                />
+              </v-col>
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="success"
+                  icon="mdi-view-dashboard"
+                  title="Ticket cerrados"
+                  :value="'' + closeTickets"
+                />
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col cols="12" sm="12" md="4" lg="6">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    max-height="300"
+                  >
+                    <v-card-text>
+                      <base-doughnut-chart
+                        :render="isLoadedSourceChart"
+                        :chartData="sourcePieChart"
+                        title="Ticket según origen"
+                        :height="200"
+                      />
+                    </v-card-text> </v-card
+                ></v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="4" lg="6">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    max-height="300"
+                  >
+                    <v-card-text>
+                      <base-doughnut-chart
+                        :render="isLoadedTypeChart"
+                        :chartData="typePieChart"
+                        title="Tipo según tipo"
+                        :height="200"
+                    /></v-card-text> </v-card
+                ></v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="6" lg="4">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    outlined
+                  >
+                    <v-card-text>
+                      <base-doughnut-chart
+                        :render="isLoadedStatusChart"
+                        :chartData="statusPieChart"
+                        title="Ticket según estado"
+                        :height="250"
+                      />
+                    </v-card-text>
+                  </v-card>
+                </v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="12" lg="8">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                  >
+                    <v-card-text>
+                      <base-horizontal-bar-chart
+                        :render="isLoadedStatusTicketByOperator"
+                        :chartData="statusTicketByOperatorChart"
+                        title="Estado de ticket según operador"
+                        :height="250"
+                      />
+                    </v-card-text>
+                  </v-card>
+                </v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="4" lg="8">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    outlined
+                    max-height="300"
+                  >
+                    <v-card-text>
+                      <base-horizontal-bar-chart
+                        :render="isLoadedStatusMotive"
+                        :chartData="statusTicketByMotiveChart"
+                        title="Estado de ticket según motivo"
+                        :height="250"
+                      />
+                    </v-card-text> </v-card
+                ></v-hover>
+              </v-col>
 
-      <v-col cols="12" sm="12" md="4" lg="6">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            outlined
-            max-height="300"
+              <v-col cols="12" sm="12" md="4" lg="4">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    outlined
+                  >
+                    <v-card-text>
+                      <base-polar-chart
+                        :render="isLoadedTypeChart"
+                        :chartData="motivePieChart"
+                        title="Ticket según motivo"
+                        :height="250"
+                      />
+                    </v-card-text>
+                  </v-card>
+                </v-hover>
+              </v-col>
+
+              <v-col cols="12" sm="12" md="4" lg="4">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    outlined
+                  >
+                    <v-card-text>
+                      <base-doughnut-chart
+                        :render="isLoadedPriorityChart"
+                        :chartData="priorityPieChart"
+                        title="Ticket según prioridad"
+                        :height="250"
+                      />
+                    </v-card-text>
+                  </v-card>
+                </v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="4" lg="8">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    outlined
+                  >
+                    <v-card-text>
+                      <base-bar-chart
+                        :render="isLoadedAgeChart"
+                        :chartData="agePieChart"
+                        title="Ticket según antigüedad"
+                        :height="250"
+                      />
+                    </v-card-text> </v-card
+                ></v-hover>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+      </v-card>
+      <v-card v-if="selectedCourse" class="mt-5">
+        <v-card-title class="mb-2">
+          <span
+            class="font-weight-bold  blueS--text overline d-flex justify-start ml-5"
           >
-            <v-card-text>
-              <base-horizontal-bar-chart
-                :render="isLoadedStatusMotive"
-                :chartData="statusTicketByMotiveChart"
-                title="Estado de ticket según motivo"
-                :height="200"
-              />
-            </v-card-text> </v-card
-        ></v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="12" lg="6">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            max-height="300"
-          >
-            <v-card-text>
-              <base-horizontal-bar-chart
-                :render="isLoadedStatusTicketByOperator"
-                :chartData="statusTicketByOperatorChart"
-                title="Estado de ticket según operador"
-                :height="200"
-              />
-            </v-card-text>
-          </v-card>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            outlined
-          >
-            <v-card-text>
-              <base-polar-chart
-                :render="isLoadedTypeChart"
-                :chartData="motivePieChart"
-                title="Ticket según motivo"
-                :height="200"
-              />
-            </v-card-text>
-          </v-card>
-        </v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            max-height="300"
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedStatusUserChart"
-                :chartData="statusUserChart"
-                title="Alumnos según estado"
-                :height="200"
-              />
-            </v-card-text> </v-card
-        ></v-hover>
-      </v-col>
-      <v-col cols="12" sm="12" md="4" lg="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            class="d-flex text-center ma-1"
-            color="grey lighten-4"
-            :elevation="hover ? '5' : '0'"
-            max-height="300"
-          >
-            <v-card-text>
-              <base-doughnut-chart
-                :render="isLoadedTimeLoggedUserChart"
-                :chartData="timeLoggedUserChart"
-                title="Alumnos según último acceso"
-                :height="200"
-              />
-            </v-card-text> </v-card
-        ></v-hover>
-      </v-col>
-    </v-row>
-    <v-row v-if="loaded"> </v-row>
+            Seguimiento de alumnos
+          </span></v-card-title
+        >
+        <v-card-text>
+          <v-container fluid>
+            <v-row>
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="warning"
+                  icon="mdi-view-dashboard"
+                  title="Matrícula inicial"
+                  :value="'' + total"
+                />
+              </v-col>
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="info"
+                  icon="mdi-view-dashboard"
+                  title="Renuncias"
+                  :value="'' + resign"
+                />
+              </v-col>
+
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="redS"
+                  icon="mdi-view-dashboard"
+                  title="Activos"
+                  :value="'' + active"
+                />
+              </v-col>
+              <v-col cols="12" sm="6" md="6" lg="3">
+                <base-material-stats-card
+                  color="success"
+                  icon="mdi-view-dashboard"
+                  title="Inactivos"
+                  :value="'' + inactive"
+                />
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col cols="12" sm="12" md="4" lg="4">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    max-height="300"
+                  >
+                    <v-card-text>
+                      <base-doughnut-chart
+                        :render="isLoadedStatusUserChart"
+                        :chartData="statusUserChart"
+                        title="Alumnos según estado"
+                        :height="250"
+                      />
+                    </v-card-text> </v-card
+                ></v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="12" lg="8">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                  >
+                    <v-card-text>
+                      <base-horizontal-bar-chart
+                        :render="isLoadedProgressStudentSection"
+                        :chartData="progressStudentSection"
+                        title="Progreso de actividades calificadas según unidad (%)"
+                        :height="250"
+                      />
+                    </v-card-text>
+                  </v-card>
+                </v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="12" lg="8">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                  >
+                    <v-card-text>
+                      <base-horizontal-bar-chart
+                        :render="isLoadedAvanceProgressStudentSection"
+                        :chartData="avanceProgressStudentSection"
+                        title="Progreso de actividades realizadas según unidad (%)"
+                        :height="250"
+                      />
+                    </v-card-text>
+                  </v-card>
+                </v-hover>
+              </v-col>
+              <v-col cols="12" sm="12" md="4" lg="4">
+                <v-hover v-slot:default="{ hover }">
+                  <v-card
+                    class="d-flex text-center ma-1"
+                    color="grey lighten-4"
+                    :elevation="hover ? '5' : '0'"
+                    max-height="300"
+                  >
+                    <v-card-text>
+                      <base-doughnut-chart
+                        :render="isLoadedTimeLoggedUserChart"
+                        :chartData="timeLoggedUserChart"
+                        title="Alumnos según último acceso"
+                        :height="250"
+                      />
+                    </v-card-text> </v-card
+                ></v-hover>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+      </v-card>
+    </v-container>
   </base-card>
 </template>
 
@@ -375,6 +474,9 @@ export default {
       await this.getStatusUserChart(this.selectedCourse.id)
       await this.getTimeLoggedUserChart(this.selectedCourse.id)
       await this.getStatusTicketByOperatorChart(this.selectedCourse.id)
+      await this.getDataCardFollowStudent(this.selectedCourse.id)
+      await this.getProgressStudentBySection(this.selectedCourse.id)
+      await this.getAvanceProgressStudentBySection(this.selectedCourse.id)
     }
   },
   computed: {
@@ -409,8 +511,33 @@ export default {
       statusUserChart: 'dashboard/statusUserChart',
       timeLoggedUserChart: 'dashboard/timeLoggedUserChart',
       statusTicketByOperatorChart: 'dashboard/statusTicketByOperatorChart',
-      isLoadedStatusTicketByOperator: 'dashboard/isLoadedStatusTicketByOperator'
-    })
+      isLoadedStatusTicketByOperator:
+        'dashboard/isLoadedStatusTicketByOperator',
+      dataCardFollowStudent: 'dashboard/dataCardFollowStudent',
+      isDataCardFollowStudent: 'dashboard/isDataCardFollowStudent',
+      progressStudentSection: 'dashboard/progressStudentSection',
+      isLoadedProgressStudentSection:
+        'dashboard/isLoadedProgressStudentSection',
+      avanceProgressStudentSection: 'dashboard/avanceProgressStudentSection',
+      isLoadedAvanceProgressStudentSection:
+        'dashboard/isLoadedAvanceProgressStudentSection'
+    }),
+    resign() {
+      if (!this.dataCardFollowStudent) return ''
+      return this.dataCardFollowStudent.resign
+    },
+    active() {
+      if (!this.dataCardFollowStudent) return ''
+      return this.dataCardFollowStudent.active
+    },
+    inactive() {
+      if (!this.dataCardFollowStudent) return ''
+      return this.dataCardFollowStudent.inactive
+    },
+    total() {
+      if (!this.dataCardFollowStudent) return ''
+      return this.dataCardFollowStudent.total
+    }
   },
   methods: {
     ...mapActions({
@@ -434,7 +561,12 @@ export default {
       getPriorityPieChart: 'dashboard/getPriorityPieChart',
       getStatusUserChart: 'dashboard/getStatusUserChart',
       getTimeLoggedUserChart: 'dashboard/getTimeLoggedUserChart',
-      getStatusTicketByOperatorChart: 'dashboard/getStatusTicketByOperatorChart'
+      getStatusTicketByOperatorChart:
+        'dashboard/getStatusTicketByOperatorChart',
+      getDataCardFollowStudent: 'dashboard/getDataCardFollowStudent',
+      getProgressStudentBySection: 'dashboard/getProgressStudentBySection',
+      getAvanceProgressStudentBySection:
+        'dashboard/getAvanceProgressStudentBySection'
     }),
     fillChartStatusTicket() {
       this.statusTicket.forEach(status => {
