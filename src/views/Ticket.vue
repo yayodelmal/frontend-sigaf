@@ -60,7 +60,7 @@
                 large
                 depressed
                 color="blueS"
-                v-if="isAdmin || isDeveloper"
+                v-if="isAdmin || isDeveloper || isOperator"
                 @click="handleCreateMultipleTickets"
               >
                 <div class="d-flex flex-column">
@@ -593,6 +593,7 @@ export default {
       loggedUser: 'auth/user',
       isAdmin: 'auth/isAdmin',
       isDeveloper: 'auth/isDeveloper',
+      isOperator: 'auth/isOperator',
       sections: 'section/sections',
       ticketsByCourse: 'ticket/ticketsByCourse',
       courseByCategory: 'course/coursesByCategory',
