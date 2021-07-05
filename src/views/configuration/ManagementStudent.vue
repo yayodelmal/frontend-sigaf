@@ -117,7 +117,7 @@
                   @click="syncUsers"
                   :loading="loadingSync"
                 >
-                  Usuarios
+                  Sincronizar usuarios
                   <v-icon class="ml-2" size="25">mdi-sync</v-icon>
                 </v-btn>
                 <v-btn
@@ -129,7 +129,7 @@
                   :loading="loadingSynActivities"
                 >
                   Actividades
-                  <v-icon class="ml-2" size="25">mdi-sync</v-icon>
+                  <v-icon class="ml-2" size="25">mdi-sync</v-icon> 
                 </v-btn>
                 <v-dialog v-model="dialog" max-width="1000px" persistent>
                   <v-form>
@@ -827,7 +827,7 @@ export default {
     async syncUser(item) {
       this.overlay = true
       if (item.course.id_course_moodle) {
-        const URL = `/api/v2/sync/course-users/${item.course.id_course_moodle}/users/${item.registeredUser.rut}`
+        const URL = `/api/v3/sync/course-user/${item.course.id_course_moodle}/user/${item.registeredUser.rut}`
         const { status } = await axios.get(URL)
 
         if (status === 204) {
@@ -952,7 +952,7 @@ export default {
     async syncUsers() {
       if (this.courseModel.idCourseMoodle) {
         this.overlay = true
-        const URL = `/api/v2/sync/course-users/${this.courseModel.idCourseMoodle}/users`
+        const URL = `/api/v3/sync/course-users/${this.courseModel.idCourseMoodle}/users`
         const { status } = await axios.get(URL)
 
         if (status === 204) {
@@ -960,16 +960,19 @@ export default {
 
           this.makeSnakResponse(this.message, Snackbar.WARNING.type)
           this.overlay = false
+          console.log('204')
         } else if (status === 201) {
           this.fetchUsersByCourse(this.courseModel.id).then(() => {
             this.message = 'Sincronización exitosa'
             this.overlay = false
 
             this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
+            console.log('201')
           })
         }
       } else {
         console.log('none')
+        console.log('200')
       }
     },
 
