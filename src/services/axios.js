@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 let http = axios.create({
-  //baseURL: `http://sigaf.iie.cl/backend-sigaf/public`,
-  baseURL: process.env.VUE_APP_BACKEND_URL,
+  baseURL: `http://sigaf.iie.cl/backend-sigaf/public`,
+  //baseURL: process.env.VUE_APP_BACKEND_URL,
   //baseURL: `http://sigaf.test`,
   //baseURL: 'http://192.168.43.194:8000',
   headers: {
