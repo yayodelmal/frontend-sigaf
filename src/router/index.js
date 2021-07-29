@@ -199,24 +199,6 @@ const routes = [
             meta: { requiresAuth: true }
           },
           {
-            name: 'Category',
-            path: 'categoria',
-            component: () =>
-              import(
-                /*webpackChunkName: "Categoría" */ '../views/maintenance/Category.vue'
-              ),
-            meta: { requiresAuth: true }
-          },
-          {
-            name: 'Course',
-            path: 'Curso',
-            component: () =>
-              import(
-                /*webpackChunkName: "Curso" */ '../views/maintenance/Course.vue'
-              ),
-            meta: { requiresAuth: true }
-          },
-          {
             name: 'User',
             path: 'Usuario',
             component: () =>
@@ -235,6 +217,24 @@ const routes = [
           ),
         meta: { requiresAuth: true },
         children: [
+          {
+            name: 'Category',
+            path: 'categoria',
+            component: () =>
+              import(
+                /*webpackChunkName: "Categoría" */ '../views/configuration/Category.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
+          {
+            name: 'Course',
+            path: 'Curso',
+            component: () =>
+              import(
+                /*webpackChunkName: "Curso" */ '../views/configuration/Course.vue'
+              ),
+            meta: { requiresAuth: true }
+          },
           {
             name: 'LoadStudents',
             path: 'cargar-estudiantes',

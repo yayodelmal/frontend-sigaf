@@ -248,16 +248,6 @@ export default {
               privileges: ['Developer']
             },
             {
-              name: 'Categoría',
-              to: { name: 'Category' },
-              privileges: ['Administrador', 'Developer']
-            },
-            {
-              name: 'Curso',
-              to: { name: 'Course' },
-              privileges: ['Administrador', 'Developer']
-            },
-            {
               name: 'Usuario',
               to: { name: 'User' },
               privileges: ['Administrador', 'Developer']
@@ -269,6 +259,16 @@ export default {
           icon: 'mdi-cog-outline',
           privileges: ['Administrador', 'Developer'],
           links: [
+            {
+              name: 'Categoría',
+              to: { name: 'Category' },
+              privileges: ['Administrador', 'Developer']
+            },
+            {
+              name: 'Curso',
+              to: { name: 'Course' },
+              privileges: ['Administrador', 'Developer']
+            },
             {
               name: 'Matrícula',
               to: { name: 'LoadStudents' },

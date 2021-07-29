@@ -4,7 +4,7 @@
       color="blueS"
       class="px-5 py-3"
       icon="mdi-hammer-wrench"
-      title="Categoría de curso"
+      title="Curso"
     >
       <sigaf-skeleton-loader
         v-if="loading"
@@ -13,12 +13,12 @@
       ></sigaf-skeleton-loader>
       <sigaf-datatable
         v-else
-        :items="categoriesItems"
+        :items="coursesItems"
         :headers="headers"
         :button-name="buttonName"
         :loading="loading"
         :items-per-page="5"
-        @createItem="createCategory"
+        @createItem="createCourse"
         @editItem="editItem"
         @deleteItem="deleteItem"
       ></sigaf-datatable>
@@ -28,12 +28,13 @@
       :form-title="formTitle"
       :loading="loading"
       :loading-save="loadingSave"
+      :max-width="maxWidth"
       @close="close"
       @save="save"
     >
       <template v-slot:default>
         <v-row>
-          <v-col cols="8">
+          <v-col cols="12">
             <base-textfield
               v-model="editedItem.description"
               label="Nombre"
@@ -42,34 +43,45 @@
               :error-messages="descriptionErrors"
             ></base-textfield>
           </v-col>
-          <v-col cols="4">
+          <v-col cols="6">
             <base-textfield
-              v-model="editedItem.categoryCode"
-              label="Código"
-              @input="$v.categoryCode.$touch()"
-              @blur="$v.categoryCode.$touch()"
-              :error-messages="categoryCodeErrors"
+              v-model="editedItem.email"
+              label="Correo electrónico"
+              @input="$v.email.$touch()"
+              @blur="$v.email.$touch()"
+              :error-messages="emailErrors"
+            ></base-textfield>
+          </v-col>
+          <v-col cols="6">
+            <base-textfield
+              v-model="editedItem.password"
+              label="Contraseña"
+              @input="$v.password.$touch()"
+              @blur="$v.password.$touch()"
+              :error-messages="passwordErrors"
             ></base-textfield>
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="8">
             <base-autocomplete
-              v-model="editedItem.platform"
-              :items="platformsItems"
-              label="Plataforma"
+              v-model="editedItem.category"
+              :items="categoriesItems"
+              label="Categoría"
               item-value="id"
               item-text="description"
               return-object
-              @change="$v.platform.$touch()"
-              @blur="$v.platform.$touch()"
-              :error-messages="platformErrors"
+              @change="$v.category.$touch()"
+              @blur="$v.category.$touch()"
+              :error-messages="categoryErrors"
             ></base-autocomplete>
           </v-col>
           <v-col cols="4">
             <base-textfield
-              v-model="editedItem.idCategoryMoodle"
+              v-model="editedItem.idCourseMoodle"
               label="Id Moodle"
+              required
+              clearable
               @input="$v.idMoodle.$touch()"
               @blur="$v.idMoodle.$touch()"
               :error-messages="idMoodleErrors"
@@ -95,7 +107,7 @@
 </template>
 
 <script>
-import Category from '../../models/Category'
+import Course from '../../models/Course'
 import { validationMixin } from 'vuelidate'
 import {
   required,
@@ -103,7 +115,8 @@ import {
   maxLength,
   numeric,
   minValue,
-  maxValue
+  maxValue,
+  email
 } from 'vuelidate/lib/validators'
 import { mapActions, mapGetters } from 'vuex'
 import SigafSnackbar from '../../components/component/Snackbar'
@@ -126,13 +139,17 @@ export default {
   validations: {
     description: {
       required,
-      minLength: minLength(7),
+      minLength: minLength(10),
       maxLength: maxLength(150)
     },
-    categoryCode: {
+    email: {
+      required,
+      email
+    },
+    password: {
       required
     },
-    platform: {
+    category: {
       required
     },
     idMoodle: {
@@ -144,23 +161,28 @@ export default {
   data: () => ({
     dialog: false,
     dialogConfirm: false,
-    buttonName: 'Crear categoría',
+    buttonName: 'Importar curso',
+    maxWidth: '700px',
     headers: [
       {
         text: 'Nombre',
         value: 'description'
       },
       {
-        text: 'Código',
-        value: 'categoryCode'
+        text: 'Correo electrónico',
+        value: 'email'
+      },
+      {
+        text: 'Contraseña',
+        value: 'password'
       },
       {
         text: 'ID moodle',
-        value: 'idCategoryMoodle'
+        value: 'idCourseMoodle'
       },
       {
-        text: 'Plataforma',
-        value: 'platform.properties.description'
+        text: 'Categoría',
+        value: 'category.properties.description'
       },
       {
         text: 'Acciones',
@@ -169,8 +191,8 @@ export default {
       }
     ],
     editedIndex: -1,
-    editedItem: new Category(),
-    defaultItem: new Category(),
+    editedItem: new Course(),
+    defaultItem: new Course(),
     message: '',
     snackbar: false,
     type: '',
@@ -182,8 +204,8 @@ export default {
   }),
   computed: {
     ...mapGetters({
-      categoriesItems: 'category/categories',
-      platformsItems: 'platform/platforms'
+      coursesItems: 'course/courses',
+      categoriesItems: 'category/categories'
     }),
     descriptionErrors() {
       const errors = []
@@ -191,24 +213,33 @@ export default {
       if (!this.$v.description.$dirty) return errors
       !this.$v.description.required && errors.push('Es obligatorio.')
       !this.$v.description.minLength &&
-        errors.push('Debe contener al menos 7 caracteres.')
+        errors.push('Debe contener al menos 10 caracteres.')
       !this.$v.description.maxLength &&
-        errors.push('Debe contener máximo 25 caracteres.')
+        errors.push('Debe contener máximo 100 caracteres.')
       return errors
     },
-    categoryCodeErrors() {
+    emailErrors() {
       const errors = []
 
-      if (!this.$v.categoryCode.$dirty) return errors
-      !this.$v.categoryCode.required && errors.push('Es obligatorio.')
+      if (!this.$v.email.$dirty) return errors
+      !this.$v.email.required && errors.push('Es obligatorio.')
+      !this.$v.email.email && errors.push('Correo electrónico inválido.')
 
       return errors
     },
-    platformErrors() {
+    passwordErrors() {
       const errors = []
 
-      if (!this.$v.platform.$dirty) return errors
-      !this.$v.platform.required && errors.push('Es obligatorio.')
+      if (!this.$v.password.$dirty) return errors
+      !this.$v.password.required && errors.push('Es obligatorio.')
+
+      return errors
+    },
+    categoryErrors() {
+      const errors = []
+
+      if (!this.$v.category.$dirty) return errors
+      !this.$v.category.required && errors.push('Es obligatorio.')
 
       return errors
     },
@@ -224,25 +255,28 @@ export default {
       return errors
     },
     formTitle() {
-      return this.editedIndex === -1 ? 'Crear categoría' : 'Editar categoría'
+      return this.editedIndex === -1 ? 'Crear curso' : 'Editar curso'
     },
     description() {
       return this.editedItem.description
     },
-    categoryCode() {
-      return this.editedItem.categoryCode
+    email() {
+      return this.editedItem.email
     },
-    platform() {
-      return this.editedItem.platform
+    password() {
+      return this.editedItem.password
+    },
+    category() {
+      return this.editedItem.category
     },
     idMoodle() {
-      return this.editedItem.idCategoryMoodle
+      return this.editedItem.idCourseMoodle
     }
   },
   async created() {
     this.loading = true
-    if (this.categoriesItems.length === 0) {
-      const { success } = await this.fetchCategoryItems()
+    if (this.coursesItems.length === 0) {
+      const { success } = await this.fetchCourseItems()
       this.loading = !success
     } else {
       this.loading = false
@@ -250,19 +284,19 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchCategoryItems: 'category/fetchCategories',
-      postItem: 'category/postCategory',
-      putItem: 'category/putCategory',
-      removeItem: 'category/deleteCategory',
-      fetchPlatformItems: 'platform/fetchPlatforms'
+      fetchCourseItems: 'course/fetchCourses',
+      postItem: 'course/postCourse',
+      putItem: 'course/putCourse',
+      removeItem: 'course/deleteCourse',
+      fetchCategoryItems: 'category/fetchCategories'
     }),
-    createCategory() {
-      this.getPlatforms()
+    createCourse() {
+      this.getCategories()
       this.dialog = true
     },
-    getPlatforms() {
-      if (this.platformsItems.length === 0) {
-        this.fetchPlatformItems()
+    getCategories() {
+      if (this.categoriesItems.length === 0) {
+        this.fetchCategoryItems()
       }
     },
     makeSnakResponse(message, type) {
@@ -278,17 +312,17 @@ export default {
       this.makeSnakResponse(Snackbar.ERROR.message, Snackbar.ERROR.type)
     },
     editItem(item) {
-      console.log('mostrando item en el papá', item)
-      this.getPlatforms()
-      this.editedIndex = this.categoriesItems.indexOf(item)
+      this.getCategories()
+      this.editedIndex = this.coursesItems.indexOf(item)
 
       this.editedItem = Object.assign({}, item)
-      this.editedItem.platform = Object.assign({}, item.platform.properties)
+
+      this.editedItem.category = Object.assign({}, item.category.properties)
 
       this.dialog = true
     },
     deleteItem(item) {
-      this.editedIndex = this.categoriesItems.indexOf(item)
+      this.editedIndex = this.coursesItems.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialogConfirm = true
     },
@@ -313,9 +347,8 @@ export default {
       if (!this.$v.$error) {
         this.loadingSave = true
         let dataStore = Object.assign(this.editedItem, {
-          category_code: this.editedItem.categoryCode,
-          platform_id: this.editedItem.platform.id,
-          id_category_moodle: this.editedItem.idCategoryMoodle,
+          category_id: this.editedItem.category.id,
+          id_course_moodle: this.editedItem.idCourseMoodle,
           status: 1
         })
         if (this.editedIndex > -1) {
