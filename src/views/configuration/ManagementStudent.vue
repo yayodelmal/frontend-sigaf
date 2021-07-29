@@ -125,10 +125,10 @@
                   depressed
                   large
                   color="blueS"
-                  @click="syncActivities"
+                  @click="syncCourseActivities"
                   :loading="loadingSynActivities"
                 >
-                  Actividades
+                  Sincronizar Actividades
                   <v-icon class="ml-2" size="25">mdi-sync</v-icon> 
                 </v-btn>
                 <v-dialog v-model="dialog" max-width="1000px" persistent>
@@ -957,6 +957,32 @@ export default {
 
         if (status === 204) {
           this.message = 'El usuario no se encuentra registrado en moodle'
+
+          this.makeSnakResponse(this.message, Snackbar.WARNING.type)
+          this.overlay = false
+          console.log('204')
+        } else if (status === 201) {
+          this.fetchUsersByCourse(this.courseModel.id).then(() => {
+            this.message = 'Sincronización exitosa'
+            this.overlay = false
+
+            this.makeSnakResponse(this.message, Snackbar.SUCCESS.type)
+            console.log('201')
+          })
+        }
+      } else {
+        console.log('none')
+        console.log('200')
+      }
+    },
+    async syncCourseActivities() {
+      if (this.courseModel.idCourseMoodle) {
+        this.overlay = true
+        const URL = `/api/v3/sync/activities-users/${this.courseModel.idCourseMoodle}`
+        const { status } = await axios.get(URL)
+
+        if (status === 416) {
+          this.message = 'Error sincronizando actividades'
 
           this.makeSnakResponse(this.message, Snackbar.WARNING.type)
           this.overlay = false
